@@ -1,0 +1,1 @@
+// CameraDataData — SwiftData persistence layer.

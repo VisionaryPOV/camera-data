@@ -1,0 +1,1 @@
+// CameraDataDomain — pure domain logic, no SwiftUI/SwiftData imports.

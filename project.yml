@@ -1,0 +1,148 @@
+name: CameraData
+options:
+  bundleIdPrefix: com.visionarypov
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: 1
+
+targets:
+  CameraDataDomain:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/Domain
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.domain
+      DEFINES_MODULE: YES
+      ENABLE_TESTABILITY: YES
+
+  CameraDataDesignSystem:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/DesignSystem
+    dependencies:
+      - target: CameraDataDomain
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.designsystem
+      DEFINES_MODULE: YES
+      ENABLE_TESTABILITY: YES
+
+  CameraDataData:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/Data
+    dependencies:
+      - target: CameraDataDomain
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.data
+      DEFINES_MODULE: YES
+      ENABLE_TESTABILITY: YES
+
+  CameraDataServices:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/Services
+    dependencies:
+      - target: CameraDataDomain
+      - target: CameraDataData
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.services
+      DEFINES_MODULE: YES
+      ENABLE_TESTABILITY: YES
+
+  CameraDataFeatures:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/Features
+    dependencies:
+      - target: CameraDataDomain
+      - target: CameraDataData
+      - target: CameraDataDesignSystem
+      - target: CameraDataServices
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.features
+      DEFINES_MODULE: YES
+      ENABLE_TESTABILITY: YES
+
+  CameraData:
+    type: application
+    platform: iOS
+    sources:
+      - path: CameraDataApp
+    dependencies:
+      - target: CameraDataFeatures
+      - target: CameraDataDomain
+      - target: CameraDataData
+      - target: CameraDataDesignSystem
+      - target: CameraDataServices
+      - target: CameraDataWidget
+        embed: true
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata
+      INFOPLIST_KEY_CFBundleDisplayName: Camera Data
+      INFOPLIST_KEY_UILaunchScreen_Generation: YES
+      INFOPLIST_KEY_NSMicrophoneUsageDescription: "Voice logging for camera takes"
+      INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Transcribe voice logs on set"
+      INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Capture shoot location metadata"
+      INFOPLIST_KEY_NSFaceIDUsageDescription: "Secure production access"
+      INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
+    entitlements:
+      path: CameraDataApp/CameraData.entitlements
+
+  CameraDataWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widgets/CameraDataWidget
+        excludes:
+          - Info.plist
+    settings:
+      GENERATE_INFOPLIST_FILE: NO
+      INFOPLIST_FILE: Widgets/CameraDataWidget/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.widget
+
+  CameraDataTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/CameraDataTests
+    dependencies:
+      - target: CameraData
+      - target: CameraDataDomain
+      - target: CameraDataData
+      - target: CameraDataServices
+      - target: CameraDataFeatures
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.tests
+
+schemes:
+  CameraData:
+    build:
+      targets:
+        CameraData: all
+        CameraDataTests: [test]
+    test:
+      targets:
+        - CameraDataTests
+    run:
+      config: Debug
