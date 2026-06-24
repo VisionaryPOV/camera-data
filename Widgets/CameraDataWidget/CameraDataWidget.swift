@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import CameraDataDomain
 
 struct TakeCountEntry: TimelineEntry {
     let date: Date
@@ -13,12 +14,18 @@ struct TakeCountProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TakeCountEntry) -> Void) {
-        completion(TakeCountEntry(date: .now, takeCount: 12, productionName: "Production"))
+        let snapshot = readSnapshot()
+        completion(TakeCountEntry(date: .now, takeCount: snapshot.takeCount, productionName: snapshot.productionName))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TakeCountEntry>) -> Void) {
-        let entry = TakeCountEntry(date: .now, takeCount: 0, productionName: "Camera Data")
+        let snapshot = readSnapshot()
+        let entry = TakeCountEntry(date: .now, takeCount: snapshot.takeCount, productionName: snapshot.productionName)
         completion(Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(900))))
+    }
+
+    private func readSnapshot() -> (takeCount: Int, productionName: String) {
+        AppGroupStore.readWidgetSnapshot()
     }
 }
 

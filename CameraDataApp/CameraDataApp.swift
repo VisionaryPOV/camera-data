@@ -29,13 +29,13 @@ struct CameraDataApp: App {
     @MainActor
     private func bootstrap() async {
         do {
-            let deps = try AppDependencies(cloudKitEnabled: true, inMemory: false)
-            try deps.bootstrapIfNeeded()
+            let deps = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: false)
+            try await deps.bootstrapIfNeeded()
             dependencies = deps
             NSLog("[CameraData] launchState=%@", deps.session.launchState)
         } catch {
             bootstrapError = error.localizedDescription
-            print("[CameraData] bootstrap_error=\(error)")
+            NSLog("[CameraData] bootstrap_error=%@", error.localizedDescription)
         }
     }
 }

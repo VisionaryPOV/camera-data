@@ -16,6 +16,7 @@ public final class EntryEditorViewModel {
     private let useCase: LogTakeUseCase
     private let session: ProductionSession
     private let entryRepository: LogEntryRepositoryProtocol
+    private let smartSuggestor: CoreMLSmartSuggestor?
     private var editingEntry: LogEntryModel?
     private var lastEntry: LogEntryDraft?
 
@@ -23,12 +24,14 @@ public final class EntryEditorViewModel {
         useCase: LogTakeUseCase,
         session: ProductionSession,
         entryRepository: LogEntryRepositoryProtocol,
-        editingEntry: LogEntryModel? = nil
+        editingEntry: LogEntryModel? = nil,
+        smartSuggestor: CoreMLSmartSuggestor? = nil
     ) {
         self.useCase = useCase
         self.session = session
         self.entryRepository = entryRepository
         self.editingEntry = editingEntry
+        self.smartSuggestor = smartSuggestor
         self.draft = editingEntry.map(LogEntryMapper.toDraft) ?? LogEntryDraft()
     }
 
@@ -46,8 +49,8 @@ public final class EntryEditorViewModel {
         lastEntry = entries.first.map(LogEntryMapper.toDraft)
 
         if draft.scene.isEmpty {
-            draft.scene = lastEntry?.scene ?? ""
-            draft.take = TakeIncrementer.suggestedTake(
+            draft.scene = session.slateScene.isEmpty ? (lastEntry?.scene ?? "") : session.slateScene
+            draft.take = session.slateTake > 0 ? session.slateTake : TakeIncrementer.suggestedTake(
                 for: draft.scene,
                 existing: try entryRepository.fetchSceneTakes(production: production, camera: camera)
             )
@@ -77,7 +80,12 @@ public final class EntryEditorViewModel {
         let history = (try? entryRepository.fetchEntries(
             production: production, camera: camera, day: nil, limit: 200, offset: 0
         ).map(LogEntryMapper.toDraft)) ?? []
-        suggestions = SmartSuggestService.suggestions(from: history, for: draft)
+
+        if let smartSuggestor {
+            suggestions = smartSuggestor.suggest(from: history, for: draft)
+        } else {
+            suggestions = SmartSuggestService.suggestions(from: history, for: draft)
+        }
     }
 
     public func appendToScene(_ digit: String) {
@@ -106,26 +114,22 @@ public final class EntryEditorViewModel {
         isSaving = true
         defer { isSaving = false }
 
-        do {
-            let result = try useCase.logAndNext(
-                draft: draft,
-                production: production,
-                camera: camera,
-                day: day,
-                existing: editingEntry,
-                modifiedBy: "local-user"
-            )
-            HapticManager.medium()
-            lastEntry = LogEntryMapper.toDraft(result.saved)
-            draft = result.nextDraft
-            editingEntry = nil
-            validationMessage = nil
-            refreshSuggestions()
-        } catch {
-            validationMessage = String(describing: error)
-            HapticManager.warning()
-            throw error
-        }
+        let result = try useCase.logAndNext(
+            draft: draft,
+            production: production,
+            camera: camera,
+            day: day,
+            existing: editingEntry,
+            modifiedBy: "local-user"
+        )
+        HapticManager.medium()
+        lastEntry = LogEntryMapper.toDraft(result.saved)
+        draft = result.nextDraft
+        session.slateScene = result.saved.scene
+        session.slateTake = result.nextDraft.take
+        editingEntry = nil
+        validationMessage = nil
+        refreshSuggestions()
     }
 
     public func applySuggestion(_ suggestion: SmartSuggestion) {

@@ -8,19 +8,22 @@ public struct DashboardView: View {
     public var onLogTake: () -> Void
     public var onOpenReports: () -> Void
     public var onOpenSettings: () -> Void
+    public var onSelectEntry: (LogEntryModel) -> Void
 
     public init(
         viewModel: DashboardViewModel,
         session: ProductionSession,
         onLogTake: @escaping () -> Void,
         onOpenReports: @escaping () -> Void,
-        onOpenSettings: @escaping () -> Void
+        onOpenSettings: @escaping () -> Void,
+        onSelectEntry: @escaping (LogEntryModel) -> Void
     ) {
         self.viewModel = viewModel
         self.session = session
         self.onLogTake = onLogTake
         self.onOpenReports = onOpenReports
         self.onOpenSettings = onOpenSettings
+        self.onSelectEntry = onSelectEntry
     }
 
     public var body: some View {
@@ -29,6 +32,7 @@ public struct DashboardView: View {
 
             VStack(spacing: 16) {
                 header
+                searchRow
                 cameraPicker
                 statsRow
                 presenceRow
@@ -62,6 +66,16 @@ public struct DashboardView: View {
             Text("Launch: \(session.launchState)")
                 .font(.caption2)
                 .foregroundStyle(ThemeTokens.textSecondary)
+        }
+    }
+
+    private var searchRow: some View {
+        VStack(spacing: 8) {
+            TextField("Search scenes, lenses, notes…", text: $viewModel.searchText)
+                .textFieldStyle(.roundedBorder)
+            Toggle("Circled only", isOn: $viewModel.showCircledOnly)
+                .tint(ThemeTokens.accent)
+                .font(.subheadline)
         }
     }
 
@@ -119,20 +133,25 @@ public struct DashboardView: View {
     private var entryList: some View {
         List {
             ForEach(viewModel.entries, id: \.id) { entry in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Scene \(entry.scene) / Take \(entry.take)")
-                            .font(.headline)
-                        Text(entry.lens.isEmpty ? "No lens" : entry.lens)
-                            .font(.subheadline)
-                            .foregroundStyle(ThemeTokens.textSecondary)
-                    }
-                    Spacer()
-                    if entry.isCircled {
-                        Image(systemName: "circle.fill")
-                            .foregroundStyle(ThemeTokens.circled)
+                Button {
+                    onSelectEntry(entry)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("Scene \(entry.scene) / Take \(entry.take)")
+                                .font(.headline)
+                            Text(entry.lens.isEmpty ? "No lens" : entry.lens)
+                                .font(.subheadline)
+                                .foregroundStyle(ThemeTokens.textSecondary)
+                        }
+                        Spacer()
+                        if entry.isCircled {
+                            Image(systemName: "circle.fill")
+                                .foregroundStyle(ThemeTokens.circled)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
                 .listRowBackground(ThemeTokens.surface.opacity(0.5))
             }
         }

@@ -16,20 +16,22 @@ public enum ModelContainerFactory {
         PresenceRecordModel.self
     ])
 
+    public static let cloudKitContainerIdentifier = "iCloud.com.visionarypov.cameradata"
+
     public static func makeInMemory() throws -> ModelContainer {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         return try ModelContainer(for: schema, configurations: [config])
     }
 
     public static func makePersistent(cloudKitEnabled: Bool = false) throws -> ModelContainer {
         if cloudKitEnabled {
-            let config = ModelConfiguration(
-                "CameraData",
-                cloudKitDatabase: .automatic
+            let privateConfig = ModelConfiguration(
+                "CameraData-Private",
+                cloudKitDatabase: .private(cloudKitContainerIdentifier)
             )
-            return try ModelContainer(for: schema, configurations: [config])
+            return try ModelContainer(for: schema, configurations: [privateConfig])
         }
-        let config = ModelConfiguration("CameraData")
+        let config = ModelConfiguration("CameraData", cloudKitDatabase: .none)
         return try ModelContainer(for: schema, configurations: [config])
     }
 }

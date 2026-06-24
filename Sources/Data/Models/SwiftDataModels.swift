@@ -4,7 +4,7 @@ import CameraDataDomain
 
 @Model
 public final class ProductionModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var name: String
     public var code: String
     public var createdAt: Date
@@ -28,6 +28,9 @@ public final class ProductionModel {
     @Relationship(deleteRule: .cascade, inverse: \ProductionMemberModel.production)
     public var members: [ProductionMemberModel]
 
+    @Relationship(deleteRule: .cascade, inverse: \LogEntryModel.production)
+    public var logEntries: [LogEntryModel]
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -45,12 +48,13 @@ public final class ProductionModel {
         self.days = []
         self.customFields = []
         self.members = []
+        self.logEntries = []
     }
 }
 
 @Model
 public final class CameraUnitModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var label: String
     public var sortOrder: Int
     public var isActive: Bool
@@ -87,7 +91,7 @@ public final class CameraUnitModel {
 
 @Model
 public final class ShootDayModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var date: Date
     public var dayNumber: Int
     public var locationName: String
@@ -112,7 +116,7 @@ public final class ShootDayModel {
 
 @Model
 public final class LogEntryModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var scene: String
     public var take: Int
     public var setup: String?
@@ -202,7 +206,7 @@ public final class LogEntryModel {
 
 @Model
 public final class CustomFieldDefinitionModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var key: String
     public var label: String
     public var fieldTypeRaw: String
@@ -232,7 +236,7 @@ public final class CustomFieldDefinitionModel {
 
 @Model
 public final class CustomFieldValueModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var stringValue: String?
     public var numberValue: Double?
     public var boolValue: Bool?
@@ -248,7 +252,7 @@ public final class CustomFieldValueModel {
 
 @Model
 public final class RollModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var rollNumber: String
     public var mediaType: String
     public var capacity: String
@@ -269,7 +273,7 @@ public final class RollModel {
 
 @Model
 public final class AttachmentModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var typeRaw: String
     public var localPath: String?
     public var thumbnailPath: String?
@@ -288,7 +292,7 @@ public final class AttachmentModel {
 
 @Model
 public final class ProductionMemberModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var userId: String
     public var displayName: String
     public var roleRaw: String
@@ -307,7 +311,7 @@ public final class ProductionMemberModel {
 
 @Model
 public final class AuditEventModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var fieldKey: String
     public var oldValue: String
     public var newValue: String
@@ -330,7 +334,7 @@ public final class AuditEventModel {
 
 @Model
 public final class PresenceRecordModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var userId: String
     public var displayName: String
     public var editingEntryLabel: String?

@@ -11,6 +11,14 @@ final class DomainLogicTests: XCTestCase {
         XCTAssertTrue(SortKeyGenerator.compare(keyA3, keyB1) || keyA3 != keyB1)
     }
 
+    func testSortKeyGeneratorNaturalSceneOrdering() {
+        let scene2 = SortKeyGenerator.make(scene: "2", take: 1)
+        let scene10 = SortKeyGenerator.make(scene: "10", take: 1)
+        XCTAssertTrue(SortKeyGenerator.compare(scene2, scene10), "Scene 2 must sort before scene 10")
+        XCTAssertEqual(SortKeyGenerator.naturalSceneKey("10"), "000010")
+        XCTAssertEqual(SortKeyGenerator.naturalSceneKey("2"), "000002")
+    }
+
     func testTakeIncrementerNextTake() {
         XCTAssertEqual(TakeIncrementer.nextTake(after: 2, existingTakesForScene: [1, 2, 3]), 4)
         XCTAssertEqual(TakeIncrementer.suggestedTake(for: "10", existing: [("10", 1), ("10", 2)]), 3)

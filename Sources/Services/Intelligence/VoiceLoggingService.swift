@@ -5,6 +5,14 @@ public protocol SpeechTranscribing: Sendable {
     func transcribe(_ audioData: Data) async throws -> String
 }
 
+public struct SpeechFrameworkTranscriber: SpeechTranscribing {
+    public init() {}
+
+    public func transcribe(_ audioData: Data) async throws -> String {
+        try await SpeechRecognitionService.transcribe(audioData: audioData)
+    }
+}
+
 public struct StubSpeechTranscriber: SpeechTranscribing {
     public init() {}
     public func transcribe(_ audioData: Data) async throws -> String {
@@ -32,5 +40,9 @@ public enum VoiceLoggingService {
     public static func processAudio(_ data: Data, transcriber: SpeechTranscribing) async throws -> (draft: LogEntryDraft, flags: [String]) {
         let text = try await transcriber.transcribe(data)
         return processTranscript(text)
+    }
+
+    public static func processAudioWithSpeechFramework(_ data: Data) async throws -> (draft: LogEntryDraft, flags: [String]) {
+        try await processAudio(data, transcriber: SpeechFrameworkTranscriber())
     }
 }

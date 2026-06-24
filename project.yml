@@ -87,6 +87,8 @@ targets:
     platform: iOS
     sources:
       - path: CameraDataApp
+    resources:
+      - Resources/LensPredictor.mlmodel
     dependencies:
       - target: CameraDataFeatures
       - target: CameraDataDomain
@@ -107,6 +109,20 @@ targets:
       INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
     entitlements:
       path: CameraDataApp/CameraData.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.visionarypov.cameradata
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.security.application-groups:
+          - group.com.visionarypov.cameradata
+      properties:
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.visionarypov.cameradata
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.security.application-groups:
+          - group.com.visionarypov.cameradata
 
   CameraDataWidget:
     type: app-extension
@@ -115,10 +131,17 @@ targets:
       - path: Widgets/CameraDataWidget
         excludes:
           - Info.plist
+    dependencies:
+      - target: CameraDataDomain
     settings:
       GENERATE_INFOPLIST_FILE: NO
       INFOPLIST_FILE: Widgets/CameraDataWidget/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.widget
+    entitlements:
+      path: Widgets/CameraDataWidget/CameraDataWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.visionarypov.cameradata
 
   CameraDataTests:
     type: bundle.unit-test

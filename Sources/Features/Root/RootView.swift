@@ -1,17 +1,28 @@
 import SwiftUI
 import CameraDataDesignSystem
+import CameraDataDomain
+import CameraDataData
 
 public struct RootView: View {
     public var dependencies: AppDependencies
+    @State private var dashboardViewModel: DashboardViewModel
     @State private var showEditor = false
     @State private var showReports = false
     @State private var showSettings = false
     @State private var showSlate = false
     @State private var showSearch = false
+    @State private var showConflictResolution = false
+    @State private var showAuditHistory = false
+    @State private var selectedEntry: LogEntryModel?
     @State private var searchQuery = ""
 
     public init(dependencies: AppDependencies) {
         self.dependencies = dependencies
+        _dashboardViewModel = State(initialValue: DashboardViewModel(
+            entryRepository: dependencies.logEntryRepository,
+            session: dependencies.session,
+            smartSuggestor: dependencies.smartSuggestor
+        ))
     }
 
     public var body: some View {
@@ -21,20 +32,20 @@ public struct RootView: View {
                 session: dependencies.session,
                 onLogTake: { showEditor = true },
                 onOpenReports: { showReports = true },
-                onOpenSettings: { showSettings = true }
+                onOpenSettings: { showSettings = true },
+                onSelectEntry: { entry in
+                    selectedEntry = entry
+                    showAuditHistory = true
+                }
             )
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showSearch = true
-                    } label: {
+                    Button { showSearch = true } label: {
                         Image(systemName: "magnifyingglass")
                     }
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showSlate = true
-                    } label: {
+                    Button { showSlate = true } label: {
                         Image(systemName: "rectangle.split.3x1")
                     }
                 }
@@ -46,7 +57,10 @@ public struct RootView: View {
             NavigationStack {
                 EntryEditorView(
                     viewModel: entryEditorViewModel,
-                    onDismiss: { showEditor = false }
+                    onDismiss: {
+                        showEditor = false
+                        try? dashboardViewModel.reload()
+                    }
                 )
             }
             .presentationBackground(.ultraThinMaterial)
@@ -61,13 +75,33 @@ public struct RootView: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
-                SettingsView(session: dependencies.session) {
-                    cloneTemplate()
-                }
+                SettingsView(
+                    session: dependencies.session,
+                    onCloneTemplate: cloneTemplate,
+                    onReviewConflicts: {
+                        dependencies.session.seedSampleConflict()
+                        showConflictResolution = true
+                    }
+                )
             }
         }
         .sheet(isPresented: $showSearch) {
             SearchView(query: $searchQuery, entries: dashboardViewModel.entries)
+        }
+        .sheet(isPresented: $showConflictResolution) {
+            NavigationStack {
+                ConflictResolutionView(conflicts: dependencies.session.pendingConflicts) { resolutions in
+                    resolveConflicts(resolutions)
+                    showConflictResolution = false
+                }
+            }
+        }
+        .sheet(isPresented: $showAuditHistory) {
+            if let entry = selectedEntry {
+                NavigationStack {
+                    AuditHistoryView(entry: entry)
+                }
+            }
         }
         .fullScreenCover(isPresented: $showSlate) {
             DigitalSlateView(
@@ -89,10 +123,17 @@ public struct RootView: View {
         }
     }
 
-    private var dashboardViewModel: DashboardViewModel {
-        DashboardViewModel(
-            entryRepository: dependencies.logEntryRepository,
-            session: dependencies.session
+    private var slateSceneBinding: Binding<String> {
+        Binding(
+            get: { dependencies.session.slateScene },
+            set: { dependencies.session.slateScene = $0 }
+        )
+    }
+
+    private var slateTakeBinding: Binding<Int> {
+        Binding(
+            get: { dependencies.session.slateTake },
+            set: { dependencies.session.slateTake = $0 }
         )
     }
 
@@ -100,27 +141,14 @@ public struct RootView: View {
         EntryEditorViewModel(
             useCase: dependencies.logTakeUseCase,
             session: dependencies.session,
-            entryRepository: dependencies.logEntryRepository
-        )
-    }
-
-    private var slateSceneBinding: Binding<String> {
-        Binding(
-            get: { dependencies.session.activeProduction?.name ?? "" },
-            set: { _ in }
-        )
-    }
-
-    private var slateTakeBinding: Binding<Int> {
-        Binding(
-            get: { dashboardViewModel.entries.first?.take ?? 1 },
-            set: { _ in }
+            entryRepository: dependencies.logEntryRepository,
+            smartSuggestor: dependencies.smartSuggestor
         )
     }
 
     private func incrementSlateTake() {
-        // Slate mode auto-increment handled in UI binding refresh via dashboard reload
-        try? dashboardViewModel.reload()
+        dependencies.session.slateTake += 1
+        HapticManager.medium()
     }
 
     private func completeOnboarding() {
@@ -131,6 +159,14 @@ public struct RootView: View {
     private func cloneTemplate() {
         guard let source = dependencies.session.activeProduction else { return }
         _ = try? dependencies.templateRepository.cloneProduction(from: source, newName: "\(source.name) Copy")
+    }
+
+    private func resolveConflicts(_ resolutions: [String: ConflictResolutionChoice]) {
+        guard let local = dependencies.session.conflictLocalDraft,
+              let remote = dependencies.session.conflictRemoteDraft else { return }
+        let merged = ConflictMerger.merge(local: local, remote: remote, resolutions: resolutions)
+        dependencies.session.conflictLocalDraft = merged
+        dependencies.session.pendingConflicts = []
     }
 
     private func refreshPresence() async {

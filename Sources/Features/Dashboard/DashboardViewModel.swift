@@ -9,17 +9,28 @@ import CameraDataServices
 public final class DashboardViewModel {
     public var entries: [LogEntryModel] = []
     public var stats: DashboardStats = DashboardStats(takeCount: 0, circledCount: 0, dominantLens: nil, takesPerHour: 0)
-    public var searchText: String = ""
-    public var showCircledOnly: Bool = false
+    public var searchText: String = "" {
+        didSet { scheduleReload() }
+    }
+    public var showCircledOnly: Bool = false {
+        didSet { scheduleReload() }
+    }
     public var pageSize: Int = 50
     public var isLoading: Bool = false
 
     private let entryRepository: LogEntryRepositoryProtocol
     private let session: ProductionSession
+    private let smartSuggestor: CoreMLSmartSuggestor?
+    private var reloadTask: Task<Void, Never>?
 
-    public init(entryRepository: LogEntryRepositoryProtocol, session: ProductionSession) {
+    public init(
+        entryRepository: LogEntryRepositoryProtocol,
+        session: ProductionSession,
+        smartSuggestor: CoreMLSmartSuggestor? = nil
+    ) {
         self.entryRepository = entryRepository
         self.session = session
+        self.smartSuggestor = smartSuggestor
     }
 
     public func reload() throws {
@@ -27,7 +38,7 @@ public final class DashboardViewModel {
         isLoading = true
         defer { isLoading = false }
 
-        entries = try entryRepository.fetchEntries(
+        var fetched = try entryRepository.fetchEntries(
             production: production,
             camera: session.selectedCamera,
             day: session.selectedDay,
@@ -35,22 +46,49 @@ public final class DashboardViewModel {
             offset: 0
         )
 
-        let drafts = entries.map(LogEntryMapper.toDraft)
-        stats = DashboardStatsCalculator.compute(entries: drafts, shootDurationHours: 8)
-
         if !searchText.isEmpty {
             let parsed = NLPQueryParser.parse(searchText)
-            let filtered = drafts.enumerated().filter { NLPQueryParser.matches($0.element, query: parsed) }
-            entries = filtered.map { entries[$0.offset] }
+            fetched = fetched.filter { NLPQueryParser.matches(LogEntryMapper.toDraft($0), query: parsed) }
         }
 
         if showCircledOnly {
-            entries = entries.filter(\.isCircled)
+            fetched = fetched.filter(\.isCircled)
+        }
+
+        entries = fetched
+
+        let drafts = entries.map(LogEntryMapper.toDraft)
+        stats = DashboardStatsCalculator.compute(entries: drafts, shootDurationHours: 8)
+
+        AppGroupStore.writeWidgetSnapshot(
+            takeCount: stats.takeCount,
+            productionName: production.name
+        )
+
+        if let latest = entries.first {
+            session.slateScene = latest.scene
+            session.slateTake = latest.take
         }
     }
 
     public func selectCamera(_ camera: CameraUnitModel) throws {
         session.selectedCamera = camera
         try reload()
+    }
+
+    public func smartSuggestions(for draft: LogEntryDraft) -> [SmartSuggestion] {
+        let history = entries.map(LogEntryMapper.toDraft)
+        if let smartSuggestor {
+            return smartSuggestor.suggest(from: history, for: draft)
+        }
+        return SmartSuggestService.suggestions(from: history, for: draft)
+    }
+
+    private func scheduleReload() {
+        reloadTask?.cancel()
+        reloadTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            try? reload()
+        }
     }
 }

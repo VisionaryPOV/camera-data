@@ -3,9 +3,9 @@ import XCTest
 
 @MainActor
 final class AppBootstrapTests: XCTestCase {
-    func testAppDependenciesBootstrapCreatesProductionAndLaunchState() throws {
-        let deps = try AppDependencies(cloudKitEnabled: false, inMemory: true)
-        try deps.bootstrapIfNeeded()
+    func testAppDependenciesBootstrapCreatesProductionAndLaunchState() async throws {
+        let deps = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: true)
+        try await deps.bootstrapIfNeeded()
 
         XCTAssertNotNil(deps.session.activeProduction)
         XCTAssertNotNil(deps.session.selectedCamera)

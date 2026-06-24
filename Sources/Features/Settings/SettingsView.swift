@@ -7,10 +7,16 @@ import CameraDataServices
 public struct SettingsView: View {
     @Bindable public var session: ProductionSession
     public var onCloneTemplate: () -> Void
+    public var onReviewConflicts: () -> Void
 
-    public init(session: ProductionSession, onCloneTemplate: @escaping () -> Void) {
+    public init(
+        session: ProductionSession,
+        onCloneTemplate: @escaping () -> Void,
+        onReviewConflicts: @escaping () -> Void
+    ) {
         self.session = session
         self.onCloneTemplate = onCloneTemplate
+        self.onReviewConflicts = onReviewConflicts
     }
 
     public var body: some View {
@@ -31,9 +37,16 @@ public struct SettingsView: View {
             Section("Production") {
                 Button("Clone Production Template", action: onCloneTemplate)
             }
+            Section("Collaboration") {
+                Button("Review Sync Conflicts", action: onReviewConflicts)
+                if !session.pendingConflicts.isEmpty {
+                    Text("\(session.pendingConflicts.count) conflicts pending")
+                        .foregroundStyle(ThemeTokens.accent)
+                }
+            }
             Section("Security") {
                 Label(
-                    SecurityStatusLabel.canUseBiometrics ? "Biometrics Available" : "Biometrics Unavailable",
+                    SecurityService.canUseBiometrics() ? "Biometrics Available" : "Biometrics Unavailable",
                     systemImage: "faceid"
                 )
             }
@@ -41,11 +54,5 @@ public struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(ThemeTokens.background)
         .navigationTitle("Settings")
-    }
-}
-
-private enum SecurityStatusLabel {
-    static var canUseBiometrics: Bool {
-        SecurityService.canUseBiometrics()
     }
 }

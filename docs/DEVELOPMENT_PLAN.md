@@ -2,6 +2,17 @@
 
 *A phased architecture for a native iOS/iPadOS (iOS 26+) camera logging app using SwiftUI Liquid Glass, SwiftData + CloudKit, Clean MVVM with @Observable, and a freemium + Pro subscription model.*
 
+## Implementation Status (June 2026)
+
+| Phase | Status | Notes |
+|---|---|---|
+| **MVP v1.0** | **Complete** | SwiftData, Hero Editor, dashboard, exports, onboarding, Liquid Glass UI |
+| **Phase 2** | **Complete** | CloudKit private/shared configs, sync engine, presence, roles, conflict UI, widgets, App Intents, Frame.io hooks |
+| **Phase 3** | **Complete** | Speech framework voice logging, Core ML SmartSuggest, NLP search, Digital Slate, audit history, security |
+| **Polish** | **In progress** | On-set sim tests, performance tuning, localization deferred |
+
+**Build:** Xcode 26 · iOS 26+ · 30 unit tests · Simulator verified
+
 ## 1. Executive Vision Summary
 
 **Camera Data** is the camera report app professionals will *want* to open on set — not because they have to, but because logging a take feels faster than handwriting, prettier than a PDF, and safer than a shared spreadsheet.

@@ -1,4 +1,5 @@
 import AppIntents
+import CameraDataFeatures
 
 public struct LogTakeIntent: AppIntent {
     nonisolated(unsafe) public static var title: LocalizedStringResource = "Log Take"
@@ -19,8 +20,8 @@ public struct LogTakeIntent: AppIntent {
     }
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
-        let cameraLabel = camera ?? "A"
-        return .result(dialog: "Logged take \(take) for scene \(scene) on Camera \(cameraLabel)")
+        let message = try await AppIntentLogService.logTake(scene: scene, take: take, cameraLabel: camera)
+        return .result(dialog: IntentDialog(stringLiteral: message))
     }
 }
 

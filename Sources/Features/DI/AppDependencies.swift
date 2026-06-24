@@ -16,6 +16,11 @@ public final class ProductionSession {
     public var isOnboarded: Bool
     public var launchState: String = "initializing"
     public var presenceMessages: [String] = []
+    public var slateScene: String = ""
+    public var slateTake: Int = 1
+    public var pendingConflicts: [ConflictField] = []
+    public var conflictLocalDraft: LogEntryDraft?
+    public var conflictRemoteDraft: LogEntryDraft?
 
     public init(isOnboarded: Bool = false) {
         self.isOnboarded = isOnboarded
@@ -23,6 +28,14 @@ public final class ProductionSession {
 
     public func markReady(productionName: String?) {
         launchState = "dashboard_ready:\(productionName ?? "none")"
+    }
+
+    public func seedSampleConflict() {
+        conflictLocalDraft = LogEntryDraft(scene: "12", take: 4, lens: "50mm", notes: "Local notes")
+        conflictRemoteDraft = LogEntryDraft(scene: "12", take: 4, lens: "75mm", notes: "Remote notes")
+        if let local = conflictLocalDraft, let remote = conflictRemoteDraft {
+            pendingConflicts = ConflictMerger.detectConflicts(local: local, remote: remote)
+        }
     }
 }
 
@@ -36,12 +49,17 @@ public final class AppDependencies {
     public let syncEngine: SyncEngine
     public let presenceService: PresenceService
     public let auditService: AuditService
+    public let smartSuggestor: CoreMLSmartSuggestor
     public let session: ProductionSession
 
-    public init(cloudKitEnabled: Bool = false, inMemory: Bool = false) throws {
+    public init(
+        swiftDataCloudKit: Bool = false,
+        syncCloudKit: Bool = true,
+        inMemory: Bool = false
+    ) throws {
         modelContainer = try inMemory
             ? ModelContainerFactory.makeInMemory()
-            : ModelContainerFactory.makePersistent(cloudKitEnabled: cloudKitEnabled)
+            : ModelContainerFactory.makePersistent(cloudKitEnabled: swiftDataCloudKit)
 
         let context = modelContainer.mainContext
         auditService = AuditService()
@@ -49,14 +67,15 @@ public final class AppDependencies {
         logEntryRepository = LogEntryRepository(context: context, auditService: auditService)
         templateRepository = ProductionTemplateRepository(context: context)
         logTakeUseCase = LogTakeUseCase(entryRepository: logEntryRepository)
-        syncEngine = SyncEngine(cloudKitAvailable: cloudKitEnabled)
+        syncEngine = SyncEngine(cloudKitAvailable: syncCloudKit)
         presenceService = PresenceService()
+        smartSuggestor = CoreMLSmartSuggestor()
 
         let onboarded = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         session = ProductionSession(isOnboarded: onboarded)
     }
 
-    public func bootstrapIfNeeded() throws {
+    public func bootstrapIfNeeded() async throws {
         if try productionRepository.fetchActive() == nil {
             let production = try productionRepository.create(name: "Untitled Production")
             session.activeProduction = production
@@ -65,6 +84,29 @@ public final class AppDependencies {
         }
         session.selectedCamera = session.activeProduction?.cameras.sorted(by: { $0.sortOrder < $1.sortOrder }).first
         session.selectedDay = session.activeProduction?.days.sorted(by: { $0.dayNumber < $1.dayNumber }).first
+
+        if let production = session.activeProduction {
+            _ = try? await syncEngine.prepareZones(for: production.code)
+            _ = syncEngine.makeInvite(for: production.code)
+        }
+
+        syncLatestEntryToSlate()
         session.markReady(productionName: session.activeProduction?.name)
+        AppIntentLogService.register(self)
+    }
+
+    public func syncLatestEntryToSlate() {
+        guard let production = session.activeProduction,
+              let camera = session.selectedCamera else { return }
+        let entries = (try? logEntryRepository.fetchEntries(
+            production: production, camera: camera, day: session.selectedDay, limit: 1, offset: 0
+        )) ?? []
+        if let latest = entries.first {
+            session.slateScene = latest.scene
+            session.slateTake = latest.take
+        } else {
+            session.slateScene = ""
+            session.slateTake = 1
+        }
     }
 }
