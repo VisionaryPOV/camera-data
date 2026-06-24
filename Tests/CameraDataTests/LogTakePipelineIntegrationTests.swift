@@ -100,6 +100,7 @@ final class LogTakePipelineIntegrationTests: XCTestCase {
             existing: nil,
             modifiedBy: "live-path-test"
         )
+        _ = await deps.flushSyncQueue()
 
         let logEntries = await store.logEntries()
         XCTAssertEqual(logEntries.count, 1)
@@ -108,7 +109,7 @@ final class LogTakePipelineIntegrationTests: XCTestCase {
         XCTAssertFalse(logEntries.first?.pushedToCloudKit ?? true)
 
         let flushCount = await deps.syncEngine.flushInvocationCount
-        XCTAssertEqual(flushCount, 1)
+        XCTAssertEqual(flushCount, 2, "Bootstrap flush + post-log batch flush")
     }
 
     func testAppDependenciesDefaultEnablesSyncPipeline() throws {

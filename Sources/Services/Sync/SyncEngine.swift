@@ -83,17 +83,16 @@ public actor SyncEngine {
     public private(set) var flushInvocationCount: Int = 0
     public private(set) var modifyRecordsInvocationCount: Int = 0
 
-    public init(
-        transport: CloudKitSyncTransport = LiveCloudKitTransport(),
-        offlineStore: OfflineCloudKitRecordStore? = nil
-    ) {
+    public init(transport: CloudKitSyncTransport, offlineStore: OfflineCloudKitRecordStore? = nil) {
         self.transport = transport
         self.offlineStore = offlineStore
     }
 
     public func enqueue(entryId: UUID, syncVersion: Int) async {
         await hydratePendingQueueIfNeeded()
-        pendingQueue.append(PendingSyncOperation(entryId: entryId, syncVersion: syncVersion))
+        upsertPending(
+            PendingSyncOperation(entryId: entryId, syncVersion: syncVersion)
+        )
         await persistPendingQueue()
     }
 
@@ -107,7 +106,7 @@ public actor SyncEngine {
         productionCode: String
     ) async {
         await hydratePendingQueueIfNeeded()
-        pendingQueue.append(
+        upsertPending(
             PendingSyncOperation(
                 entryId: entryId,
                 syncVersion: syncVersion,
@@ -193,7 +192,7 @@ public actor SyncEngine {
             privateZoneName: privateZone.zoneID.zoneName,
             sharedZoneName: sharedZone.zoneID.zoneName,
             containerIdentifier: Self.containerIdentifier,
-            shareURL: "https://cameradata.app/join/\(productionCode)"
+            shareURL: nil
         )
         zoneInfo = info
         return info
@@ -211,6 +210,10 @@ public actor SyncEngine {
 
         try await transport.modifyRecords(saving: [root, share], deleting: [])
         lastShare = share
+        if var info = zoneInfo {
+            info.shareURL = share.url?.absoluteString
+            zoneInfo = info
+        }
         return share
     }
 
@@ -261,6 +264,14 @@ public actor SyncEngine {
     private func persistPendingQueue() async {
         guard let offlineStore else { return }
         await offlineStore.setPendingOperations(pendingQueue)
+    }
+
+    private func upsertPending(_ operation: PendingSyncOperation) {
+        if let index = pendingQueue.firstIndex(where: { $0.entryId == operation.entryId }) {
+            pendingQueue[index] = operation
+        } else {
+            pendingQueue.append(operation)
+        }
     }
 
     private func makeCKRecord(from operation: PendingSyncOperation, zoneName: String) -> CKRecord {

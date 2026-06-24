@@ -19,6 +19,7 @@ public final class ProductionSession {
     public var slateScene: String = ""
     public var slateTake: Int = 1
     public var pendingConflicts: [ConflictField] = []
+    public var conflictEntryId: UUID?
     public var conflictLocalDraft: LogEntryDraft?
     public var conflictRemoteDraft: LogEntryDraft?
 
@@ -81,7 +82,7 @@ public final class AppDependencies {
         syncEngine = SyncEngine(transport: transport, offlineStore: store)
         postSaveCoordinator = LogPostSaveCoordinator(
             syncEngine: syncEngine,
-            flushAfterEnqueue: syncPipelineEnabled
+            flushAfterEnqueue: false
         )
 
         let resolvedMetadata: any MetadataProviding = metadataProvider ?? LiveMetadataProvider()
@@ -110,13 +111,17 @@ public final class AppDependencies {
         session.selectedDay = session.activeProduction?.days.sorted(by: { $0.dayNumber < $1.dayNumber }).first
 
         if syncPipelineEnabled, let production = session.activeProduction {
-            let zones = try await syncEngine.prepareZones(for: production.code)
-            _ = try? await syncEngine.createShare(for: production.code, productionName: production.name)
+            _ = try await syncEngine.prepareZones(for: production.code)
             let invite = syncEngine.makeInvite(for: production.code)
-            production.shareURL = zones.shareURL ?? invite.shareURL.absoluteString
+            if let share = try? await syncEngine.createShare(for: production.code, productionName: production.name) {
+                production.shareURL = share.url?.absoluteString ?? invite.shareURL.absoluteString
+            } else {
+                production.shareURL = await syncEngine.currentZoneInfo()?.shareURL ?? invite.shareURL.absoluteString
+            }
             try productionRepository.setActive(production)
             _ = try? await syncEngine.replayUnpushedOfflineRecords()
             try await applyInboundSync()
+            _ = await postSaveCoordinator.flushPending()
         }
 
         syncLatestEntryToSlate()
@@ -135,6 +140,7 @@ public final class AppDependencies {
                 let localDraft = LogEntryMapper.toDraft(existing)
                 let conflicts = ConflictMerger.detectConflicts(local: localDraft, remote: change.draft)
                 if !conflicts.isEmpty, change.syncVersion > existing.syncVersion {
+                    session.conflictEntryId = change.entryId
                     session.conflictLocalDraft = localDraft
                     session.conflictRemoteDraft = change.draft
                     session.pendingConflicts = conflicts
@@ -152,6 +158,36 @@ public final class AppDependencies {
                 )
             }
         }
+    }
+
+    public func resolvePendingConflict(resolutions: [String: ConflictResolutionChoice]) throws {
+        guard let entryId = session.conflictEntryId,
+              let local = session.conflictLocalDraft,
+              let remote = session.conflictRemoteDraft,
+              let production = session.activeProduction,
+              let camera = session.selectedCamera,
+              let day = session.selectedDay,
+              let existing = try logEntryRepository.fetchEntry(id: entryId) else { return }
+
+        let merged = ConflictMerger.merge(local: local, remote: remote, resolutions: resolutions)
+        _ = try logEntryRepository.save(
+            draft: merged,
+            production: production,
+            camera: camera,
+            day: day,
+            existing: existing,
+            modifiedBy: "conflict-resolution",
+            captureContext: nil,
+            preferredId: nil
+        )
+        session.conflictEntryId = nil
+        session.conflictLocalDraft = nil
+        session.conflictRemoteDraft = nil
+        session.pendingConflicts = []
+    }
+
+    public func flushSyncQueue() async -> Int {
+        await postSaveCoordinator.flushPending()
     }
 
     public func syncLatestEntryToSlate() {

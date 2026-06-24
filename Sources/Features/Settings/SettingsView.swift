@@ -42,7 +42,12 @@ public struct SettingsView: View {
             }
             Section("Collaboration") {
                 Button("Review Sync Conflicts", action: onReviewConflicts)
-                if !session.pendingConflicts.isEmpty {
+                    .disabled(session.pendingConflicts.isEmpty)
+                if session.pendingConflicts.isEmpty {
+                    Text("No sync conflicts")
+                        .font(.caption)
+                        .foregroundStyle(ThemeTokens.textSecondary)
+                } else {
                     Text("\(session.pendingConflicts.count) conflicts pending")
                         .foregroundStyle(ThemeTokens.accent)
                 }

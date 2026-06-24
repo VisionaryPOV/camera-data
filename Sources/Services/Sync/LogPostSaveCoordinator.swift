@@ -29,7 +29,11 @@ public struct LogPostSaveCoordinator: Sendable {
         )
 
         if flushAfterEnqueue {
-            _ = await syncEngine.flushOfflineQueue()
+            _ = await flushPending()
         }
+    }
+
+    public func flushPending() async -> Int {
+        await syncEngine.flushOfflineQueue()
     }
 }

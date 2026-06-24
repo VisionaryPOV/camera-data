@@ -5,6 +5,7 @@ import CameraDataData
 
 public struct RootView: View {
     public var dependencies: AppDependencies
+    @Environment(\.scenePhase) private var scenePhase
     @State private var dashboardViewModel: DashboardViewModel
     @State private var activeSheet: RootActiveSheet?
     @State private var showSlate = false
@@ -67,6 +68,16 @@ public struct RootView: View {
         .task {
             await refreshPresence()
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                Task { _ = await dependencies.flushSyncQueue() }
+            }
+        }
+        .onChange(of: dependencies.session.pendingConflicts.count) { _, count in
+            if count > 0 {
+                activeSheet = .conflicts
+            }
+        }
     }
 
     @ViewBuilder
@@ -99,8 +110,9 @@ public struct RootView: View {
                     session: dependencies.session,
                     onCloneTemplate: cloneTemplate,
                     onReviewConflicts: {
-                        dependencies.session.seedSampleConflict()
-                        activeSheet = .conflicts
+                        if !dependencies.session.pendingConflicts.isEmpty {
+                            activeSheet = .conflicts
+                        }
                     }
                 )
             }
@@ -164,11 +176,8 @@ public struct RootView: View {
     }
 
     private func resolveConflicts(_ resolutions: [String: ConflictResolutionChoice]) {
-        guard let local = dependencies.session.conflictLocalDraft,
-              let remote = dependencies.session.conflictRemoteDraft else { return }
-        let merged = ConflictMerger.merge(local: local, remote: remote, resolutions: resolutions)
-        dependencies.session.conflictLocalDraft = merged
-        dependencies.session.pendingConflicts = []
+        try? dependencies.resolvePendingConflict(resolutions: resolutions)
+        try? dashboardViewModel.reload()
     }
 
     private func refreshPresence() async {

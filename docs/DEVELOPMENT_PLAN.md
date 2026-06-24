@@ -9,9 +9,11 @@
 | **MVP v1.0** | **Complete** | SwiftData, Hero Editor, dashboard, exports, onboarding, Liquid Glass UI |
 | **Phase 2** | **Complete** | CloudKit private/shared configs, sync engine, presence, roles, conflict UI, widgets, App Intents, Frame.io hooks |
 | **Phase 3** | **Complete** | Speech framework voice logging, Core ML SmartSuggest, NLP search, Digital Slate, audit history, security |
-| **Polish** | **In progress** | On-set sim tests, performance tuning, localization deferred |
+| **Polish** | **Complete** | On-set sim tests, batched CloudKit sync, durable offline queue |
 
-**Build:** Xcode 26 · iOS 26+ · 30 unit tests · Simulator verified
+**Build:** Xcode 26 · iOS 26+ · 51 unit tests · Simulator verified
+
+**Sync architecture:** SwiftData uses local persistence (`cloudKitDatabase: .none`); custom `SyncEngine` + `CloudKitSyncTransport` handles explicit CK `LogEntry` records, durable offline queue, inbound pull, and conflict resolution UI.
 
 ## 1. Executive Vision Summary
 

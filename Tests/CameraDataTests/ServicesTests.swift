@@ -180,7 +180,7 @@ final class ServicesTests: XCTestCase {
         let transport = RecordingCloudKitTransport()
         let syncEngine = SyncEngine(transport: transport)
         _ = try await syncEngine.prepareZones(for: production.code)
-        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushAfterEnqueue: true)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushAfterEnqueue: false)
         let useCase = LogTakeUseCase(
             entryRepository: repo,
             postSaveCoordinator: coordinator,
@@ -201,6 +201,8 @@ final class ServicesTests: XCTestCase {
             draft = LogEntryDraft(scene: "100", take: i + 1, lens: "50mm")
         }
 
+        _ = await coordinator.flushPending()
+
         let fetched = try repo.fetchEntries(
             production: production,
             camera: camera,
@@ -211,7 +213,39 @@ final class ServicesTests: XCTestCase {
         XCTAssertEqual(fetched.count, 50)
 
         let modifyCount = await syncEngine.modifyRecordsInvocationCount
-        XCTAssertEqual(modifyCount, 50)
+        XCTAssertEqual(modifyCount, 1, "Burst logging should batch into a single modifyRecords call")
+        let saved = await transport.savedRecords
+        XCTAssertEqual(saved.count, 50)
+    }
+
+    func testSyncEngineDedupesPendingOperationsByEntryId() async {
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
+        let engine = SyncEngine(transport: RecordingCloudKitTransport(), offlineStore: store)
+        let entryId = UUID()
+        await engine.enqueueLogEntry(
+            entryId: entryId,
+            syncVersion: 1,
+            scene: "1",
+            take: 1,
+            lens: "50mm",
+            iso: 800,
+            productionCode: "DEDUP"
+        )
+        await engine.enqueueLogEntry(
+            entryId: entryId,
+            syncVersion: 2,
+            scene: "1",
+            take: 2,
+            lens: "75mm",
+            iso: 1280,
+            productionCode: "DEDUP"
+        )
+        let pendingCount = await engine.pendingCount()
+        XCTAssertEqual(pendingCount, 1)
+        let pending = await store.pendingOperations()
+        XCTAssertEqual(pending.count, 1)
+        XCTAssertEqual(pending.first?.syncVersion, 2)
+        XCTAssertEqual(pending.first?.take, 2)
     }
 
     func testSyncEngineRetainsQueueWhenZonesUnavailable() async {
