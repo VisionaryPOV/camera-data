@@ -73,6 +73,29 @@ final class ServicesTests: XCTestCase {
         XCTAssertEqual(flushed, 1)
         let remaining = await engine.pendingCount()
         XCTAssertEqual(remaining, 0)
+        let flushCount = await engine.flushInvocationCount
+        XCTAssertEqual(flushCount, 1)
+    }
+
+    func testLogPostSaveCoordinatorEnqueuesAndFlushes() async throws {
+        let engine = SyncEngine(cloudKitAvailable: false)
+        _ = try await engine.prepareZones(for: "COORD01")
+        let coordinator = LogPostSaveCoordinator(syncEngine: engine, flushWhenCloudKitEnabled: true)
+
+        await coordinator.handle(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "1",
+            take: 1,
+            lens: "40mm",
+            iso: 800,
+            productionCode: "COORD01"
+        )
+
+        let flushCount = await engine.flushInvocationCount
+        XCTAssertEqual(flushCount, 1)
+        let pending = await engine.pendingCount()
+        XCTAssertEqual(pending, 0)
     }
 
     func testSyncEngineResolvesConflictPreferRemote() async {
@@ -135,7 +158,13 @@ final class ServicesTests: XCTestCase {
         context.insert(day)
 
         let repo = LogEntryRepository(context: context)
-        let useCase = LogTakeUseCase(entryRepository: repo)
+        let syncEngine = SyncEngine(cloudKitAvailable: false)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushWhenCloudKitEnabled: false)
+        let useCase = LogTakeUseCase(
+            entryRepository: repo,
+            postSaveCoordinator: coordinator,
+            metadataProvider: FixedMetadataProvider()
+        )
 
         var draft = LogEntryDraft(scene: "100", take: 1, lens: "50mm")
         for i in 1...50 {

@@ -58,15 +58,12 @@ final class DataLayerTests: XCTestCase {
 
     func testLogTakeUseCaseLogAndNextIncrementsTake() async throws {
         let syncEngine = SyncEngine(cloudKitAvailable: false)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushWhenCloudKitEnabled: true)
+        let metadata = FixedMetadataProvider(pitch: 1.5, roll: 2.5, yaw: 3.5)
         let useCase = LogTakeUseCase(
             entryRepository: repository,
-            syncEngine: syncEngine,
-            metadataProvider: {
-                MetadataCaptureService.captureContext(
-                    location: nil,
-                    motion: DeviceMotionSnapshot(pitch: 1.5, roll: 2.5, yaw: 3.5)
-                )
-            }
+            postSaveCoordinator: coordinator,
+            metadataProvider: metadata
         )
         var draft = LogEntryDraft(scene: "20", take: 1, lens: "50mm")
         let first = try await useCase.logAndNext(
@@ -79,8 +76,8 @@ final class DataLayerTests: XCTestCase {
         )
         XCTAssertEqual(first.saved.take, 1)
         XCTAssertEqual(first.saved.pitch, 1.5)
-        let pendingAfterFirst = await syncEngine.pendingCount()
-        XCTAssertEqual(pendingAfterFirst, 1)
+        let flushAfterFirst = await syncEngine.flushInvocationCount
+        XCTAssertEqual(flushAfterFirst, 1)
 
         draft = LogEntryDraft(scene: "20", take: 2, lens: "50mm")
         let second = try await useCase.logAndNext(
@@ -93,8 +90,8 @@ final class DataLayerTests: XCTestCase {
         )
         XCTAssertEqual(second.saved.take, 2)
         XCTAssertEqual(second.nextDraft.take, 3)
-        let pendingAfterSecond = await syncEngine.pendingCount()
-        XCTAssertEqual(pendingAfterSecond, 2)
+        let flushAfterSecond = await syncEngine.flushInvocationCount
+        XCTAssertEqual(flushAfterSecond, 2)
     }
 
     func testFetchEntriesScopesToProduction() throws {

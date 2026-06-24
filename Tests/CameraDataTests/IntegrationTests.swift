@@ -32,6 +32,8 @@ final class IntegrationTests: XCTestCase {
         )
         XCTAssertEqual(entries.first?.scene, "44")
         XCTAssertEqual(entries.first?.take, 2)
+        let flushCount = await deps.syncEngine.flushInvocationCount
+        XCTAssertEqual(flushCount, 0, "App uses syncCloudKit:false so coordinator should not flush")
         let pendingSync = await deps.syncEngine.pendingCount()
         XCTAssertGreaterThan(pendingSync, 0)
     }
@@ -109,13 +111,13 @@ final class IntegrationTests: XCTestCase {
 
         let viewModel = DashboardViewModel(entryRepository: repo, session: session)
         try viewModel.reload()
-        XCTAssertEqual(viewModel.roleFilteredDrafts.first?.notes, "VFX marker")
+        XCTAssertEqual(viewModel.entries.first?.displayDraft.notes, "VFX marker")
         XCTAssertFalse(viewModel.canEdit)
 
         session.currentRole = .editor
         try viewModel.reload()
         XCTAssertTrue(viewModel.canEdit)
-        XCTAssertEqual(viewModel.roleFilteredDrafts.first?.notes, "Camera note")
+        XCTAssertEqual(viewModel.entries.first?.displayDraft.notes, "Camera note")
     }
 
     func testSpeechRecognitionServiceAvailabilityAPI() {

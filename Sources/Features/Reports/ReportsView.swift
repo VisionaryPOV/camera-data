@@ -6,11 +6,11 @@ import CameraDataDomain
 
 public struct ReportsView: View {
     public let production: ProductionModel?
-    public let entries: [LogEntryModel]
+    public let entries: [DashboardEntry]
     public let role: ProductionRole
     @State private var exportMessage: String = ""
 
-    public init(production: ProductionModel?, entries: [LogEntryModel], role: ProductionRole = .editor) {
+    public init(production: ProductionModel?, entries: [DashboardEntry], role: ProductionRole = .editor) {
         self.production = production
         self.entries = entries
         self.role = role
@@ -47,7 +47,7 @@ public struct ReportsView: View {
     }
 
     private var drafts: [LogEntryDraft] {
-        DashboardViewModel.roleFilteredDrafts(from: entries, role: role)
+        entries.map(\.displayDraft)
     }
 
     private func exportPDF() {

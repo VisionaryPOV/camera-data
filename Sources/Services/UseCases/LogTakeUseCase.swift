@@ -5,18 +5,16 @@ import CameraDataData
 @MainActor
 public final class LogTakeUseCase {
     private let entryRepository: LogEntryRepositoryProtocol
-    private let syncEngine: SyncEngine?
-    private let metadataProvider: () -> CaptureContext
+    private let postSaveCoordinator: LogPostSaveCoordinator
+    private let metadataProvider: any MetadataProviding
 
     public init(
         entryRepository: LogEntryRepositoryProtocol,
-        syncEngine: SyncEngine? = nil,
-        metadataProvider: @escaping () -> CaptureContext = {
-            MetadataCaptureService.captureContext(location: nil, motion: nil)
-        }
+        postSaveCoordinator: LogPostSaveCoordinator,
+        metadataProvider: any MetadataProviding
     ) {
         self.entryRepository = entryRepository
-        self.syncEngine = syncEngine
+        self.postSaveCoordinator = postSaveCoordinator
         self.metadataProvider = metadataProvider
     }
 
@@ -36,7 +34,7 @@ public final class LogTakeUseCase {
         existing: LogEntryModel?,
         modifiedBy: String
     ) async throws -> (saved: LogEntryModel, nextDraft: LogEntryDraft) {
-        let captureContext = metadataProvider()
+        let captureContext = metadataProvider.captureContext()
         let saved = try entryRepository.save(
             draft: draft,
             production: production,
@@ -47,17 +45,15 @@ public final class LogTakeUseCase {
             captureContext: captureContext
         )
 
-        if let syncEngine {
-            await syncEngine.enqueueLogEntry(
-                entryId: saved.id,
-                syncVersion: saved.syncVersion,
-                scene: saved.scene,
-                take: saved.take,
-                lens: saved.lens,
-                iso: saved.iso,
-                productionCode: production.code
-            )
-        }
+        await postSaveCoordinator.handle(
+            entryId: saved.id,
+            syncVersion: saved.syncVersion,
+            scene: saved.scene,
+            take: saved.take,
+            lens: saved.lens,
+            iso: saved.iso,
+            productionCode: production.code
+        )
 
         let sceneTakes = try entryRepository.fetchSceneTakes(production: production, camera: camera)
         let nextTake = TakeIncrementer.nextTake(

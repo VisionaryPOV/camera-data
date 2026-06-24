@@ -138,26 +138,26 @@ public struct DashboardView: View {
 
     private var entryList: some View {
         List {
-            ForEach(viewModel.entries, id: \.id) { entry in
+            ForEach(viewModel.entries) { entry in
                 Button {
-                    onSelectEntry(entry)
+                    onSelectEntry(entry.model)
                 } label: {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Scene \(entry.scene) / Take \(entry.take)")
+                            Text("Scene \(entry.displayDraft.scene) / Take \(entry.displayDraft.take)")
                                 .font(.headline)
-                            Text(entry.lens.isEmpty ? "No lens" : entry.lens)
+                            Text(entry.displayDraft.lens.isEmpty ? "No lens" : entry.displayDraft.lens)
                                 .font(.subheadline)
                                 .foregroundStyle(ThemeTokens.textSecondary)
-                            if !viewModel.displayNotes(for: entry).isEmpty {
-                                Text(viewModel.displayNotes(for: entry))
+                            if !entry.displayDraft.notes.isEmpty {
+                                Text(entry.displayDraft.notes)
                                     .font(.caption)
                                     .foregroundStyle(ThemeTokens.textSecondary)
                                     .lineLimit(1)
                             }
                         }
                         Spacer()
-                        if entry.isCircled {
+                        if entry.displayDraft.isCircled {
                             Image(systemName: "circle.fill")
                                 .foregroundStyle(ThemeTokens.circled)
                         }

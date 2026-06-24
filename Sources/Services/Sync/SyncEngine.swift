@@ -69,6 +69,7 @@ public actor SyncEngine {
     private var sharedDatabase: CKDatabase?
     private var zoneInfo: CloudKitZoneInfo?
     private var lastShare: CKShare?
+    public private(set) var flushInvocationCount: Int = 0
 
     public init(cloudKitAvailable: Bool = true) {
         self.isCloudKitAvailable = cloudKitAvailable
@@ -111,6 +112,7 @@ public actor SyncEngine {
     }
 
     public func flushOfflineQueue() async -> Int {
+        flushInvocationCount += 1
         let operations = pendingQueue
         pendingQueue.removeAll()
 

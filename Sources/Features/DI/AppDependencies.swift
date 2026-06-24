@@ -47,15 +47,19 @@ public final class AppDependencies {
     public let templateRepository: ProductionTemplateRepository
     public let logTakeUseCase: LogTakeUseCase
     public let syncEngine: SyncEngine
+    public let postSaveCoordinator: LogPostSaveCoordinator
+    public let metadataProvider: LiveMetadataProvider
     public let presenceService: PresenceService
     public let auditService: AuditService
     public let smartSuggestor: CoreMLSmartSuggestor
     public let session: ProductionSession
+    private let syncCloudKitEnabled: Bool
 
     public init(
         swiftDataCloudKit: Bool = false,
         syncCloudKit: Bool = true,
-        inMemory: Bool = false
+        inMemory: Bool = false,
+        metadataProvider: (any MetadataProviding)? = nil
     ) throws {
         modelContainer = try inMemory
             ? ModelContainerFactory.makeInMemory()
@@ -66,16 +70,21 @@ public final class AppDependencies {
         productionRepository = ProductionRepository(context: context)
         logEntryRepository = LogEntryRepository(context: context, auditService: auditService)
         templateRepository = ProductionTemplateRepository(context: context)
+        syncCloudKitEnabled = syncCloudKit
         syncEngine = SyncEngine(cloudKitAvailable: syncCloudKit)
+        postSaveCoordinator = LogPostSaveCoordinator(
+            syncEngine: syncEngine,
+            flushWhenCloudKitEnabled: syncCloudKit
+        )
+
+        let liveMetadata = LiveMetadataProvider()
+        self.metadataProvider = liveMetadata
+        let resolvedMetadata: any MetadataProviding = metadataProvider ?? liveMetadata
+
         logTakeUseCase = LogTakeUseCase(
             entryRepository: logEntryRepository,
-            syncEngine: syncEngine,
-            metadataProvider: {
-                MetadataCaptureService.captureContext(
-                    location: nil,
-                    motion: DeviceMotionSnapshot(pitch: 0, roll: 0, yaw: 0)
-                )
-            }
+            postSaveCoordinator: postSaveCoordinator,
+            metadataProvider: resolvedMetadata
         )
         presenceService = PresenceService()
         smartSuggestor = CoreMLSmartSuggestor()

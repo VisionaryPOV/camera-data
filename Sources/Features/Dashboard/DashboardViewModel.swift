@@ -7,8 +7,7 @@ import CameraDataServices
 @MainActor
 @Observable
 public final class DashboardViewModel {
-    public var entries: [LogEntryModel] = []
-    public var roleFilteredDrafts: [LogEntryDraft] = []
+    public var entries: [DashboardEntry] = []
     public var stats: DashboardStats = DashboardStats(takeCount: 0, circledCount: 0, dominantLens: nil, takesPerHour: 0)
     public var searchText: String = "" {
         didSet { scheduleReload() }
@@ -38,6 +37,10 @@ public final class DashboardViewModel {
         session.currentRole.canEdit
     }
 
+    public var entryModels: [LogEntryModel] {
+        entries.map(\.model)
+    }
+
     public func reload() throws {
         guard let production = session.activeProduction else { return }
         isLoading = true
@@ -60,10 +63,9 @@ public final class DashboardViewModel {
             fetched = fetched.filter(\.isCircled)
         }
 
-        entries = fetched
-        roleFilteredDrafts = Self.roleFilteredDrafts(from: fetched, role: session.currentRole)
-
-        stats = DashboardStatsCalculator.compute(entries: roleFilteredDrafts, shootDurationHours: 8)
+        entries = DashboardEntry.project(fetched, role: session.currentRole)
+        let displayDrafts = entries.map(\.displayDraft)
+        stats = DashboardStatsCalculator.compute(entries: displayDrafts, shootDurationHours: 8)
 
         AppGroupStore.writeWidgetSnapshot(
             takeCount: stats.takeCount,
@@ -71,22 +73,8 @@ public final class DashboardViewModel {
         )
 
         if let latest = entries.first {
-            session.slateScene = latest.scene
-            session.slateTake = latest.take
-        }
-    }
-
-    public static func roleFilteredDrafts(from entries: [LogEntryModel], role: ProductionRole) -> [LogEntryDraft] {
-        let pairs = entries.map { (draft: LogEntryMapper.toDraft($0), vfxNotes: $0.vfxNotes) }
-        return RoleFilter.filterEntries(pairs, role: role)
-    }
-
-    public func displayNotes(for entry: LogEntryModel) -> String {
-        switch session.currentRole {
-        case .vfx:
-            return entry.vfxNotes.isEmpty ? entry.notes : entry.vfxNotes
-        case .readOnly, .admin, .editor:
-            return entry.notes
+            session.slateScene = latest.displayDraft.scene
+            session.slateTake = latest.displayDraft.take
         }
     }
 
@@ -96,7 +84,7 @@ public final class DashboardViewModel {
     }
 
     public func smartSuggestions(for draft: LogEntryDraft) -> [SmartSuggestion] {
-        let history = roleFilteredDrafts
+        let history = entries.map(\.displayDraft)
         if let smartSuggestor {
             return smartSuggestor.suggest(from: history, for: draft)
         }

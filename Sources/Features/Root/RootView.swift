@@ -6,14 +6,8 @@ import CameraDataData
 public struct RootView: View {
     public var dependencies: AppDependencies
     @State private var dashboardViewModel: DashboardViewModel
-    @State private var showEditor = false
-    @State private var showReports = false
-    @State private var showSettings = false
+    @State private var activeSheet: RootActiveSheet?
     @State private var showSlate = false
-    @State private var showSearch = false
-    @State private var showConflictResolution = false
-    @State private var showAuditHistory = false
-    @State private var selectedEntry: LogEntryModel?
     @State private var searchQuery = ""
 
     public init(dependencies: AppDependencies) {
@@ -30,17 +24,16 @@ public struct RootView: View {
             DashboardView(
                 viewModel: dashboardViewModel,
                 session: dependencies.session,
-                onLogTake: { showEditor = true },
-                onOpenReports: { showReports = true },
-                onOpenSettings: { showSettings = true },
+                onLogTake: { activeSheet = .editor },
+                onOpenReports: { activeSheet = .reports },
+                onOpenSettings: { activeSheet = .settings },
                 onSelectEntry: { entry in
-                    selectedEntry = entry
-                    showAuditHistory = true
+                    activeSheet = .audit(entryId: entry.id)
                 }
             )
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { showSearch = true } label: {
+                    Button { activeSheet = .search } label: {
                         Image(systemName: "magnifyingglass")
                     }
                 }
@@ -53,59 +46,8 @@ public struct RootView: View {
         }
         .preferredColorScheme(.dark)
         .environment(\.cinematicTheme, dependencies.session.themeMode)
-        .sheet(isPresented: $showEditor) {
-            NavigationStack {
-                EntryEditorView(
-                    viewModel: entryEditorViewModel,
-                    onDismiss: {
-                        showEditor = false
-                        try? dashboardViewModel.reload()
-                    }
-                )
-            }
-            .presentationBackground(.ultraThinMaterial)
-        }
-        .sheet(isPresented: $showReports) {
-            NavigationStack {
-                ReportsView(
-                    production: dependencies.session.activeProduction,
-                    entries: dashboardViewModel.entries,
-                    role: dependencies.session.currentRole
-                )
-            }
-        }
-        .sheet(isPresented: $showSettings) {
-            NavigationStack {
-                SettingsView(
-                    session: dependencies.session,
-                    onCloneTemplate: cloneTemplate,
-                    onReviewConflicts: {
-                        dependencies.session.seedSampleConflict()
-                        showSettings = false
-                        DispatchQueue.main.async {
-                            showConflictResolution = true
-                        }
-                    }
-                )
-            }
-        }
-        .sheet(isPresented: $showSearch) {
-            SearchView(query: $searchQuery, entries: dashboardViewModel.entries)
-        }
-        .sheet(isPresented: $showConflictResolution) {
-            NavigationStack {
-                ConflictResolutionView(conflicts: dependencies.session.pendingConflicts) { resolutions in
-                    resolveConflicts(resolutions)
-                    showConflictResolution = false
-                }
-            }
-        }
-        .sheet(isPresented: $showAuditHistory) {
-            if let entry = selectedEntry {
-                NavigationStack {
-                    AuditHistoryView(entry: entry)
-                }
-            }
+        .sheet(item: $activeSheet) { sheet in
+            sheetContent(for: sheet)
         }
         .fullScreenCover(isPresented: $showSlate) {
             DigitalSlateView(
@@ -124,6 +66,62 @@ public struct RootView: View {
         }
         .task {
             await refreshPresence()
+        }
+    }
+
+    @ViewBuilder
+    private func sheetContent(for sheet: RootActiveSheet) -> some View {
+        switch sheet {
+        case .editor:
+            NavigationStack {
+                EntryEditorView(
+                    viewModel: entryEditorViewModel,
+                    onDismiss: {
+                        activeSheet = nil
+                        try? dashboardViewModel.reload()
+                    }
+                )
+            }
+            .presentationBackground(.ultraThinMaterial)
+
+        case .reports:
+            NavigationStack {
+                ReportsView(
+                    production: dependencies.session.activeProduction,
+                    entries: dashboardViewModel.entries,
+                    role: dependencies.session.currentRole
+                )
+            }
+
+        case .settings:
+            NavigationStack {
+                SettingsView(
+                    session: dependencies.session,
+                    onCloneTemplate: cloneTemplate,
+                    onReviewConflicts: {
+                        dependencies.session.seedSampleConflict()
+                        activeSheet = .conflicts
+                    }
+                )
+            }
+
+        case .search:
+            SearchView(query: $searchQuery, entries: dashboardViewModel.entryModels)
+
+        case .conflicts:
+            NavigationStack {
+                ConflictResolutionView(conflicts: dependencies.session.pendingConflicts) { resolutions in
+                    resolveConflicts(resolutions)
+                    activeSheet = nil
+                }
+            }
+
+        case .audit(let entryId):
+            if let entry = dashboardViewModel.entryModels.first(where: { $0.id == entryId }) {
+                NavigationStack {
+                    AuditHistoryView(entry: entry)
+                }
+            }
         }
     }
 
@@ -177,7 +175,7 @@ public struct RootView: View {
         await dependencies.presenceService.heartbeat(
             userId: "local-user",
             displayName: "You",
-            editingEntryLabel: showEditor ? "Take" : nil
+            editingEntryLabel: activeSheet == .editor ? "Take" : nil
         )
         let presences = await dependencies.presenceService.activePresences()
         var messages: [String] = []
