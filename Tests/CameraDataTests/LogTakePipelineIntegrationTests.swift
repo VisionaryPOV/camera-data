@@ -7,7 +7,7 @@ import CameraDataFeatures
 
 @MainActor
 final class LogTakePipelineIntegrationTests: XCTestCase {
-    func testLogAndNextCapturesMetadataEnqueuesAndFlushes() async throws {
+    func testLogAndNextCapturesMetadataEnqueuesFlushesAndModifyRecords() async throws {
         let container = try ModelContainerFactory.makeInMemory()
         let context = container.mainContext
         let production = ProductionModel(name: "Pipeline Test")
@@ -21,10 +21,11 @@ final class LogTakePipelineIntegrationTests: XCTestCase {
         try context.save()
 
         let repository = LogEntryRepository(context: context)
-        let syncEngine = SyncEngine(cloudKitAvailable: false)
+        let transport = RecordingCloudKitTransport()
+        let syncEngine = SyncEngine(transport: transport)
         _ = try await syncEngine.prepareZones(for: production.code)
 
-        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushWhenCloudKitEnabled: true)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushAfterEnqueue: true)
         let metadata = FixedMetadataProvider(
             latitude: 34.05,
             longitude: -118.25,
@@ -60,12 +61,46 @@ final class LogTakePipelineIntegrationTests: XCTestCase {
         let flushCount = await syncEngine.flushInvocationCount
         XCTAssertEqual(flushCount, 1)
 
+        let modifyCount = await syncEngine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 1)
+
         let pending = await syncEngine.pendingCount()
         XCTAssertEqual(pending, 0)
+
+        let savedRecords = await transport.savedRecords
+        XCTAssertEqual(savedRecords.count, 1)
+        XCTAssertEqual(savedRecords.first?["scene"] as? String, "55")
+        XCTAssertEqual(savedRecords.first?["take"] as? Int, 1)
+        XCTAssertEqual(savedRecords.first?["lens"] as? String, "50mm")
     }
 
-    func testAppDependenciesUsesLiveMetadataProvider() throws {
-        let deps = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: true)
+    func testAppDependenciesDefaultEnablesSyncPipeline() throws {
+        let transport = RecordingCloudKitTransport()
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            inMemory: true,
+            syncTransport: transport
+        )
+        XCTAssertTrue(deps.syncPipelineEnabled)
+    }
+
+    func testAppDependenciesUsesInjectedMetadataProvider() throws {
+        let fixed = FixedMetadataProvider(pitch: 9, roll: 8, yaw: 7)
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            inMemory: true,
+            syncTransport: RecordingCloudKitTransport(),
+            metadataProvider: fixed
+        )
+        XCTAssertEqual(deps.metadataProvider.captureContext().pitch, 9)
+    }
+
+    func testAppDependenciesUsesLiveMetadataProviderByDefault() throws {
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            inMemory: true,
+            syncTransport: RecordingCloudKitTransport()
+        )
         XCTAssertTrue(deps.metadataProvider is LiveMetadataProvider)
     }
 }

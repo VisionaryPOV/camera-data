@@ -29,7 +29,11 @@ struct CameraDataApp: App {
     @MainActor
     private func bootstrap() async {
         do {
-            let deps = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: false)
+            let deps = try AppDependencies(
+                swiftDataCloudKit: false,
+                syncPipelineEnabled: true,
+                inMemory: false
+            )
             try await deps.bootstrapIfNeeded()
             dependencies = deps
             NSLog("[CameraData] launchState=%@", deps.session.launchState)

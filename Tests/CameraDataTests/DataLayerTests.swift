@@ -57,8 +57,10 @@ final class DataLayerTests: XCTestCase {
     }
 
     func testLogTakeUseCaseLogAndNextIncrementsTake() async throws {
-        let syncEngine = SyncEngine(cloudKitAvailable: false)
-        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushWhenCloudKitEnabled: true)
+        let transport = RecordingCloudKitTransport()
+        let syncEngine = SyncEngine(transport: transport)
+        _ = try await syncEngine.prepareZones(for: production.code)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushAfterEnqueue: true)
         let metadata = FixedMetadataProvider(pitch: 1.5, roll: 2.5, yaw: 3.5)
         let useCase = LogTakeUseCase(
             entryRepository: repository,
@@ -92,6 +94,12 @@ final class DataLayerTests: XCTestCase {
         XCTAssertEqual(second.nextDraft.take, 3)
         let flushAfterSecond = await syncEngine.flushInvocationCount
         XCTAssertEqual(flushAfterSecond, 2)
+
+        let modifyCount = await syncEngine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 2)
+
+        let savedRecords = await transport.savedRecords
+        XCTAssertEqual(savedRecords.count, 2)
     }
 
     func testFetchEntriesScopesToProduction() throws {

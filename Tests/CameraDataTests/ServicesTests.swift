@@ -30,7 +30,9 @@ final class ServicesTests: XCTestCase {
     }
 
     func testSyncEngineQueuesAndFlushes() async {
-        let engine = SyncEngine(cloudKitAvailable: false)
+        let transport = RecordingCloudKitTransport()
+        let engine = SyncEngine(transport: transport)
+        _ = try? await engine.prepareZones(for: "DEMO")
         await engine.enqueueLogEntry(
             entryId: UUID(),
             syncVersion: 1,
@@ -55,10 +57,15 @@ final class ServicesTests: XCTestCase {
         XCTAssertEqual(flushed, 2)
         let remaining = await engine.pendingCount()
         XCTAssertEqual(remaining, 0)
+        let modifyCount = await engine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 1)
+        let saved = await transport.savedRecords
+        XCTAssertEqual(saved.count, 2)
     }
 
     func testSyncEngineFlushWritesRecordsWhenZonesReady() async throws {
-        let engine = SyncEngine(cloudKitAvailable: false)
+        let transport = RecordingCloudKitTransport()
+        let engine = SyncEngine(transport: transport)
         _ = try await engine.prepareZones(for: "FLUSH01")
         await engine.enqueueLogEntry(
             entryId: UUID(),
@@ -75,12 +82,19 @@ final class ServicesTests: XCTestCase {
         XCTAssertEqual(remaining, 0)
         let flushCount = await engine.flushInvocationCount
         XCTAssertEqual(flushCount, 1)
+        let modifyCount = await engine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 1)
+        let saved = await transport.savedRecords
+        XCTAssertEqual(saved.count, 1)
+        XCTAssertEqual(saved.first?["scene"] as? String, "5")
+        XCTAssertEqual(saved.first?["lens"] as? String, "32mm")
     }
 
     func testLogPostSaveCoordinatorEnqueuesAndFlushes() async throws {
-        let engine = SyncEngine(cloudKitAvailable: false)
+        let transport = RecordingCloudKitTransport()
+        let engine = SyncEngine(transport: transport)
         _ = try await engine.prepareZones(for: "COORD01")
-        let coordinator = LogPostSaveCoordinator(syncEngine: engine, flushWhenCloudKitEnabled: true)
+        let coordinator = LogPostSaveCoordinator(syncEngine: engine, flushAfterEnqueue: true)
 
         await coordinator.handle(
             entryId: UUID(),
@@ -94,12 +108,16 @@ final class ServicesTests: XCTestCase {
 
         let flushCount = await engine.flushInvocationCount
         XCTAssertEqual(flushCount, 1)
+        let modifyCount = await engine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 1)
         let pending = await engine.pendingCount()
         XCTAssertEqual(pending, 0)
+        let saved = await transport.savedRecords
+        XCTAssertEqual(saved.count, 1)
     }
 
     func testSyncEngineResolvesConflictPreferRemote() async {
-        let engine = SyncEngine()
+        let engine = SyncEngine(transport: RecordingCloudKitTransport())
         let local = LogEntryDraft(scene: "1", take: 1, lens: "50mm")
         let remote = LogEntryDraft(scene: "1", take: 1, lens: "75mm")
         let merged = await engine.resolveConflict(local: local, remote: remote, preferRemote: true)
@@ -158,8 +176,10 @@ final class ServicesTests: XCTestCase {
         context.insert(day)
 
         let repo = LogEntryRepository(context: context)
-        let syncEngine = SyncEngine(cloudKitAvailable: false)
-        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushWhenCloudKitEnabled: false)
+        let transport = RecordingCloudKitTransport()
+        let syncEngine = SyncEngine(transport: transport)
+        _ = try await syncEngine.prepareZones(for: production.code)
+        let coordinator = LogPostSaveCoordinator(syncEngine: syncEngine, flushAfterEnqueue: true)
         let useCase = LogTakeUseCase(
             entryRepository: repo,
             postSaveCoordinator: coordinator,
@@ -188,5 +208,8 @@ final class ServicesTests: XCTestCase {
             offset: 0
         )
         XCTAssertEqual(fetched.count, 50)
+
+        let modifyCount = await syncEngine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 50)
     }
 }

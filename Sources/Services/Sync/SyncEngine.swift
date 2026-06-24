@@ -63,22 +63,14 @@ public actor SyncEngine {
     public static let containerIdentifier = "iCloud.com.visionarypov.cameradata"
 
     private var pendingQueue: [PendingSyncOperation] = []
-    private var isCloudKitAvailable: Bool
-    private var container: CKContainer?
-    private var privateDatabase: CKDatabase?
-    private var sharedDatabase: CKDatabase?
+    private let transport: CloudKitSyncTransport
     private var zoneInfo: CloudKitZoneInfo?
     private var lastShare: CKShare?
     public private(set) var flushInvocationCount: Int = 0
+    public private(set) var modifyRecordsInvocationCount: Int = 0
 
-    public init(cloudKitAvailable: Bool = true) {
-        self.isCloudKitAvailable = cloudKitAvailable
-        if cloudKitAvailable {
-            let ckContainer = CKContainer(identifier: Self.containerIdentifier)
-            self.container = ckContainer
-            self.privateDatabase = ckContainer.privateCloudDatabase
-            self.sharedDatabase = ckContainer.sharedCloudDatabase
-        }
+    public init(transport: CloudKitSyncTransport = LiveCloudKitTransport()) {
+        self.transport = transport
     }
 
     public func enqueue(entryId: UUID, syncVersion: Int) {
@@ -116,7 +108,7 @@ public actor SyncEngine {
         let operations = pendingQueue
         pendingQueue.removeAll()
 
-        guard isCloudKitAvailable, let privateDatabase, let zoneInfo else {
+        guard let zoneInfo else {
             return operations.count
         }
 
@@ -134,7 +126,8 @@ public actor SyncEngine {
         }
 
         if !records.isEmpty {
-            _ = try? await privateDatabase.modifyRecords(saving: records, deleting: [])
+            modifyRecordsInvocationCount += 1
+            try? await transport.modifyRecords(saving: records, deleting: [])
         }
 
         return operations.count
@@ -144,9 +137,7 @@ public actor SyncEngine {
         let privateZone = CKRecordZone(zoneName: "Production-\(productionCode)-Private")
         let sharedZone = CKRecordZone(zoneName: "Production-\(productionCode)-Shared")
 
-        if isCloudKitAvailable, let privateDatabase {
-            _ = try await privateDatabase.modifyRecordZones(saving: [privateZone, sharedZone], deleting: [])
-        }
+        try await transport.modifyRecordZones(saving: [privateZone, sharedZone], deleting: [])
 
         let info = CloudKitZoneInfo(
             privateZoneName: privateZone.zoneID.zoneName,
@@ -168,9 +159,7 @@ public actor SyncEngine {
         share[CKShare.SystemFieldKey.title] = productionName as CKRecordValue
         share.publicPermission = .readWrite
 
-        if isCloudKitAvailable, let privateDatabase {
-            _ = try await privateDatabase.modifyRecords(saving: [root, share], deleting: [])
-        }
+        try await transport.modifyRecords(saving: [root, share], deleting: [])
         lastShare = share
         return share
     }
@@ -181,8 +170,7 @@ public actor SyncEngine {
     }
 
     public func acceptShare(metadata: CKShare.Metadata) async throws {
-        guard isCloudKitAvailable, let container else { return }
-        _ = try await container.accept(metadata)
+        try await transport.acceptShare(metadata: metadata)
     }
 
     public func currentZoneInfo() -> CloudKitZoneInfo? {

@@ -14,8 +14,14 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(snapshot.productionName, "Night Shoot")
     }
 
-    func testAppIntentLogServicePersistsEntry() async throws {
-        let deps = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: true)
+    func testAppIntentLogServicePersistsEntryAndFlushesSync() async throws {
+        let transport = RecordingCloudKitTransport()
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            syncPipelineEnabled: true,
+            inMemory: true,
+            syncTransport: transport
+        )
         try await deps.bootstrapIfNeeded()
         AppIntentLogService.register(deps)
 
@@ -33,13 +39,19 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(entries.first?.scene, "44")
         XCTAssertEqual(entries.first?.take, 2)
         let flushCount = await deps.syncEngine.flushInvocationCount
-        XCTAssertEqual(flushCount, 0, "App uses syncCloudKit:false so coordinator should not flush")
+        XCTAssertEqual(flushCount, 1)
+        let modifyCount = await deps.syncEngine.modifyRecordsInvocationCount
+        XCTAssertEqual(modifyCount, 1)
         let pendingSync = await deps.syncEngine.pendingCount()
-        XCTAssertGreaterThan(pendingSync, 0)
+        XCTAssertEqual(pendingSync, 0)
+        let saved = await transport.savedRecords.filter { $0.recordType == "LogEntry" }
+        XCTAssertEqual(saved.last?["scene"] as? String, "44")
+        XCTAssertEqual(saved.last?["take"] as? Int, 2)
     }
 
     func testSyncEnginePreparesZonesInviteAndShare() async throws {
-        let engine = SyncEngine(cloudKitAvailable: false)
+        let transport = RecordingCloudKitTransport()
+        let engine = SyncEngine(transport: transport)
         let zones = try await engine.prepareZones(for: "DEMO01")
         XCTAssertTrue(zones.privateZoneName.contains("DEMO01"))
         XCTAssertTrue(zones.sharedZoneName.contains("DEMO01"))
@@ -49,6 +61,10 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(share.publicPermission, .readWrite)
         let currentShare = await engine.currentShare()
         XCTAssertNotNil(currentShare)
+        let zoneWrites = await transport.modifyRecordZonesInvocationCount
+        XCTAssertGreaterThanOrEqual(zoneWrites, 1)
+        let recordWrites = await transport.modifyRecordsInvocationCount
+        XCTAssertGreaterThanOrEqual(recordWrites, 1)
     }
 
     func testCoreMLSmartSuggestorUsesHistoricalFrequency() {
@@ -79,7 +95,7 @@ final class IntegrationTests: XCTestCase {
     }
 
     func testDashboardViewModelRoleFiltering() throws {
-        let container = try ModelContainerFactory.makeInMemory()
+        let container = try ModelContainerFactory.makeInMemory() // role-filter test
         let context = container.mainContext
         let production = ProductionModel(name: "Role Test")
         let camera = CameraUnitModel(label: "A")

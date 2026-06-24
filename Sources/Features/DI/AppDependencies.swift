@@ -48,17 +48,18 @@ public final class AppDependencies {
     public let logTakeUseCase: LogTakeUseCase
     public let syncEngine: SyncEngine
     public let postSaveCoordinator: LogPostSaveCoordinator
-    public let metadataProvider: LiveMetadataProvider
+    public let metadataProvider: any MetadataProviding
     public let presenceService: PresenceService
     public let auditService: AuditService
     public let smartSuggestor: CoreMLSmartSuggestor
     public let session: ProductionSession
-    private let syncCloudKitEnabled: Bool
+    public let syncPipelineEnabled: Bool
 
     public init(
         swiftDataCloudKit: Bool = false,
-        syncCloudKit: Bool = true,
+        syncPipelineEnabled: Bool = true,
         inMemory: Bool = false,
+        syncTransport: CloudKitSyncTransport? = nil,
         metadataProvider: (any MetadataProviding)? = nil
     ) throws {
         modelContainer = try inMemory
@@ -70,16 +71,17 @@ public final class AppDependencies {
         productionRepository = ProductionRepository(context: context)
         logEntryRepository = LogEntryRepository(context: context, auditService: auditService)
         templateRepository = ProductionTemplateRepository(context: context)
-        syncCloudKitEnabled = syncCloudKit
-        syncEngine = SyncEngine(cloudKitAvailable: syncCloudKit)
+        self.syncPipelineEnabled = syncPipelineEnabled
+
+        let transport = syncTransport ?? LiveCloudKitTransport()
+        syncEngine = SyncEngine(transport: transport)
         postSaveCoordinator = LogPostSaveCoordinator(
             syncEngine: syncEngine,
-            flushWhenCloudKitEnabled: syncCloudKit
+            flushAfterEnqueue: syncPipelineEnabled
         )
 
-        let liveMetadata = LiveMetadataProvider()
-        self.metadataProvider = liveMetadata
-        let resolvedMetadata: any MetadataProviding = metadataProvider ?? liveMetadata
+        let resolvedMetadata: any MetadataProviding = metadataProvider ?? LiveMetadataProvider()
+        self.metadataProvider = resolvedMetadata
 
         logTakeUseCase = LogTakeUseCase(
             entryRepository: logEntryRepository,
@@ -103,7 +105,7 @@ public final class AppDependencies {
         session.selectedCamera = session.activeProduction?.cameras.sorted(by: { $0.sortOrder < $1.sortOrder }).first
         session.selectedDay = session.activeProduction?.days.sorted(by: { $0.dayNumber < $1.dayNumber }).first
 
-        if let production = session.activeProduction {
+        if syncPipelineEnabled, let production = session.activeProduction {
             let zones = try? await syncEngine.prepareZones(for: production.code)
             _ = try? await syncEngine.createShare(for: production.code, productionName: production.name)
             let invite = syncEngine.makeInvite(for: production.code)

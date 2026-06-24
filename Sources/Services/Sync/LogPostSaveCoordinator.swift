@@ -2,11 +2,11 @@ import Foundation
 
 public struct LogPostSaveCoordinator: Sendable {
     private let syncEngine: SyncEngine
-    private let flushWhenCloudKitEnabled: Bool
+    private let flushAfterEnqueue: Bool
 
-    public init(syncEngine: SyncEngine, flushWhenCloudKitEnabled: Bool) {
+    public init(syncEngine: SyncEngine, flushAfterEnqueue: Bool = true) {
         self.syncEngine = syncEngine
-        self.flushWhenCloudKitEnabled = flushWhenCloudKitEnabled
+        self.flushAfterEnqueue = flushAfterEnqueue
     }
 
     public func handle(
@@ -28,7 +28,7 @@ public struct LogPostSaveCoordinator: Sendable {
             productionCode: productionCode
         )
 
-        if flushWhenCloudKitEnabled {
+        if flushAfterEnqueue {
             _ = await syncEngine.flushOfflineQueue()
         }
     }

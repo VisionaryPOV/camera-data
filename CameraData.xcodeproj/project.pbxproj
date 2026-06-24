@@ -80,6 +80,7 @@
 		C2F8045BAEE82D1D61516E95 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F6790E9CBD2D067C6DCF12 /* GlassComponents.swift */; };
 		C549627456887969D20FC7A6 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57C4BA88990A4386DD6E29A /* SyncEngine.swift */; };
 		D18F92F4393A4CA70E10D9AE /* VoiceLoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9C57BE98156486E44BD6FD9 /* VoiceLoggingService.swift */; };
+		D3D96B16D5A38144DDFAFFEE /* CloudKitSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */; };
 		D4A5FBC059B18FA83ED711EF /* CameraDataDesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F16E2D869E4FCFB02C722AD6 /* CameraDataDesignSystem.framework */; };
 		D5A31862566CAD984C6456D1 /* NLPQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FD14069573B3F3323657E4 /* NLPQueryParser.swift */; };
 		D6A2D423F7BF488561D8ED06 /* CameraDataDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */; };
@@ -295,6 +296,7 @@
 		0DA30100DB637ADFD60C8236 /* FilmTerminologyLexicon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmTerminologyLexicon.swift; sourceTree = "<group>"; };
 		0E964CD72DBBE5A0CF7FEB8D /* CameraDataWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CameraDataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F5DD13D6619525BDEF258BB /* MetadataCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataCaptureService.swift; sourceTree = "<group>"; };
+		1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransport.swift; sourceTree = "<group>"; };
 		15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataServices.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C5052B1CFBF7D176C5E263F /* AuditHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditHistoryView.swift; sourceTree = "<group>"; };
 		1F2676FEE718151B677126F5 /* RootActiveSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootActiveSheet.swift; sourceTree = "<group>"; };
@@ -717,6 +719,7 @@
 		A0DE0DAD2B45CE91955B83D5 /* Sync */ = {
 			isa = PBXGroup;
 			children = (
+				1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */,
 				EEC64ED3B2AE42C7890038D5 /* LogPostSaveCoordinator.swift */,
 				92D3E043701B3E2B240FDBAA /* PresenceService.swift */,
 				F57C4BA88990A4386DD6E29A /* SyncEngine.swift */,
@@ -1131,6 +1134,7 @@
 			files = (
 				DFCA930BEC742B639A30D487 /* AuditService.swift in Sources */,
 				82DAD75D18F7680EB5552A14 /* CameraDataServices.swift in Sources */,
+				D3D96B16D5A38144DDFAFFEE /* CloudKitSyncTransport.swift in Sources */,
 				25267837397E4362314EFD0B /* CoreMLSmartSuggestor.swift in Sources */,
 				A23553F7055E29748F938F31 /* ExportService.swift in Sources */,
 				81A4192ED61B5F37F491FDAF /* FrameIOExportHook.swift in Sources */,

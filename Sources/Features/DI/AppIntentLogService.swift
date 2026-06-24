@@ -16,7 +16,12 @@ public enum AppIntentLogService {
         if let cachedDependencies {
             deps = cachedDependencies
         } else {
-            let fresh = try AppDependencies(swiftDataCloudKit: false, syncCloudKit: false, inMemory: true)
+            let fresh = try AppDependencies(
+                swiftDataCloudKit: false,
+                syncPipelineEnabled: true,
+                inMemory: true,
+                syncTransport: RecordingCloudKitTransport()
+            )
             try await fresh.bootstrapIfNeeded()
             cachedDependencies = fresh
             deps = fresh
