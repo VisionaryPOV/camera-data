@@ -14,13 +14,13 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(snapshot.productionName, "Night Shoot")
     }
 
-    func testAppIntentLogServicePersistsEntryAndFlushesSync() async throws {
-        let transport = RecordingCloudKitTransport()
+    func testAppIntentLogServicePersistsEntryAndFlushesSyncViaLiveTransport() async throws {
+        let store = OfflineCloudKitRecordStore()
         let deps = try AppDependencies(
             swiftDataCloudKit: false,
             syncPipelineEnabled: true,
             inMemory: true,
-            syncTransport: transport
+            offlineCloudKitStore: store
         )
         try await deps.bootstrapIfNeeded()
         AppIntentLogService.register(deps)
@@ -38,15 +38,51 @@ final class IntegrationTests: XCTestCase {
         )
         XCTAssertEqual(entries.first?.scene, "44")
         XCTAssertEqual(entries.first?.take, 2)
+
         let flushCount = await deps.syncEngine.flushInvocationCount
         XCTAssertEqual(flushCount, 1)
         let modifyCount = await deps.syncEngine.modifyRecordsInvocationCount
         XCTAssertEqual(modifyCount, 1)
         let pendingSync = await deps.syncEngine.pendingCount()
         XCTAssertEqual(pendingSync, 0)
-        let saved = await transport.savedRecords.filter { $0.recordType == "LogEntry" }
-        XCTAssertEqual(saved.last?["scene"] as? String, "44")
-        XCTAssertEqual(saved.last?["take"] as? Int, 2)
+
+        let logEntries = await store.logEntries()
+        XCTAssertEqual(logEntries.count, 1)
+        XCTAssertEqual(logEntries.first?.scene, "44")
+        XCTAssertEqual(logEntries.first?.take, 2)
+        XCTAssertEqual(logEntries.first?.lens, entries.first?.lens)
+        XCTAssertFalse(logEntries.first?.pushedToCloudKit ?? true, "Harness lacks iCloud; offline persist must still run")
+    }
+
+    func testLiveTransportPersistsZonesAndRecordsOffline() async throws {
+        let store = OfflineCloudKitRecordStore()
+        let transport = LiveCloudKitTransport(offlineStore: store)
+        let engine = SyncEngine(transport: transport)
+
+        _ = try await engine.prepareZones(for: "OFFLINE01")
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "7",
+            take: 3,
+            lens: "32mm",
+            iso: 640,
+            productionCode: "OFFLINE01"
+        )
+        _ = await engine.flushOfflineQueue()
+
+        let zones = await store.zones
+        XCTAssertGreaterThanOrEqual(zones.count, 2)
+        XCTAssertFalse(zones.first?.pushedToCloudKit ?? true)
+
+        let logEntries = await store.logEntries()
+        XCTAssertEqual(logEntries.count, 1)
+        XCTAssertEqual(logEntries.first?.scene, "7")
+        XCTAssertEqual(logEntries.first?.take, 3)
+        XCTAssertEqual(logEntries.first?.lens, "32mm")
+        XCTAssertFalse(logEntries.first?.pushedToCloudKit ?? true)
+
+        XCTAssertEqual(transport.cloudKitPushAttemptCount, 0, "No iCloud in harness; live CK push must not run")
     }
 
     func testSyncEnginePreparesZonesInviteAndShare() async throws {
@@ -95,7 +131,7 @@ final class IntegrationTests: XCTestCase {
     }
 
     func testDashboardViewModelRoleFiltering() throws {
-        let container = try ModelContainerFactory.makeInMemory() // role-filter test
+        let container = try ModelContainerFactory.makeInMemory()
         let context = container.mainContext
         let production = ProductionModel(name: "Role Test")
         let camera = CameraUnitModel(label: "A")

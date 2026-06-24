@@ -5,12 +5,12 @@ import CameraDataServices
 @MainActor
 final class AppBootstrapTests: XCTestCase {
     func testAppDependenciesBootstrapCreatesProductionAndLaunchState() async throws {
-        let transport = RecordingCloudKitTransport()
+        let store = OfflineCloudKitRecordStore()
         let deps = try AppDependencies(
             swiftDataCloudKit: false,
             syncPipelineEnabled: true,
             inMemory: true,
-            syncTransport: transport
+            offlineCloudKitStore: store
         )
         try await deps.bootstrapIfNeeded()
 
@@ -20,7 +20,8 @@ final class AppBootstrapTests: XCTestCase {
         XCTAssertTrue(deps.session.launchState.hasPrefix("dashboard_ready:"))
         XCTAssertTrue(deps.syncPipelineEnabled)
 
-        let zoneCount = await transport.modifyRecordZonesInvocationCount
-        XCTAssertGreaterThanOrEqual(zoneCount, 1)
+        let zones = await store.zones
+        XCTAssertGreaterThanOrEqual(zones.count, 2)
+        XCTAssertFalse(zones.first?.pushedToCloudKit ?? true)
     }
 }

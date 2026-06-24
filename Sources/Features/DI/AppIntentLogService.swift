@@ -19,8 +19,7 @@ public enum AppIntentLogService {
             let fresh = try AppDependencies(
                 swiftDataCloudKit: false,
                 syncPipelineEnabled: true,
-                inMemory: true,
-                syncTransport: RecordingCloudKitTransport()
+                inMemory: true
             )
             try await fresh.bootstrapIfNeeded()
             cachedDependencies = fresh

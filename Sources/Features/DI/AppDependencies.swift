@@ -54,12 +54,14 @@ public final class AppDependencies {
     public let smartSuggestor: CoreMLSmartSuggestor
     public let session: ProductionSession
     public let syncPipelineEnabled: Bool
+    public let offlineCloudKitStore: OfflineCloudKitRecordStore
 
     public init(
         swiftDataCloudKit: Bool = false,
         syncPipelineEnabled: Bool = true,
         inMemory: Bool = false,
         syncTransport: CloudKitSyncTransport? = nil,
+        offlineCloudKitStore: OfflineCloudKitRecordStore? = nil,
         metadataProvider: (any MetadataProviding)? = nil
     ) throws {
         modelContainer = try inMemory
@@ -72,8 +74,10 @@ public final class AppDependencies {
         logEntryRepository = LogEntryRepository(context: context, auditService: auditService)
         templateRepository = ProductionTemplateRepository(context: context)
         self.syncPipelineEnabled = syncPipelineEnabled
+        let store = offlineCloudKitStore ?? OfflineCloudKitRecordStore()
+        self.offlineCloudKitStore = store
 
-        let transport = syncTransport ?? LiveCloudKitTransport()
+        let transport = syncTransport ?? LiveCloudKitTransport(offlineStore: store)
         syncEngine = SyncEngine(transport: transport)
         postSaveCoordinator = LogPostSaveCoordinator(
             syncEngine: syncEngine,

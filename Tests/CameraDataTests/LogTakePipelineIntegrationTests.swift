@@ -69,9 +69,46 @@ final class LogTakePipelineIntegrationTests: XCTestCase {
 
         let savedRecords = await transport.savedRecords
         XCTAssertEqual(savedRecords.count, 1)
-        XCTAssertEqual(savedRecords.first?["scene"] as? String, "55")
-        XCTAssertEqual(savedRecords.first?["take"] as? Int, 1)
-        XCTAssertEqual(savedRecords.first?["lens"] as? String, "50mm")
+        XCTAssertEqual(savedRecords.first?.ckString("scene"), "55")
+        XCTAssertEqual(savedRecords.first?.ckInt("take"), 1)
+        XCTAssertEqual(savedRecords.first?.ckString("lens"), "50mm")
+    }
+
+    func testLogAndNextUsesLiveTransportOfflineStoreInProductionPath() async throws {
+        let store = OfflineCloudKitRecordStore()
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            syncPipelineEnabled: true,
+            inMemory: true,
+            offlineCloudKitStore: store
+        )
+        try await deps.bootstrapIfNeeded()
+
+        guard let production = deps.session.activeProduction,
+              let camera = deps.session.selectedCamera,
+              let day = deps.session.selectedDay else {
+            XCTFail("Missing production context")
+            return
+        }
+
+        let draft = LogEntryDraft(scene: "88", take: 1, lens: "75mm")
+        _ = try await deps.logTakeUseCase.logAndNext(
+            draft: draft,
+            production: production,
+            camera: camera,
+            day: day,
+            existing: nil,
+            modifiedBy: "live-path-test"
+        )
+
+        let logEntries = await store.logEntries()
+        XCTAssertEqual(logEntries.count, 1)
+        XCTAssertEqual(logEntries.first?.scene, "88")
+        XCTAssertEqual(logEntries.first?.lens, "75mm")
+        XCTAssertFalse(logEntries.first?.pushedToCloudKit ?? true)
+
+        let flushCount = await deps.syncEngine.flushInvocationCount
+        XCTAssertEqual(flushCount, 1)
     }
 
     func testAppDependenciesDefaultEnablesSyncPipeline() throws {

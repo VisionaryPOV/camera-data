@@ -9,31 +9,53 @@ public protocol CloudKitSyncTransport: Sendable {
 
 public final class LiveCloudKitTransport: CloudKitSyncTransport, @unchecked Sendable {
     private let container: CKContainer
+    private let offlineStore: OfflineCloudKitRecordStore
     private var privateDatabase: CKDatabase { container.privateCloudDatabase }
 
-    public init(containerIdentifier: String = SyncEngine.containerIdentifier) {
+    public private(set) var cloudKitPushAttemptCount: Int = 0
+    public private(set) var cloudKitPushSuccessCount: Int = 0
+
+    public init(
+        containerIdentifier: String = SyncEngine.containerIdentifier,
+        offlineStore: OfflineCloudKitRecordStore = OfflineCloudKitRecordStore()
+    ) {
         container = CKContainer(identifier: containerIdentifier)
+        self.offlineStore = offlineStore
     }
 
     public func modifyRecordZones(
         saving zones: [CKRecordZone],
         deleting zoneIDs: [CKRecordZone.ID]
     ) async throws {
-        guard try await isAccountAvailable() else { return }
-        _ = try await privateDatabase.modifyRecordZones(saving: zones, deleting: zoneIDs)
+        var pushed = false
+        if try await isAccountAvailable() {
+            cloudKitPushAttemptCount += 1
+            _ = try await privateDatabase.modifyRecordZones(saving: zones, deleting: zoneIDs)
+            cloudKitPushSuccessCount += 1
+            pushed = true
+        }
+        await offlineStore.persist(zones: zones, pushedToCloudKit: pushed)
     }
 
     public func modifyRecords(
         saving records: [CKRecord],
         deleting recordIDs: [CKRecord.ID]
     ) async throws {
-        guard try await isAccountAvailable() else { return }
-        _ = try await privateDatabase.modifyRecords(saving: records, deleting: recordIDs)
+        var pushed = false
+        if try await isAccountAvailable() {
+            cloudKitPushAttemptCount += 1
+            _ = try await privateDatabase.modifyRecords(saving: records, deleting: recordIDs)
+            cloudKitPushSuccessCount += 1
+            pushed = true
+        }
+        await offlineStore.persist(records: records, pushedToCloudKit: pushed)
     }
 
     public func acceptShare(metadata: CKShare.Metadata) async throws {
         guard try await isAccountAvailable() else { return }
+        cloudKitPushAttemptCount += 1
         _ = try await container.accept(metadata)
+        cloudKitPushSuccessCount += 1
     }
 
     private func isAccountAvailable() async throws -> Bool {

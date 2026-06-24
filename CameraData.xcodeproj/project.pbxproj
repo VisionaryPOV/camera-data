@@ -80,6 +80,7 @@
 		C2F8045BAEE82D1D61516E95 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F6790E9CBD2D067C6DCF12 /* GlassComponents.swift */; };
 		C549627456887969D20FC7A6 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57C4BA88990A4386DD6E29A /* SyncEngine.swift */; };
 		D18F92F4393A4CA70E10D9AE /* VoiceLoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9C57BE98156486E44BD6FD9 /* VoiceLoggingService.swift */; };
+		D19882EEE34C4651AFD2FC54 /* OfflineCloudKitRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05B04D3F64697772C389F0C /* OfflineCloudKitRecordStore.swift */; };
 		D3D96B16D5A38144DDFAFFEE /* CloudKitSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */; };
 		D4A5FBC059B18FA83ED711EF /* CameraDataDesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F16E2D869E4FCFB02C722AD6 /* CameraDataDesignSystem.framework */; };
 		D5A31862566CAD984C6456D1 /* NLPQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FD14069573B3F3323657E4 /* NLPQueryParser.swift */; };
@@ -350,6 +351,7 @@
 		B9C57BE98156486E44BD6FD9 /* VoiceLoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLoggingService.swift; sourceTree = "<group>"; };
 		BECE2AC554D87E24C0451FF7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		CA238BAC553755359DE276B2 /* AuditService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditService.swift; sourceTree = "<group>"; };
+		D05B04D3F64697772C389F0C /* OfflineCloudKitRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCloudKitRecordStore.swift; sourceTree = "<group>"; };
 		D4BFC23CDE6CE55316FBA6D4 /* VESFieldMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VESFieldMapper.swift; sourceTree = "<group>"; };
 		D4CF171B66E6A7EAF1BA5378 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
 		E13003A137C16895674800C9 /* LogEntryMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntryMapper.swift; sourceTree = "<group>"; };
@@ -721,6 +723,7 @@
 			children = (
 				1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */,
 				EEC64ED3B2AE42C7890038D5 /* LogPostSaveCoordinator.swift */,
+				D05B04D3F64697772C389F0C /* OfflineCloudKitRecordStore.swift */,
 				92D3E043701B3E2B240FDBAA /* PresenceService.swift */,
 				F57C4BA88990A4386DD6E29A /* SyncEngine.swift */,
 			);
@@ -1142,6 +1145,7 @@
 				1DEF20F4AE753FE386AAACC5 /* LogTakeUseCase.swift in Sources */,
 				3A58B5A5AD286768F4A65A77 /* MetadataCaptureService.swift in Sources */,
 				638A1C29264F8BCEC5BDB489 /* MetadataProviding.swift in Sources */,
+				D19882EEE34C4651AFD2FC54 /* OfflineCloudKitRecordStore.swift in Sources */,
 				E349969ECC7EFE4A8E00345E /* PresenceService.swift in Sources */,
 				B9890BE8A38EA3CAC2CE0A78 /* SecurityService.swift in Sources */,
 				D8AA1D06B4905E0812F5A795 /* SmartSuggestService.swift in Sources */,

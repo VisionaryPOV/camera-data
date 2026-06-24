@@ -86,8 +86,8 @@ final class ServicesTests: XCTestCase {
         XCTAssertEqual(modifyCount, 1)
         let saved = await transport.savedRecords
         XCTAssertEqual(saved.count, 1)
-        XCTAssertEqual(saved.first?["scene"] as? String, "5")
-        XCTAssertEqual(saved.first?["lens"] as? String, "32mm")
+        XCTAssertEqual(saved.first?.ckString("scene"), "5")
+        XCTAssertEqual(saved.first?.ckString("lens"), "32mm")
     }
 
     func testLogPostSaveCoordinatorEnqueuesAndFlushes() async throws {
