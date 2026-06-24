@@ -32,27 +32,90 @@ final class IntegrationTests: XCTestCase {
         )
         XCTAssertEqual(entries.first?.scene, "44")
         XCTAssertEqual(entries.first?.take, 2)
+        let pendingSync = await deps.syncEngine.pendingCount()
+        XCTAssertGreaterThan(pendingSync, 0)
     }
 
-    func testSyncEnginePreparesZonesAndInvite() async throws {
+    func testSyncEnginePreparesZonesInviteAndShare() async throws {
         let engine = SyncEngine(cloudKitAvailable: false)
         let zones = try await engine.prepareZones(for: "DEMO01")
         XCTAssertTrue(zones.privateZoneName.contains("DEMO01"))
         XCTAssertTrue(zones.sharedZoneName.contains("DEMO01"))
         let invite = engine.makeInvite(for: "DEMO01")
         XCTAssertEqual(invite.productionCode, "DEMO01")
+        let share = try await engine.createShare(for: "DEMO01", productionName: "Demo Production")
+        XCTAssertEqual(share.publicPermission, .readWrite)
+        let currentShare = await engine.currentShare()
+        XCTAssertNotNil(currentShare)
     }
 
-    func testCoreMLSmartSuggestorLoadsModel() {
-        let bundle = Bundle(for: IntegrationTests.self)
+    func testCoreMLSmartSuggestorUsesHistoricalFrequency() {
         let suggestor = CoreMLSmartSuggestor(bundle: Bundle.main)
         let history = [
             LogEntryDraft(scene: "8", take: 1, lens: "40mm"),
-            LogEntryDraft(scene: "8", take: 2, lens: "40mm")
+            LogEntryDraft(scene: "8", take: 2, lens: "40mm"),
+            LogEntryDraft(scene: "8", take: 3, lens: "75mm")
         ]
-        let draft = LogEntryDraft(scene: "8", take: 3)
-        let suggestions = suggestor.suggest(from: history, for: draft)
-        XCTAssertFalse(suggestions.isEmpty)
+        let draft = LogEntryDraft(scene: "8", take: 4)
+        let baseline = SmartSuggestEngine.suggest(from: history, for: draft)
+        let mlSuggestions = suggestor.suggest(from: history, for: draft)
+        XCTAssertFalse(baseline.isEmpty)
+        XCTAssertFalse(mlSuggestions.isEmpty)
+        XCTAssertTrue(suggestor.isModelLoaded, "LensPredictor.mlmodel must be bundled in the app target")
+
+        let frequency = CoreMLSmartSuggestor.historicalFrequency(
+            history: history, scene: "8", field: "lens", value: "40mm"
+        )
+        XCTAssertEqual(frequency, 2.0 / 3.0, accuracy: 0.01)
+
+        if let baselineLens = baseline.first(where: { $0.field == "lens" }),
+           let mlLens = mlSuggestions.first(where: { $0.field == "lens" }) {
+            XCTAssertEqual(mlLens.value, "40mm")
+            XCTAssertGreaterThanOrEqual(mlLens.confidence, baselineLens.confidence)
+            XCTAssertGreaterThan(mlLens.confidence, baselineLens.confidence, "ML inference should boost confidence above frequency baseline")
+        }
+    }
+
+    func testDashboardViewModelRoleFiltering() throws {
+        let container = try ModelContainerFactory.makeInMemory()
+        let context = container.mainContext
+        let production = ProductionModel(name: "Role Test")
+        let camera = CameraUnitModel(label: "A")
+        let day = ShootDayModel(dayNumber: 1)
+        camera.production = production
+        day.production = production
+        production.cameras = [camera]
+        production.days = [day]
+        context.insert(production)
+        try context.save()
+
+        let repo = LogEntryRepository(context: context)
+        var draft = LogEntryDraft(scene: "9", take: 1, notes: "Camera note", vfxNotes: "VFX marker")
+        _ = try repo.save(
+            draft: draft,
+            production: production,
+            camera: camera,
+            day: day,
+            existing: nil,
+            modifiedBy: "tester",
+            captureContext: nil
+        )
+
+        let session = ProductionSession(isOnboarded: true)
+        session.activeProduction = production
+        session.selectedCamera = camera
+        session.selectedDay = day
+        session.currentRole = .vfx
+
+        let viewModel = DashboardViewModel(entryRepository: repo, session: session)
+        try viewModel.reload()
+        XCTAssertEqual(viewModel.roleFilteredDrafts.first?.notes, "VFX marker")
+        XCTAssertFalse(viewModel.canEdit)
+
+        session.currentRole = .editor
+        try viewModel.reload()
+        XCTAssertTrue(viewModel.canEdit)
+        XCTAssertEqual(viewModel.roleFilteredDrafts.first?.notes, "Camera note")
     }
 
     func testSpeechRecognitionServiceAvailabilityAPI() {

@@ -22,9 +22,9 @@ public struct EntryEditorView: View {
                     Text(message).foregroundStyle(.red).font(.caption)
                 }
                 GlassButton("Log & Next", isPrimary: true) {
-                    try? viewModel.logAndNext()
+                    Task { try? await viewModel.logAndNext() }
                 }
-                .disabled(viewModel.isSaving)
+                .disabled(viewModel.isSaving || !viewModel.canEdit)
             }
             .padding()
         }
@@ -98,10 +98,12 @@ public struct EntryEditorView: View {
     private var fieldsSection: some View {
         VStack(spacing: 12) {
             fieldRow("Lens", text: $viewModel.draft.lens)
+                .disabled(!viewModel.canEdit)
             fieldRow("ISO", value: "\(viewModel.draft.iso)")
             fieldRow("FPS", value: String(format: "%.3f", viewModel.draft.fps))
             fieldRow("WB", text: $viewModel.draft.whiteBalance)
             fieldRow("Notes", text: $viewModel.draft.notes)
+                .disabled(!viewModel.canEdit)
         }
     }
 

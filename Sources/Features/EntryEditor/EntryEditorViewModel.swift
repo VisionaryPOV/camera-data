@@ -20,6 +20,10 @@ public final class EntryEditorViewModel {
     private var editingEntry: LogEntryModel?
     private var lastEntry: LogEntryDraft?
 
+    public var canEdit: Bool {
+        session.currentRole.canEdit
+    }
+
     public init(
         useCase: LogTakeUseCase,
         session: ProductionSession,
@@ -36,6 +40,11 @@ public final class EntryEditorViewModel {
     }
 
     public func onAppear() throws {
+        guard canEdit else {
+            validationMessage = "Read-only access — logging disabled for \(session.currentRole.rawValue) role"
+            return
+        }
+
         guard let production = session.activeProduction,
               let camera = session.selectedCamera else { return }
 
@@ -61,6 +70,7 @@ public final class EntryEditorViewModel {
     }
 
     public func applySmartFill() {
+        guard canEdit else { return }
         let cameraDefaults = session.selectedCamera.map { cam in
             LogEntryDraft(
                 lens: cam.defaultLens,
@@ -89,11 +99,13 @@ public final class EntryEditorViewModel {
     }
 
     public func appendToScene(_ digit: String) {
+        guard canEdit else { return }
         draft.scene += digit
         HapticManager.light()
     }
 
     public func appendToTake(_ digit: String) {
+        guard canEdit else { return }
         let current = draft.take == 0 ? "" : String(draft.take)
         if let newValue = Int(current + digit) {
             draft.take = newValue
@@ -102,11 +114,17 @@ public final class EntryEditorViewModel {
     }
 
     public func toggleCircled() {
+        guard canEdit else { return }
         draft.isCircled.toggle()
         if draft.isCircled { HapticManager.success() } else { HapticManager.light() }
     }
 
-    public func logAndNext() throws {
+    public func logAndNext() async throws {
+        guard canEdit else {
+            validationMessage = "Read-only access — cannot log takes"
+            return
+        }
+
         guard let production = session.activeProduction,
               let camera = session.selectedCamera,
               let day = session.selectedDay else { return }
@@ -114,7 +132,7 @@ public final class EntryEditorViewModel {
         isSaving = true
         defer { isSaving = false }
 
-        let result = try useCase.logAndNext(
+        let result = try await useCase.logAndNext(
             draft: draft,
             production: production,
             camera: camera,
@@ -133,6 +151,7 @@ public final class EntryEditorViewModel {
     }
 
     public func applySuggestion(_ suggestion: SmartSuggestion) {
+        guard canEdit else { return }
         switch suggestion.field {
         case "lens": draft.lens = suggestion.value
         case "iso": draft.iso = Int(suggestion.value) ?? draft.iso

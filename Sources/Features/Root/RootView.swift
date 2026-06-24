@@ -69,7 +69,8 @@ public struct RootView: View {
             NavigationStack {
                 ReportsView(
                     production: dependencies.session.activeProduction,
-                    entries: dashboardViewModel.entries
+                    entries: dashboardViewModel.entries,
+                    role: dependencies.session.currentRole
                 )
             }
         }
@@ -80,7 +81,10 @@ public struct RootView: View {
                     onCloneTemplate: cloneTemplate,
                     onReviewConflicts: {
                         dependencies.session.seedSampleConflict()
-                        showConflictResolution = true
+                        showSettings = false
+                        DispatchQueue.main.async {
+                            showConflictResolution = true
+                        }
                     }
                 )
             }

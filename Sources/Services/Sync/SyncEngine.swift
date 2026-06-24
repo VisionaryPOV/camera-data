@@ -5,11 +5,30 @@ import CameraDataDomain
 public struct PendingSyncOperation: Equatable, Sendable {
     public var entryId: UUID
     public var syncVersion: Int
+    public var scene: String
+    public var take: Int
+    public var lens: String
+    public var iso: Int
+    public var productionCode: String
     public var enqueuedAt: Date
 
-    public init(entryId: UUID, syncVersion: Int, enqueuedAt: Date = .now) {
+    public init(
+        entryId: UUID,
+        syncVersion: Int,
+        scene: String = "",
+        take: Int = 0,
+        lens: String = "",
+        iso: Int = 0,
+        productionCode: String = "",
+        enqueuedAt: Date = .now
+    ) {
         self.entryId = entryId
         self.syncVersion = syncVersion
+        self.scene = scene
+        self.take = take
+        self.lens = lens
+        self.iso = iso
+        self.productionCode = productionCode
         self.enqueuedAt = enqueuedAt
     }
 }
@@ -49,6 +68,7 @@ public actor SyncEngine {
     private var privateDatabase: CKDatabase?
     private var sharedDatabase: CKDatabase?
     private var zoneInfo: CloudKitZoneInfo?
+    private var lastShare: CKShare?
 
     public init(cloudKitAvailable: Bool = true) {
         self.isCloudKitAvailable = cloudKitAvailable
@@ -64,15 +84,58 @@ public actor SyncEngine {
         pendingQueue.append(PendingSyncOperation(entryId: entryId, syncVersion: syncVersion))
     }
 
+    public func enqueueLogEntry(
+        entryId: UUID,
+        syncVersion: Int,
+        scene: String,
+        take: Int,
+        lens: String,
+        iso: Int,
+        productionCode: String
+    ) {
+        pendingQueue.append(
+            PendingSyncOperation(
+                entryId: entryId,
+                syncVersion: syncVersion,
+                scene: scene,
+                take: take,
+                lens: lens,
+                iso: iso,
+                productionCode: productionCode
+            )
+        )
+    }
+
     public func pendingCount() -> Int {
         pendingQueue.count
     }
 
     public func flushOfflineQueue() async -> Int {
-        guard isCloudKitAvailable else { return 0 }
-        let count = pendingQueue.count
+        let operations = pendingQueue
         pendingQueue.removeAll()
-        return count
+
+        guard isCloudKitAvailable, let privateDatabase, let zoneInfo else {
+            return operations.count
+        }
+
+        let records = operations.map { operation -> CKRecord in
+            let zoneID = CKRecordZone.ID(zoneName: zoneInfo.privateZoneName, ownerName: CKCurrentUserDefaultName)
+            let recordID = CKRecord.ID(recordName: "entry-\(operation.entryId.uuidString)", zoneID: zoneID)
+            let record = CKRecord(recordType: "LogEntry", recordID: recordID)
+            record["scene"] = operation.scene as CKRecordValue
+            record["take"] = operation.take as CKRecordValue
+            record["lens"] = operation.lens as CKRecordValue
+            record["iso"] = operation.iso as CKRecordValue
+            record["syncVersion"] = operation.syncVersion as CKRecordValue
+            record["productionCode"] = operation.productionCode as CKRecordValue
+            return record
+        }
+
+        if !records.isEmpty {
+            _ = try? await privateDatabase.modifyRecords(saving: records, deleting: [])
+        }
+
+        return operations.count
     }
 
     public func prepareZones(for productionCode: String) async throws -> CloudKitZoneInfo {
@@ -106,6 +169,7 @@ public actor SyncEngine {
         if isCloudKitAvailable, let privateDatabase {
             _ = try await privateDatabase.modifyRecords(saving: [root, share], deleting: [])
         }
+        lastShare = share
         return share
     }
 
@@ -121,6 +185,10 @@ public actor SyncEngine {
 
     public func currentZoneInfo() -> CloudKitZoneInfo? {
         zoneInfo
+    }
+
+    public func currentShare() -> CKShare? {
+        lastShare
     }
 
     public func resolveConflict(

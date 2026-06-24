@@ -37,7 +37,8 @@ final class DataLayerTests: XCTestCase {
             camera: camera,
             day: day,
             existing: nil,
-            modifiedBy: "tester"
+            modifiedBy: "tester",
+            captureContext: nil
         )
 
         XCTAssertEqual(saved.scene, "15")
@@ -55,10 +56,20 @@ final class DataLayerTests: XCTestCase {
         XCTAssertEqual(LogEntryMapper.toDraft(fetched[0]).lens, "32mm")
     }
 
-    func testLogTakeUseCaseLogAndNextIncrementsTake() throws {
-        let useCase = LogTakeUseCase(entryRepository: repository)
+    func testLogTakeUseCaseLogAndNextIncrementsTake() async throws {
+        let syncEngine = SyncEngine(cloudKitAvailable: false)
+        let useCase = LogTakeUseCase(
+            entryRepository: repository,
+            syncEngine: syncEngine,
+            metadataProvider: {
+                MetadataCaptureService.captureContext(
+                    location: nil,
+                    motion: DeviceMotionSnapshot(pitch: 1.5, roll: 2.5, yaw: 3.5)
+                )
+            }
+        )
         var draft = LogEntryDraft(scene: "20", take: 1, lens: "50mm")
-        let first = try useCase.logAndNext(
+        let first = try await useCase.logAndNext(
             draft: draft,
             production: production,
             camera: camera,
@@ -67,9 +78,12 @@ final class DataLayerTests: XCTestCase {
             modifiedBy: "tester"
         )
         XCTAssertEqual(first.saved.take, 1)
+        XCTAssertEqual(first.saved.pitch, 1.5)
+        let pendingAfterFirst = await syncEngine.pendingCount()
+        XCTAssertEqual(pendingAfterFirst, 1)
 
         draft = LogEntryDraft(scene: "20", take: 2, lens: "50mm")
-        let second = try useCase.logAndNext(
+        let second = try await useCase.logAndNext(
             draft: draft,
             production: production,
             camera: camera,
@@ -79,6 +93,46 @@ final class DataLayerTests: XCTestCase {
         )
         XCTAssertEqual(second.saved.take, 2)
         XCTAssertEqual(second.nextDraft.take, 3)
+        let pendingAfterSecond = await syncEngine.pendingCount()
+        XCTAssertEqual(pendingAfterSecond, 2)
+    }
+
+    func testFetchEntriesScopesToProduction() throws {
+        let otherProduction = ProductionModel(name: "Other Show")
+        let otherCamera = CameraUnitModel(label: "B")
+        otherCamera.production = otherProduction
+        otherProduction.cameras = [otherCamera]
+        context.insert(otherProduction)
+        try context.save()
+
+        _ = try repository.save(
+            draft: LogEntryDraft(scene: "1", take: 1),
+            production: production,
+            camera: camera,
+            day: day,
+            existing: nil,
+            modifiedBy: "tester",
+            captureContext: nil
+        )
+        _ = try repository.save(
+            draft: LogEntryDraft(scene: "2", take: 1),
+            production: otherProduction,
+            camera: otherCamera,
+            day: day,
+            existing: nil,
+            modifiedBy: "tester",
+            captureContext: nil
+        )
+
+        let scoped = try repository.fetchEntries(
+            production: production,
+            camera: nil,
+            day: nil,
+            limit: 100,
+            offset: 0
+        )
+        XCTAssertEqual(scoped.count, 1)
+        XCTAssertEqual(scoped.first?.scene, "1")
     }
 
     func testProductionTemplateCloneCopiesCamerasAndFields() throws {
@@ -102,7 +156,8 @@ final class DataLayerTests: XCTestCase {
             camera: camera,
             day: day,
             existing: nil,
-            modifiedBy: "tester"
+            modifiedBy: "tester",
+            captureContext: nil
         )
 
         draft.lens = "32mm"
@@ -113,7 +168,8 @@ final class DataLayerTests: XCTestCase {
             camera: camera,
             day: day,
             existing: entry,
-            modifiedBy: "tester"
+            modifiedBy: "tester",
+            captureContext: nil
         )
 
         let history = AuditService.history(for: entry)

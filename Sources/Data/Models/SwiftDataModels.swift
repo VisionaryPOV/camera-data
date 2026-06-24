@@ -148,6 +148,9 @@ public final class LogEntryModel {
     public var syncVersion: Int
     public var isDeleted: Bool
     public var deviceId: String
+    public var productionId: UUID
+    public var cameraId: UUID?
+    public var dayId: UUID?
     public var latitude: Double?
     public var longitude: Double?
     public var altitude: Double?
@@ -198,6 +201,7 @@ public final class LogEntryModel {
         self.syncVersion = 0
         self.isDeleted = false
         self.deviceId = UUID().uuidString
+        self.productionId = UUID()
         self.customValues = []
         self.attachments = []
         self.auditTrail = []

@@ -30,13 +30,47 @@ final class ServicesTests: XCTestCase {
     }
 
     func testSyncEngineQueuesAndFlushes() async {
-        let engine = SyncEngine(cloudKitAvailable: true)
-        await engine.enqueue(entryId: UUID(), syncVersion: 1)
-        await engine.enqueue(entryId: UUID(), syncVersion: 2)
+        let engine = SyncEngine(cloudKitAvailable: false)
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "12",
+            take: 3,
+            lens: "50mm",
+            iso: 800,
+            productionCode: "DEMO"
+        )
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 2,
+            scene: "12",
+            take: 4,
+            lens: "75mm",
+            iso: 1280,
+            productionCode: "DEMO"
+        )
         let pending = await engine.pendingCount()
         XCTAssertEqual(pending, 2)
         let flushed = await engine.flushOfflineQueue()
         XCTAssertEqual(flushed, 2)
+        let remaining = await engine.pendingCount()
+        XCTAssertEqual(remaining, 0)
+    }
+
+    func testSyncEngineFlushWritesRecordsWhenZonesReady() async throws {
+        let engine = SyncEngine(cloudKitAvailable: false)
+        _ = try await engine.prepareZones(for: "FLUSH01")
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "5",
+            take: 1,
+            lens: "32mm",
+            iso: 640,
+            productionCode: "FLUSH01"
+        )
+        let flushed = await engine.flushOfflineQueue()
+        XCTAssertEqual(flushed, 1)
         let remaining = await engine.pendingCount()
         XCTAssertEqual(remaining, 0)
     }
@@ -88,7 +122,7 @@ final class ServicesTests: XCTestCase {
     }
 
     @MainActor
-    func testOnSetSimulationBurstLogging() throws {
+    func testOnSetSimulationBurstLogging() async throws {
         let container = try ModelContainerFactory.makeInMemory()
         let context = container.mainContext
         let production = ProductionModel(name: "Burst Test")
@@ -106,7 +140,7 @@ final class ServicesTests: XCTestCase {
         var draft = LogEntryDraft(scene: "100", take: 1, lens: "50mm")
         for i in 1...50 {
             draft.take = i
-            _ = try useCase.logAndNext(
+            _ = try await useCase.logAndNext(
                 draft: draft,
                 production: production,
                 camera: camera,

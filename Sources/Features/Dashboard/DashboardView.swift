@@ -40,8 +40,10 @@ public struct DashboardView: View {
             }
             .padding()
 
-            FloatingLogButton(action: onLogTake)
-                .padding()
+            if viewModel.canEdit {
+                FloatingLogButton(action: onLogTake)
+                    .padding()
+            }
         }
         .navigationTitle(session.activeProduction?.name ?? "Camera Data")
         .toolbar {
@@ -55,6 +57,9 @@ public struct DashboardView: View {
         .onAppear {
             try? viewModel.reload()
         }
+        .onChange(of: session.currentRole) {
+            try? viewModel.reload()
+        }
     }
 
     private var header: some View {
@@ -62,6 +67,7 @@ public struct DashboardView: View {
             if let day = session.selectedDay {
                 GlassChip("Day \(day.dayNumber)", isSelected: true)
             }
+            GlassChip(session.currentRole.rawValue, isSelected: false)
             Spacer()
             Text("Launch: \(session.launchState)")
                 .font(.caption2)
@@ -143,6 +149,12 @@ public struct DashboardView: View {
                             Text(entry.lens.isEmpty ? "No lens" : entry.lens)
                                 .font(.subheadline)
                                 .foregroundStyle(ThemeTokens.textSecondary)
+                            if !viewModel.displayNotes(for: entry).isEmpty {
+                                Text(viewModel.displayNotes(for: entry))
+                                    .font(.caption)
+                                    .foregroundStyle(ThemeTokens.textSecondary)
+                                    .lineLimit(1)
+                            }
                         }
                         Spacer()
                         if entry.isCircled {

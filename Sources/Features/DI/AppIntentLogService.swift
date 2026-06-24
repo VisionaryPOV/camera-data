@@ -36,7 +36,7 @@ public enum AppIntentLogService {
         var draft = LogEntryDraft(scene: scene, take: take)
         draft = deps.logTakeUseCase.prepareDraft(current: draft, lastEntry: nil, cameraDefaults: nil)
 
-        let result = try deps.logTakeUseCase.logAndNext(
+        let result = try await deps.logTakeUseCase.logAndNext(
             draft: draft,
             production: production,
             camera: camera,
@@ -44,8 +44,6 @@ public enum AppIntentLogService {
             existing: nil,
             modifiedBy: "siri-intent"
         )
-
-        await deps.syncEngine.enqueue(entryId: result.saved.id, syncVersion: result.saved.syncVersion)
 
         let count = try deps.logEntryRepository.fetchEntries(
             production: production,

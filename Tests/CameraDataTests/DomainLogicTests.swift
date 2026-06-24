@@ -84,6 +84,23 @@ final class DomainLogicTests: XCTestCase {
         XCTAssertEqual(stats.takesPerHour, 1.5)
     }
 
+    func testRoleFilterVFXSurfacesVfxNotes() {
+        let pairs = [
+            (draft: LogEntryDraft(scene: "1", take: 1, notes: "Camera notes"), vfxNotes: "Marker needed"),
+            (draft: LogEntryDraft(scene: "2", take: 1, notes: "Other"), vfxNotes: "")
+        ]
+        let filtered = RoleFilter.filterEntries(pairs, role: .vfx)
+        XCTAssertEqual(filtered[0].notes, "Marker needed")
+        XCTAssertEqual(filtered[1].notes, "Other")
+    }
+
+    func testProductionRoleCanEdit() {
+        XCTAssertTrue(ProductionRole.editor.canEdit)
+        XCTAssertTrue(ProductionRole.admin.canEdit)
+        XCTAssertFalse(ProductionRole.readOnly.canEdit)
+        XCTAssertFalse(ProductionRole.vfx.canEdit)
+    }
+
     func testSmartSuggestEngineSuggestsLensForScene() {
         let history = [
             LogEntryDraft(scene: "8", take: 1, lens: "40mm"),

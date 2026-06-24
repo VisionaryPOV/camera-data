@@ -33,6 +33,9 @@ public struct SettingsView: View {
                         Text(role.rawValue).tag(role)
                     }
                 }
+                Text(roleDescription)
+                    .font(.caption)
+                    .foregroundStyle(ThemeTokens.textSecondary)
             }
             Section("Production") {
                 Button("Clone Production Template", action: onCloneTemplate)
@@ -54,5 +57,16 @@ public struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(ThemeTokens.background)
         .navigationTitle("Settings")
+    }
+
+    private var roleDescription: String {
+        switch session.currentRole {
+        case .admin, .editor:
+            return "Full dashboard, logging, and export access."
+        case .readOnly:
+            return "View-only — logging and editing disabled."
+        case .vfx:
+            return "VFX notes surfaced in dashboard and exports."
+        }
     }
 }

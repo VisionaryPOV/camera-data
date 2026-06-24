@@ -8,6 +8,7 @@ import CameraDataServices
 @Observable
 public final class DashboardViewModel {
     public var entries: [LogEntryModel] = []
+    public var roleFilteredDrafts: [LogEntryDraft] = []
     public var stats: DashboardStats = DashboardStats(takeCount: 0, circledCount: 0, dominantLens: nil, takesPerHour: 0)
     public var searchText: String = "" {
         didSet { scheduleReload() }
@@ -33,6 +34,10 @@ public final class DashboardViewModel {
         self.smartSuggestor = smartSuggestor
     }
 
+    public var canEdit: Bool {
+        session.currentRole.canEdit
+    }
+
     public func reload() throws {
         guard let production = session.activeProduction else { return }
         isLoading = true
@@ -56,9 +61,9 @@ public final class DashboardViewModel {
         }
 
         entries = fetched
+        roleFilteredDrafts = Self.roleFilteredDrafts(from: fetched, role: session.currentRole)
 
-        let drafts = entries.map(LogEntryMapper.toDraft)
-        stats = DashboardStatsCalculator.compute(entries: drafts, shootDurationHours: 8)
+        stats = DashboardStatsCalculator.compute(entries: roleFilteredDrafts, shootDurationHours: 8)
 
         AppGroupStore.writeWidgetSnapshot(
             takeCount: stats.takeCount,
@@ -71,13 +76,27 @@ public final class DashboardViewModel {
         }
     }
 
+    public static func roleFilteredDrafts(from entries: [LogEntryModel], role: ProductionRole) -> [LogEntryDraft] {
+        let pairs = entries.map { (draft: LogEntryMapper.toDraft($0), vfxNotes: $0.vfxNotes) }
+        return RoleFilter.filterEntries(pairs, role: role)
+    }
+
+    public func displayNotes(for entry: LogEntryModel) -> String {
+        switch session.currentRole {
+        case .vfx:
+            return entry.vfxNotes.isEmpty ? entry.notes : entry.vfxNotes
+        case .readOnly, .admin, .editor:
+            return entry.notes
+        }
+    }
+
     public func selectCamera(_ camera: CameraUnitModel) throws {
         session.selectedCamera = camera
         try reload()
     }
 
     public func smartSuggestions(for draft: LogEntryDraft) -> [SmartSuggestion] {
-        let history = entries.map(LogEntryMapper.toDraft)
+        let history = roleFilteredDrafts
         if let smartSuggestor {
             return smartSuggestor.suggest(from: history, for: draft)
         }

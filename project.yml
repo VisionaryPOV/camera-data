@@ -88,6 +88,8 @@ targets:
     sources:
       - path: CameraDataApp
     resources:
+      - path: CameraDataApp/Resources
+        type: folder
       - Resources/LensPredictor.mlmodel
     dependencies:
       - target: CameraDataFeatures

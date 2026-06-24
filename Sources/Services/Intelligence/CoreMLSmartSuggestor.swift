@@ -5,6 +5,8 @@ import CameraDataDomain
 public final class CoreMLSmartSuggestor: @unchecked Sendable {
     private let model: MLModel?
 
+    public var isModelLoaded: Bool { model != nil }
+
     public init(bundle: Bundle = .main) {
         if let url = bundle.url(forResource: "LensPredictor", withExtension: "mlmodelc")
             ?? bundle.url(forResource: "LensPredictor", withExtension: "mlmodel") {
@@ -20,9 +22,9 @@ public final class CoreMLSmartSuggestor: @unchecked Sendable {
 
         return baseline.compactMap { suggestion in
             guard let confidence = predictConfidence(
-                scene: draft.scene,
-                field: suggestion.field,
-                value: suggestion.value,
+                history: history,
+                draft: draft,
+                suggestion: suggestion,
                 model: model
             ) else { return suggestion }
             let blended = (suggestion.confidence + confidence) / 2.0
@@ -30,15 +32,52 @@ public final class CoreMLSmartSuggestor: @unchecked Sendable {
         }.filter { $0.confidence >= 0.3 }
     }
 
-    private func predictConfidence(scene: String, field: String, value: String, model: MLModel) -> Double? {
-        let sceneHash = Double(abs(scene.hashValue % 1000)) / 1000.0
-        let fieldCode: Double = field == "lens" ? 1.0 : 2.0
-        let valueHash = Double(abs(value.hashValue % 1000)) / 1000.0
+    public static func historicalFrequency(
+        history: [LogEntryDraft],
+        scene: String,
+        field: String,
+        value: String
+    ) -> Double {
+        let sameScene = history.filter { $0.scene == scene }
+        guard !sameScene.isEmpty else { return 0.0 }
+
+        let matches: Int
+        switch field {
+        case "lens":
+            matches = sameScene.filter { $0.lens == value }.count
+        case "iso":
+            matches = sameScene.filter { String($0.iso) == value }.count
+        default:
+            return 0.0
+        }
+        return Double(matches) / Double(sameScene.count)
+    }
+
+    public static func sceneNumericFeature(_ scene: String) -> Double {
+        let digits = scene.filter(\.isNumber)
+        guard let number = Int(digits), number > 0 else { return 0.0 }
+        return min(1.0, Double(number) / 100.0)
+    }
+
+    private func predictConfidence(
+        history: [LogEntryDraft],
+        draft: LogEntryDraft,
+        suggestion: SmartSuggestion,
+        model: MLModel
+    ) -> Double? {
+        let sceneFeature = Self.sceneNumericFeature(draft.scene)
+        let fieldCode: Double = suggestion.field == "lens" ? 1.0 : 2.0
+        let frequency = Self.historicalFrequency(
+            history: history,
+            scene: draft.scene,
+            field: suggestion.field,
+            value: suggestion.value
+        )
 
         guard let array = try? MLMultiArray(shape: [3], dataType: .double) else { return nil }
-        array[0] = NSNumber(value: sceneHash)
+        array[0] = NSNumber(value: sceneFeature)
         array[1] = NSNumber(value: fieldCode)
-        array[2] = NSNumber(value: valueHash)
+        array[2] = NSNumber(value: frequency)
 
         guard let input = try? MLDictionaryFeatureProvider(dictionary: ["features": MLFeatureValue(multiArray: array)]),
               let output = try? model.prediction(from: input),

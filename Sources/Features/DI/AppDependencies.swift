@@ -66,8 +66,17 @@ public final class AppDependencies {
         productionRepository = ProductionRepository(context: context)
         logEntryRepository = LogEntryRepository(context: context, auditService: auditService)
         templateRepository = ProductionTemplateRepository(context: context)
-        logTakeUseCase = LogTakeUseCase(entryRepository: logEntryRepository)
         syncEngine = SyncEngine(cloudKitAvailable: syncCloudKit)
+        logTakeUseCase = LogTakeUseCase(
+            entryRepository: logEntryRepository,
+            syncEngine: syncEngine,
+            metadataProvider: {
+                MetadataCaptureService.captureContext(
+                    location: nil,
+                    motion: DeviceMotionSnapshot(pitch: 0, roll: 0, yaw: 0)
+                )
+            }
+        )
         presenceService = PresenceService()
         smartSuggestor = CoreMLSmartSuggestor()
 
@@ -86,8 +95,11 @@ public final class AppDependencies {
         session.selectedDay = session.activeProduction?.days.sorted(by: { $0.dayNumber < $1.dayNumber }).first
 
         if let production = session.activeProduction {
-            _ = try? await syncEngine.prepareZones(for: production.code)
-            _ = syncEngine.makeInvite(for: production.code)
+            let zones = try? await syncEngine.prepareZones(for: production.code)
+            _ = try? await syncEngine.createShare(for: production.code, productionName: production.name)
+            let invite = syncEngine.makeInvite(for: production.code)
+            production.shareURL = zones?.shareURL ?? invite.shareURL.absoluteString
+            try? productionRepository.setActive(production)
         }
 
         syncLatestEntryToSlate()

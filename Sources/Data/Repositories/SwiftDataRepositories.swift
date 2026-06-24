@@ -69,22 +69,41 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
         let cameraId = camera?.id
         let dayId = day?.id
 
-        var descriptor = FetchDescriptor<LogEntryModel>(
-            predicate: #Predicate<LogEntryModel> { entry in
-                entry.isDeleted == false
-            },
-            sortBy: [SortDescriptor(\.sortKey, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        descriptor.fetchOffset = offset
-
-        let all = try context.fetch(descriptor)
-        return all.filter { entry in
-            guard entry.production?.id == productionId else { return false }
-            if let cameraId, entry.camera?.id != cameraId { return false }
-            if let dayId, entry.day?.id != dayId { return false }
-            return true
+        let descriptor: FetchDescriptor<LogEntryModel>
+        if let cameraId, let dayId {
+            descriptor = FetchDescriptor<LogEntryModel>(
+                predicate: #Predicate<LogEntryModel> { entry in
+                    entry.isDeleted == false
+                        && entry.productionId == productionId
+                        && entry.cameraId == cameraId
+                        && entry.dayId == dayId
+                },
+                sortBy: [SortDescriptor(\.sortKey, order: .reverse)]
+            )
+        } else if let cameraId {
+            descriptor = FetchDescriptor<LogEntryModel>(
+                predicate: #Predicate<LogEntryModel> { entry in
+                    entry.isDeleted == false
+                        && entry.productionId == productionId
+                        && entry.cameraId == cameraId
+                },
+                sortBy: [SortDescriptor(\.sortKey, order: .reverse)]
+            )
+        } else {
+            descriptor = FetchDescriptor<LogEntryModel>(
+                predicate: #Predicate<LogEntryModel> { entry in
+                    entry.isDeleted == false && entry.productionId == productionId
+                },
+                sortBy: [SortDescriptor(\.sortKey, order: .reverse)]
+            )
         }
+
+        var mutable = descriptor
+        mutable.fetchLimit = limit
+        mutable.fetchOffset = offset
+        mutable.relationshipKeyPathsForPrefetching = [\.auditTrail]
+
+        return try context.fetch(mutable)
     }
 
     public func fetchSceneTakes(production: ProductionModel, camera: CameraUnitModel?) throws -> [(scene: String, take: Int)] {
@@ -98,7 +117,8 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
         camera: CameraUnitModel,
         day: ShootDayModel,
         existing: LogEntryModel?,
-        modifiedBy: String
+        modifiedBy: String,
+        captureContext: CaptureContext?
     ) throws -> LogEntryModel {
         let sceneTakes = try fetchSceneTakes(production: production, camera: camera)
         try LogEntryValidator.validate(draft, existingSceneTakes: sceneTakes, excludingTake: existing?.take)
@@ -116,6 +136,14 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
             model.camera = camera
             model.day = day
             context.insert(model)
+        }
+
+        model.productionId = production.id
+        model.cameraId = camera.id
+        model.dayId = day.id
+
+        if let captureContext {
+            LogEntryMapper.applyCaptureContext(captureContext, to: model)
         }
 
         day.cachedTakeCount += existing == nil ? 1 : 0

@@ -28,7 +28,8 @@ public protocol LogEntryRepositoryProtocol {
         camera: CameraUnitModel,
         day: ShootDayModel,
         existing: LogEntryModel?,
-        modifiedBy: String
+        modifiedBy: String,
+        captureContext: CaptureContext?
     ) throws -> LogEntryModel
 
     func softDelete(_ entry: LogEntryModel) throws

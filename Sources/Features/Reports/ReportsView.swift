@@ -7,11 +7,13 @@ import CameraDataDomain
 public struct ReportsView: View {
     public let production: ProductionModel?
     public let entries: [LogEntryModel]
+    public let role: ProductionRole
     @State private var exportMessage: String = ""
 
-    public init(production: ProductionModel?, entries: [LogEntryModel]) {
+    public init(production: ProductionModel?, entries: [LogEntryModel], role: ProductionRole = .editor) {
         self.production = production
         self.entries = entries
+        self.role = role
     }
 
     public var body: some View {
@@ -21,7 +23,7 @@ public struct ReportsView: View {
                 .foregroundStyle(ThemeTokens.textPrimary)
 
             GlassCard {
-                Text("\(entries.count) entries ready for export")
+                Text("\(drafts.count) entries ready for export (\(role.rawValue))")
                     .foregroundStyle(ThemeTokens.textSecondary)
             }
 
@@ -45,7 +47,7 @@ public struct ReportsView: View {
     }
 
     private var drafts: [LogEntryDraft] {
-        entries.map(LogEntryMapper.toDraft)
+        DashboardViewModel.roleFilteredDrafts(from: entries, role: role)
     }
 
     private func exportPDF() {
