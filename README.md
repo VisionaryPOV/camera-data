@@ -42,6 +42,21 @@ Tests/CameraDataTests/    # 51 unit tests on real implementations
 - iOS 26 SDK
 - iPhone/iPad simulator or device
 
+### Code signing
+
+| Team type | Scheme | What works |
+|-----------|--------|------------|
+| **Personal Team** (free Apple ID) | `CameraData` | On-device debug builds. No iCloud or App Groups (widget uses fallback data). Offline sync queue still works locally. |
+| **Paid Apple Developer Program** | `CameraData-CloudKit` | Full CloudKit + App Groups + widget sharing. Required for TestFlight/App Store and live iCloud sync. |
+
+Personal Teams cannot provision **iCloud** or **App Groups** — Xcode will show “does not support the iCloud capability.” Use the default `CameraData` scheme (Debug entitlements) for device testing on a Personal Team.
+
+After changing `project.yml`, regenerate the project:
+
+```bash
+xcodegen generate
+```
+
 ---
 
 ## Build & Test

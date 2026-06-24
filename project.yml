@@ -14,6 +14,11 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: 1
 
+configs:
+  Debug: debug
+  Debug-CloudKit: debug
+  Release: release
+
 targets:
   CameraDataDomain:
     type: framework
@@ -100,31 +105,23 @@ targets:
       - target: CameraDataWidget
         embed: true
     settings:
-      GENERATE_INFOPLIST_FILE: YES
-      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata
-      INFOPLIST_KEY_CFBundleDisplayName: Camera Data
-      INFOPLIST_KEY_UILaunchScreen_Generation: YES
-      INFOPLIST_KEY_NSMicrophoneUsageDescription: "Voice logging for camera takes"
-      INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Transcribe voice logs on set"
-      INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Capture shoot location metadata"
-      INFOPLIST_KEY_NSFaceIDUsageDescription: "Secure production access"
-      INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
-    entitlements:
-      path: CameraDataApp/CameraData.entitlements
-      properties:
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.visionarypov.cameradata
-        com.apple.developer.icloud-services:
-          - CloudKit
-        com.apple.security.application-groups:
-          - group.com.visionarypov.cameradata
-      properties:
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.visionarypov.cameradata
-        com.apple.developer.icloud-services:
-          - CloudKit
-        com.apple.security.application-groups:
-          - group.com.visionarypov.cameradata
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata
+        INFOPLIST_KEY_CFBundleDisplayName: Camera Data
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Voice logging for camera takes"
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Transcribe voice logs on set"
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Capture shoot location metadata"
+        INFOPLIST_KEY_NSFaceIDUsageDescription: "Secure production access"
+        INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.PersonalTeam.entitlements
+        Debug-CloudKit:
+          CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.entitlements
 
   CameraDataWidget:
     type: app-extension
@@ -136,14 +133,17 @@ targets:
     dependencies:
       - target: CameraDataDomain
     settings:
-      GENERATE_INFOPLIST_FILE: NO
-      INFOPLIST_FILE: Widgets/CameraDataWidget/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.widget
-    entitlements:
-      path: Widgets/CameraDataWidget/CameraDataWidget.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.visionarypov.cameradata
+      base:
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Widgets/CameraDataWidget/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.widget
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.PersonalTeam.entitlements
+        Debug-CloudKit:
+          CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.entitlements
 
   CameraDataTests:
     type: bundle.unit-test
@@ -171,3 +171,13 @@ schemes:
         - CameraDataTests
     run:
       config: Debug
+  CameraData-CloudKit:
+    build:
+      targets:
+        CameraData: all
+        CameraDataTests: [test]
+    test:
+      targets:
+        - CameraDataTests
+    run:
+      config: Debug-CloudKit
