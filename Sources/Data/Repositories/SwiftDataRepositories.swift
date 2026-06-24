@@ -111,6 +111,11 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
         return entries.map { ($0.scene, $0.take) }
     }
 
+    public func fetchEntry(id: UUID) throws -> LogEntryModel? {
+        let descriptor = FetchDescriptor<LogEntryModel>(predicate: #Predicate { $0.id == id })
+        return try context.fetch(descriptor).first
+    }
+
     public func save(
         draft: LogEntryDraft,
         production: ProductionModel,
@@ -118,7 +123,8 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
         day: ShootDayModel,
         existing: LogEntryModel?,
         modifiedBy: String,
-        captureContext: CaptureContext?
+        captureContext: CaptureContext?,
+        preferredId: UUID? = nil
     ) throws -> LogEntryModel {
         let sceneTakes = try fetchSceneTakes(production: production, camera: camera)
         try LogEntryValidator.validate(draft, existingSceneTakes: sceneTakes, excludingTake: existing?.take)
@@ -131,6 +137,9 @@ public final class LogEntryRepository: LogEntryRepositoryProtocol {
             auditService?.recordChanges(entry: model, before: before, after: draft, userId: modifiedBy, context: context)
         } else {
             model = LogEntryModel(scene: draft.scene, take: draft.take, modifiedBy: modifiedBy)
+            if let preferredId {
+                model.id = preferredId
+            }
             LogEntryMapper.apply(draft, to: model, modifiedBy: modifiedBy)
             model.production = production
             model.camera = camera

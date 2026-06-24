@@ -38,7 +38,8 @@ final class DataLayerTests: XCTestCase {
             day: day,
             existing: nil,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
 
         XCTAssertEqual(saved.scene, "15")
@@ -117,7 +118,8 @@ final class DataLayerTests: XCTestCase {
             day: day,
             existing: nil,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
         _ = try repository.save(
             draft: LogEntryDraft(scene: "2", take: 1),
@@ -126,7 +128,8 @@ final class DataLayerTests: XCTestCase {
             day: day,
             existing: nil,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
 
         let scoped = try repository.fetchEntries(
@@ -162,7 +165,8 @@ final class DataLayerTests: XCTestCase {
             day: day,
             existing: nil,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
 
         draft.lens = "32mm"
@@ -174,7 +178,8 @@ final class DataLayerTests: XCTestCase {
             day: day,
             existing: entry,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
 
         let history = AuditService.history(for: entry)

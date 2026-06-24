@@ -78,7 +78,7 @@ public final class AppDependencies {
         self.offlineCloudKitStore = store
 
         let transport = syncTransport ?? LiveCloudKitTransport(offlineStore: store)
-        syncEngine = SyncEngine(transport: transport)
+        syncEngine = SyncEngine(transport: transport, offlineStore: store)
         postSaveCoordinator = LogPostSaveCoordinator(
             syncEngine: syncEngine,
             flushAfterEnqueue: syncPipelineEnabled
@@ -110,16 +110,48 @@ public final class AppDependencies {
         session.selectedDay = session.activeProduction?.days.sorted(by: { $0.dayNumber < $1.dayNumber }).first
 
         if syncPipelineEnabled, let production = session.activeProduction {
-            let zones = try? await syncEngine.prepareZones(for: production.code)
+            let zones = try await syncEngine.prepareZones(for: production.code)
             _ = try? await syncEngine.createShare(for: production.code, productionName: production.name)
             let invite = syncEngine.makeInvite(for: production.code)
-            production.shareURL = zones?.shareURL ?? invite.shareURL.absoluteString
-            try? productionRepository.setActive(production)
+            production.shareURL = zones.shareURL ?? invite.shareURL.absoluteString
+            try productionRepository.setActive(production)
+            _ = try? await syncEngine.replayUnpushedOfflineRecords()
+            try await applyInboundSync()
         }
 
         syncLatestEntryToSlate()
         session.markReady(productionName: session.activeProduction?.name)
         AppIntentLogService.register(self)
+    }
+
+    public func applyInboundSync() async throws {
+        let remoteChanges = try await syncEngine.pullRemoteLogEntries()
+        guard let production = session.activeProduction,
+              let camera = session.selectedCamera,
+              let day = session.selectedDay else { return }
+
+        for change in remoteChanges {
+            if let existing = try logEntryRepository.fetchEntry(id: change.entryId) {
+                let localDraft = LogEntryMapper.toDraft(existing)
+                let conflicts = ConflictMerger.detectConflicts(local: localDraft, remote: change.draft)
+                if !conflicts.isEmpty, change.syncVersion > existing.syncVersion {
+                    session.conflictLocalDraft = localDraft
+                    session.conflictRemoteDraft = change.draft
+                    session.pendingConflicts = conflicts
+                }
+            } else {
+                _ = try logEntryRepository.save(
+                    draft: change.draft,
+                    production: production,
+                    camera: camera,
+                    day: day,
+                    existing: nil,
+                    modifiedBy: "cloudkit-sync",
+                    captureContext: nil,
+                    preferredId: change.entryId
+                )
+            }
+        }
     }
 
     public func syncLatestEntryToSlate() {

@@ -11,6 +11,10 @@ public enum AppIntentLogService {
         cachedDependencies = dependencies
     }
 
+    public static func resetCachedDependenciesForTesting() {
+        cachedDependencies = nil
+    }
+
     public static func logTake(scene: String, take: Int, cameraLabel: String?) async throws -> String {
         let deps: AppDependencies
         if let cachedDependencies {
@@ -19,7 +23,7 @@ public enum AppIntentLogService {
             let fresh = try AppDependencies(
                 swiftDataCloudKit: false,
                 syncPipelineEnabled: true,
-                inMemory: true
+                inMemory: false
             )
             try await fresh.bootstrapIfNeeded()
             cachedDependencies = fresh

@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import CloudKit
 import CameraDataData
 import CameraDataDomain
 import CameraDataServices
@@ -211,5 +212,92 @@ final class ServicesTests: XCTestCase {
 
         let modifyCount = await syncEngine.modifyRecordsInvocationCount
         XCTAssertEqual(modifyCount, 50)
+    }
+
+    func testSyncEngineRetainsQueueWhenZonesUnavailable() async {
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
+        let engine = SyncEngine(transport: RecordingCloudKitTransport(), offlineStore: store)
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "1",
+            take: 1,
+            lens: "50mm",
+            iso: 800,
+            productionCode: "NOZONE"
+        )
+        let flushed = await engine.flushOfflineQueue()
+        XCTAssertEqual(flushed, 0)
+        let remaining = await engine.pendingCount()
+        XCTAssertEqual(remaining, 1)
+        let pending = await store.pendingOperations()
+        XCTAssertEqual(pending.count, 1)
+    }
+
+    func testSyncEngineRetainsQueueOnFlushFailure() async throws {
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
+        let transport = RecordingCloudKitTransport()
+        await transport.setShouldFailModifyRecords(true)
+        let engine = SyncEngine(transport: transport, offlineStore: store)
+        _ = try await engine.prepareZones(for: "FAIL01")
+        await engine.enqueueLogEntry(
+            entryId: UUID(),
+            syncVersion: 1,
+            scene: "2",
+            take: 1,
+            lens: "32mm",
+            iso: 640,
+            productionCode: "FAIL01"
+        )
+        let flushed = await engine.flushOfflineQueue()
+        XCTAssertEqual(flushed, 0)
+        let remaining = await engine.pendingCount()
+        XCTAssertEqual(remaining, 1)
+        let pending = await store.pendingOperations()
+        XCTAssertEqual(pending.count, 1)
+    }
+
+    func testSyncEnginePullsRemoteLogEntries() async throws {
+        let transport = RecordingCloudKitTransport()
+        let engine = SyncEngine(transport: transport)
+        _ = try await engine.prepareZones(for: "INBOUND")
+
+        let entryId = UUID()
+        let zoneID = CKRecordZone.ID(zoneName: "Production-INBOUND-Private", ownerName: CKCurrentUserDefaultName)
+        let record = CKRecord(
+            recordType: "LogEntry",
+            recordID: CKRecord.ID(recordName: "entry-\(entryId.uuidString)", zoneID: zoneID)
+        )
+        record["scene"] = "99" as CKRecordValue
+        record["take"] = 7 as CKRecordValue
+        record["lens"] = "40mm" as CKRecordValue
+        record["syncVersion"] = 2 as CKRecordValue
+        await transport.seedRemoteRecords([record])
+
+        let remote = try await engine.pullRemoteLogEntries()
+        XCTAssertEqual(remote.count, 1)
+        XCTAssertEqual(remote.first?.entryId, entryId)
+        XCTAssertEqual(remote.first?.draft.scene, "99")
+        XCTAssertEqual(remote.first?.draft.take, 7)
+    }
+
+    func testOfflineCloudKitRecordStorePersistsAcrossInstances() async throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("offline-store-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let store1 = OfflineCloudKitRecordStore(storageURL: url)
+        let zone = CKRecordZone(zoneName: "Persisted-Zone")
+        await store1.persist(zones: [zone], pushedToCloudKit: false)
+        await store1.setPendingOperations([
+            PendingSyncOperation(entryId: UUID(), syncVersion: 1, scene: "1", take: 1)
+        ])
+
+        let store2 = OfflineCloudKitRecordStore(storageURL: url)
+        let zones = await store2.zones
+        XCTAssertEqual(zones.count, 1)
+        let pending = await store2.pendingOperations()
+        XCTAssertEqual(pending.count, 1)
+        XCTAssertEqual(pending.first?.scene, "1")
     }
 }

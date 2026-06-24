@@ -2,7 +2,7 @@ import Foundation
 import CloudKit
 import CameraDataDomain
 
-public struct PendingSyncOperation: Equatable, Sendable {
+public struct PendingSyncOperation: Equatable, Sendable, Codable {
     public var entryId: UUID
     public var syncVersion: Int
     public var scene: String
@@ -59,22 +59,42 @@ public struct ProductionInvite: Equatable, Sendable {
     }
 }
 
+public struct RemoteLogEntryChange: Equatable, Sendable {
+    public var entryId: UUID
+    public var draft: LogEntryDraft
+    public var syncVersion: Int
+
+    public init(entryId: UUID, draft: LogEntryDraft, syncVersion: Int) {
+        self.entryId = entryId
+        self.draft = draft
+        self.syncVersion = syncVersion
+    }
+}
+
 public actor SyncEngine {
     public static let containerIdentifier = "iCloud.com.visionarypov.cameradata"
 
     private var pendingQueue: [PendingSyncOperation] = []
     private let transport: CloudKitSyncTransport
+    private let offlineStore: OfflineCloudKitRecordStore?
     private var zoneInfo: CloudKitZoneInfo?
     private var lastShare: CKShare?
+    private var queueHydrated = false
     public private(set) var flushInvocationCount: Int = 0
     public private(set) var modifyRecordsInvocationCount: Int = 0
 
-    public init(transport: CloudKitSyncTransport = LiveCloudKitTransport()) {
+    public init(
+        transport: CloudKitSyncTransport = LiveCloudKitTransport(),
+        offlineStore: OfflineCloudKitRecordStore? = nil
+    ) {
         self.transport = transport
+        self.offlineStore = offlineStore
     }
 
-    public func enqueue(entryId: UUID, syncVersion: Int) {
+    public func enqueue(entryId: UUID, syncVersion: Int) async {
+        await hydratePendingQueueIfNeeded()
         pendingQueue.append(PendingSyncOperation(entryId: entryId, syncVersion: syncVersion))
+        await persistPendingQueue()
     }
 
     public func enqueueLogEntry(
@@ -85,7 +105,8 @@ public actor SyncEngine {
         lens: String,
         iso: Int,
         productionCode: String
-    ) {
+    ) async {
+        await hydratePendingQueueIfNeeded()
         pendingQueue.append(
             PendingSyncOperation(
                 entryId: entryId,
@@ -97,6 +118,7 @@ public actor SyncEngine {
                 productionCode: productionCode
             )
         )
+        await persistPendingQueue()
     }
 
     public func pendingCount() -> Int {
@@ -104,33 +126,61 @@ public actor SyncEngine {
     }
 
     public func flushOfflineQueue() async -> Int {
+        await hydratePendingQueueIfNeeded()
         flushInvocationCount += 1
+
+        guard let zoneInfo, !pendingQueue.isEmpty else {
+            return 0
+        }
+
         let operations = pendingQueue
-        pendingQueue.removeAll()
+        let records = operations.map { makeCKRecord(from: $0, zoneName: zoneInfo.privateZoneName) }
 
-        guard let zoneInfo else {
-            return operations.count
-        }
-
-        let records = operations.map { operation -> CKRecord in
-            let zoneID = CKRecordZone.ID(zoneName: zoneInfo.privateZoneName, ownerName: CKCurrentUserDefaultName)
-            let recordID = CKRecord.ID(recordName: "entry-\(operation.entryId.uuidString)", zoneID: zoneID)
-            let record = CKRecord(recordType: "LogEntry", recordID: recordID)
-            record["scene"] = operation.scene as CKRecordValue
-            record["take"] = operation.take as CKRecordValue
-            record["lens"] = operation.lens as CKRecordValue
-            record["iso"] = operation.iso as CKRecordValue
-            record["syncVersion"] = operation.syncVersion as CKRecordValue
-            record["productionCode"] = operation.productionCode as CKRecordValue
-            return record
-        }
-
-        if !records.isEmpty {
+        do {
             modifyRecordsInvocationCount += 1
-            try? await transport.modifyRecords(saving: records, deleting: [])
+            try await transport.modifyRecords(saving: records, deleting: [])
+            pendingQueue.removeAll()
+            await persistPendingQueue()
+            return operations.count
+        } catch {
+            await persistPendingQueue()
+            return 0
         }
+    }
 
-        return operations.count
+    public func replayUnpushedOfflineRecords() async throws -> Int {
+        await hydratePendingQueueIfNeeded()
+        guard let zoneInfo, let offlineStore else { return 0 }
+
+        let unpushed = await offlineStore.unpushedLogEntries()
+        guard !unpushed.isEmpty else { return 0 }
+
+        let records = unpushed.map { $0.toCKRecord(zoneName: zoneInfo.privateZoneName) }
+        modifyRecordsInvocationCount += 1
+        try await transport.modifyRecords(saving: records, deleting: [])
+        await offlineStore.markRecordsPushed(recordNames: unpushed.map(\.recordName))
+        return unpushed.count
+    }
+
+    public func pullRemoteLogEntries() async throws -> [RemoteLogEntryChange] {
+        await hydratePendingQueueIfNeeded()
+        guard let zoneInfo else { return [] }
+
+        let records = try await transport.fetchLogEntries(in: zoneInfo.privateZoneName)
+        return records.compactMap { record in
+            guard let entryId = Self.parseEntryId(from: record.recordID.recordName) else { return nil }
+            let draft = LogEntryDraft(
+                scene: record.ckString("scene") ?? "",
+                take: record.ckInt("take") ?? 0,
+                lens: record.ckString("lens") ?? "",
+                iso: record.ckInt("iso") ?? 0
+            )
+            return RemoteLogEntryChange(
+                entryId: entryId,
+                draft: draft,
+                syncVersion: record.ckInt("syncVersion") ?? 0
+            )
+        }
     }
 
     public func prepareZones(for productionCode: String) async throws -> CloudKitZoneInfo {
@@ -200,5 +250,34 @@ public actor SyncEngine {
             shareURL: "https://cameradata.app/join/\(code)",
             revision: 1
         )
+    }
+
+    private func hydratePendingQueueIfNeeded() async {
+        guard !queueHydrated, let offlineStore else { return }
+        pendingQueue = await offlineStore.pendingOperations()
+        queueHydrated = true
+    }
+
+    private func persistPendingQueue() async {
+        guard let offlineStore else { return }
+        await offlineStore.setPendingOperations(pendingQueue)
+    }
+
+    private func makeCKRecord(from operation: PendingSyncOperation, zoneName: String) -> CKRecord {
+        let zoneID = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
+        let recordID = CKRecord.ID(recordName: "entry-\(operation.entryId.uuidString)", zoneID: zoneID)
+        let record = CKRecord(recordType: "LogEntry", recordID: recordID)
+        record["scene"] = operation.scene as CKRecordValue
+        record["take"] = operation.take as CKRecordValue
+        record["lens"] = operation.lens as CKRecordValue
+        record["iso"] = operation.iso as CKRecordValue
+        record["syncVersion"] = operation.syncVersion as CKRecordValue
+        record["productionCode"] = operation.productionCode as CKRecordValue
+        return record
+    }
+
+    private static func parseEntryId(from recordName: String) -> UUID? {
+        guard recordName.hasPrefix("entry-") else { return nil }
+        return UUID(uuidString: String(recordName.dropFirst("entry-".count)))
     }
 }

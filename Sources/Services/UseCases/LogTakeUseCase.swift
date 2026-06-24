@@ -42,7 +42,8 @@ public final class LogTakeUseCase {
             day: day,
             existing: existing,
             modifiedBy: modifiedBy,
-            captureContext: captureContext
+            captureContext: captureContext,
+            preferredId: nil
         )
 
         await postSaveCoordinator.handle(

@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import CloudKit
 import CameraDataDomain
 import CameraDataData
 import CameraDataServices
@@ -15,7 +16,7 @@ final class IntegrationTests: XCTestCase {
     }
 
     func testAppIntentLogServicePersistsEntryAndFlushesSyncViaLiveTransport() async throws {
-        let store = OfflineCloudKitRecordStore()
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
         let deps = try AppDependencies(
             swiftDataCloudKit: false,
             syncPipelineEnabled: true,
@@ -55,7 +56,7 @@ final class IntegrationTests: XCTestCase {
     }
 
     func testLiveTransportPersistsZonesAndRecordsOffline() async throws {
-        let store = OfflineCloudKitRecordStore()
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
         let transport = LiveCloudKitTransport(offlineStore: store)
         let engine = SyncEngine(transport: transport)
 
@@ -152,7 +153,8 @@ final class IntegrationTests: XCTestCase {
             day: day,
             existing: nil,
             modifiedBy: "tester",
-            captureContext: nil
+            captureContext: nil,
+            preferredId: nil
         )
 
         let session = ProductionSession(isOnboarded: true)
@@ -175,5 +177,66 @@ final class IntegrationTests: XCTestCase {
     func testSpeechRecognitionServiceAvailabilityAPI() {
         _ = SpeechRecognitionService.isAvailable()
         XCTAssertTrue(true)
+    }
+
+    func testAppIntentLogServiceColdStartSharesPersistentStore() async throws {
+        AppIntentLogService.resetCachedDependenciesForTesting()
+
+        _ = try await AppIntentLogService.logTake(scene: "COLD-A", take: 1, cameraLabel: "A")
+
+        AppIntentLogService.resetCachedDependenciesForTesting()
+
+        _ = try await AppIntentLogService.logTake(scene: "COLD-B", take: 2, cameraLabel: "A")
+
+        let verifyDeps = try AppDependencies(
+            swiftDataCloudKit: false,
+            syncPipelineEnabled: false,
+            inMemory: false,
+            syncTransport: RecordingCloudKitTransport()
+        )
+        try await verifyDeps.bootstrapIfNeeded()
+
+        let entries = try verifyDeps.logEntryRepository.fetchEntries(
+            production: verifyDeps.session.activeProduction!,
+            camera: verifyDeps.session.selectedCamera,
+            day: verifyDeps.session.selectedDay,
+            limit: 100,
+            offset: 0
+        )
+        XCTAssertTrue(entries.contains { $0.scene == "COLD-A" && $0.take == 1 })
+        XCTAssertTrue(entries.contains { $0.scene == "COLD-B" && $0.take == 2 })
+    }
+
+    func testApplyInboundSyncImportsRemoteEntry() async throws {
+        let transport = RecordingCloudKitTransport()
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            syncPipelineEnabled: true,
+            inMemory: true,
+            syncTransport: transport,
+            offlineCloudKitStore: store
+        )
+        try await deps.bootstrapIfNeeded()
+
+        let entryId = UUID()
+        let zoneName = "Production-\(deps.session.activeProduction!.code)-Private"
+        let zoneID = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
+        let record = CKRecord(
+            recordType: "LogEntry",
+            recordID: CKRecord.ID(recordName: "entry-\(entryId.uuidString)", zoneID: zoneID)
+        )
+        record["scene"] = "REMOTE-1" as CKRecordValue
+        record["take"] = 5 as CKRecordValue
+        record["lens"] = "65mm" as CKRecordValue
+        record["syncVersion"] = 1 as CKRecordValue
+        await transport.seedRemoteRecords([record])
+
+        try await deps.applyInboundSync()
+
+        let imported = try deps.logEntryRepository.fetchEntry(id: entryId)
+        XCTAssertNotNil(imported)
+        XCTAssertEqual(imported?.scene, "REMOTE-1")
+        XCTAssertEqual(imported?.take, 5)
     }
 }

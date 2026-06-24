@@ -5,7 +5,7 @@ import CameraDataServices
 @MainActor
 final class AppBootstrapTests: XCTestCase {
     func testAppDependenciesBootstrapCreatesProductionAndLaunchState() async throws {
-        let store = OfflineCloudKitRecordStore()
+        let store = OfflineCloudKitRecordStore(inMemoryOnly: true)
         let deps = try AppDependencies(
             swiftDataCloudKit: false,
             syncPipelineEnabled: true,

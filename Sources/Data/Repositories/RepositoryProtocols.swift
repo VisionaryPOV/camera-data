@@ -22,6 +22,8 @@ public protocol LogEntryRepositoryProtocol {
 
     func fetchSceneTakes(production: ProductionModel, camera: CameraUnitModel?) throws -> [(scene: String, take: Int)]
 
+    func fetchEntry(id: UUID) throws -> LogEntryModel?
+
     func save(
         draft: LogEntryDraft,
         production: ProductionModel,
@@ -29,7 +31,8 @@ public protocol LogEntryRepositoryProtocol {
         day: ShootDayModel,
         existing: LogEntryModel?,
         modifiedBy: String,
-        captureContext: CaptureContext?
+        captureContext: CaptureContext?,
+        preferredId: UUID?
     ) throws -> LogEntryModel
 
     func softDelete(_ entry: LogEntryModel) throws
