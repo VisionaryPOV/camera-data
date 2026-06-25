@@ -26,6 +26,25 @@ public final class LogTakeUseCase {
         SmartFillEngine.apply(to: current, lastEntry: lastEntry, cameraDefaults: cameraDefaults)
     }
 
+    public func applyVoiceAudio(
+        _ data: Data,
+        to draft: LogEntryDraft,
+        transcriber: SpeechTranscribing
+    ) async throws -> (draft: LogEntryDraft, flags: [String]) {
+        let (voiceDraft, flags) = try await VoiceLoggingService.processAudio(data, transcriber: transcriber)
+        var merged = draft
+        if !voiceDraft.scene.isEmpty { merged.scene = voiceDraft.scene }
+        if voiceDraft.take > 0 { merged.take = voiceDraft.take }
+        merged.isCircled = merged.isCircled || voiceDraft.isCircled
+        merged.isMOS = merged.isMOS || voiceDraft.isMOS
+        merged.isPickup = merged.isPickup || voiceDraft.isPickup
+        merged.isTail = merged.isTail || voiceDraft.isTail
+        merged.isHold = merged.isHold || voiceDraft.isHold
+        merged.isBad = merged.isBad || voiceDraft.isBad
+        merged.isSeries = merged.isSeries || voiceDraft.isSeries
+        return (merged, flags)
+    }
+
     public func logAndNext(
         draft: LogEntryDraft,
         production: ProductionModel,

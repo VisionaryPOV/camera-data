@@ -23,7 +23,7 @@ public enum ModelContainerFactory {
         return try ModelContainer(for: schema, configurations: [config])
     }
 
-    public static func makePersistent(cloudKitEnabled: Bool = false) throws -> ModelContainer {
+    public static func makePersistent(cloudKitEnabled: Bool = false, storeURL: URL? = nil) throws -> ModelContainer {
         if cloudKitEnabled {
             let privateConfig = ModelConfiguration(
                 "CameraData-Private",
@@ -31,16 +31,25 @@ public enum ModelContainerFactory {
             )
             return try ModelContainer(for: schema, configurations: [privateConfig])
         }
-        let config = ModelConfiguration("CameraData", cloudKitDatabase: .none)
+        let config: ModelConfiguration
+        if let storeURL {
+            config = ModelConfiguration("CameraData", url: storeURL, cloudKitDatabase: .none)
+        } else {
+            config = ModelConfiguration("CameraData", cloudKitDatabase: .none)
+        }
+        return try openPersistentContainer(configuration: config)
+    }
+
+    public static func openPersistentContainer(configuration: ModelConfiguration) throws -> ModelContainer {
         do {
-            return try ModelContainer(for: schema, configurations: [config])
+            return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
-            try removePersistentStoreFiles(for: config)
-            return try ModelContainer(for: schema, configurations: [config])
+            try removePersistentStoreFiles(for: configuration)
+            return try ModelContainer(for: schema, configurations: [configuration])
         }
     }
 
-    private static func removePersistentStoreFiles(for configuration: ModelConfiguration) throws {
+    public static func removePersistentStoreFiles(for configuration: ModelConfiguration) throws {
         let storeURL = configuration.url
         let fileManager = FileManager.default
         let related = [

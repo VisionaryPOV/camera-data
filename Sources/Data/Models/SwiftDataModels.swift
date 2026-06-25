@@ -139,6 +139,7 @@ public final class LogEntryModel {
     public var rollNumber: String
     public var timecodeIn: String
     public var timecodeOut: String
+    public var duration: String = ""
     public var notes: String
     public var scriptNotes: String
     public var vfxNotes: String
@@ -192,6 +193,7 @@ public final class LogEntryModel {
         self.rollNumber = ""
         self.timecodeIn = "00:00:00:00"
         self.timecodeOut = ""
+        self.duration = ""
         self.notes = ""
         self.scriptNotes = ""
         self.vfxNotes = ""

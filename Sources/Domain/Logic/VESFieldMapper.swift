@@ -4,7 +4,7 @@ import Foundation
 public enum VESFieldMapper {
     public static let standardFieldOrder: [String] = [
         "Scene", "Take", "Lens", "Filter", "ISO", "Shutter", "WhiteBalance",
-        "FPS", "Resolution", "Codec", "Roll", "TimecodeIn", "TimecodeOut", "Notes"
+        "FPS", "Resolution", "Codec", "Roll", "TimecodeIn", "TimecodeOut", "Duration", "Notes"
     ]
 
     public static func csvRow(from draft: LogEntryDraft) -> [String] {
@@ -22,6 +22,7 @@ public enum VESFieldMapper {
             draft.rollNumber,
             draft.timecodeIn,
             draft.timecodeOut,
+            draft.duration,
             draft.notes
         ]
     }
@@ -43,6 +44,7 @@ public enum VESFieldMapper {
             "roll": draft.rollNumber,
             "timecodeIn": draft.timecodeIn,
             "timecodeOut": draft.timecodeOut,
+            "duration": draft.duration,
             "notes": draft.notes,
             "flags": flagsDictionary(from: draft)
         ]

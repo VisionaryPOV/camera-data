@@ -2,13 +2,14 @@ import SwiftUI
 import CameraDataDesignSystem
 import CameraDataDomain
 import CameraDataData
+import CameraDataServices
 
 public struct RootView: View {
     public var dependencies: AppDependencies
     @Environment(\.scenePhase) private var scenePhase
     @State private var dashboardViewModel: DashboardViewModel
     @State private var activeSheet: RootActiveSheet?
-    @State private var showSlate = false
+    @State private var slateController: SlateSessionController
     @State private var searchQuery = ""
     @State private var productionEditorViewModel: ProductionEditorViewModel
     @State private var productionsList: [ProductionModel] = []
@@ -24,6 +25,7 @@ public struct RootView: View {
             productionRepository: dependencies.productionRepository,
             session: dependencies.session
         ))
+        _slateController = State(initialValue: SlateSessionController(session: dependencies.session))
     }
 
     public var body: some View {
@@ -31,7 +33,7 @@ public struct RootView: View {
             DashboardView(
                 viewModel: dashboardViewModel,
                 session: dependencies.session,
-                onLogTake: { activeSheet = .editor },
+                onLogTake: openEditorIfUnlocked,
                 onOpenReports: { activeSheet = .reports },
                 onOpenSettings: { activeSheet = .settings },
                 onSelectEntry: { entry in
@@ -45,7 +47,7 @@ public struct RootView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { showSlate = true } label: {
+                    Button { slateController.present() } label: {
                         Image(systemName: "rectangle.split.3x1")
                     }
                 }
@@ -56,13 +58,17 @@ public struct RootView: View {
         .sheet(item: $activeSheet) { sheet in
             sheetContent(for: sheet)
         }
-        .fullScreenCover(isPresented: $showSlate) {
+        .fullScreenCover(isPresented: $slateController.isPresented) {
+            let bindings = slateController.bindings()
             DigitalSlateView(
-                scene: slateSceneBinding,
-                take: slateTakeBinding,
-                isRolling: slateIsRollingBinding,
-                onIncrementTake: incrementSlateTake,
-                onDismiss: { showSlate = false }
+                scene: bindings.scene,
+                take: bindings.take,
+                isRolling: bindings.isRolling,
+                onIncrementTake: {
+                    slateController.incrementTake()
+                    HapticManager.medium()
+                },
+                onDismiss: { slateController.dismiss() }
             )
         }
         .overlay {
@@ -70,6 +76,8 @@ public struct RootView: View {
                 OnboardingView {
                     completeOnboarding()
                 }
+            } else if dependencies.session.securityEnabled && !dependencies.session.isUnlocked {
+                SecurityUnlockView(session: dependencies.session)
             }
         }
         .task {
@@ -160,31 +168,28 @@ public struct RootView: View {
         case .audit(let entryId):
             if let entry = dashboardViewModel.entryModels.first(where: { $0.id == entryId }) {
                 NavigationStack {
-                    AuditHistoryView(entry: entry)
+                    AuditHistoryView(entry: entry) { field, value in
+                        restoreAuditValue(entry: entry, field: field, value: value)
+                    }
                 }
             }
         }
     }
 
-    private var slateSceneBinding: Binding<String> {
-        Binding(
-            get: { dependencies.session.slateScene },
-            set: { dependencies.session.slateScene = $0 }
-        )
+    private func openEditorIfUnlocked() {
+        guard dependencies.session.isUnlocked else { return }
+        activeSheet = .editor
     }
 
-    private var slateTakeBinding: Binding<Int> {
-        Binding(
-            get: { dependencies.session.slateTake },
-            set: { dependencies.session.slateTake = $0 }
+    private func restoreAuditValue(entry: LogEntryModel, field: String, value: String) {
+        _ = try? AuditRestoreService.restore(
+            entry: entry,
+            field: field,
+            value: value,
+            repository: dependencies.logEntryRepository,
+            modifiedBy: "local-user"
         )
-    }
-
-    private var slateIsRollingBinding: Binding<Bool> {
-        Binding(
-            get: { dependencies.session.slateIsRolling },
-            set: { dependencies.session.slateIsRolling = $0 }
-        )
+        try? dashboardViewModel.reload()
     }
 
     private var entryEditorViewModel: EntryEditorViewModel {
@@ -194,11 +199,6 @@ public struct RootView: View {
             entryRepository: dependencies.logEntryRepository,
             smartSuggestor: dependencies.smartSuggestor
         )
-    }
-
-    private func incrementSlateTake() {
-        dependencies.session.slateTake += 1
-        HapticManager.medium()
     }
 
     private func completeOnboarding() {

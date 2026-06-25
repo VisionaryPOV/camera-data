@@ -26,6 +26,7 @@ public enum LogEntryMapper {
             rollNumber: model.rollNumber,
             timecodeIn: model.timecodeIn,
             timecodeOut: model.timecodeOut,
+            duration: model.duration,
             notes: model.notes,
             scriptNotes: model.scriptNotes,
             vfxNotes: model.vfxNotes,
@@ -57,6 +58,7 @@ public enum LogEntryMapper {
         model.rollNumber = draft.rollNumber
         model.timecodeIn = draft.timecodeIn
         model.timecodeOut = draft.timecodeOut
+        model.duration = draft.duration
         model.notes = draft.notes
         model.scriptNotes = draft.scriptNotes
         model.vfxNotes = draft.vfxNotes

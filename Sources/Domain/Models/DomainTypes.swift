@@ -90,6 +90,7 @@ public struct LogEntryDraft: Equatable, Sendable {
     public var rollNumber: String
     public var timecodeIn: String
     public var timecodeOut: String
+    public var duration: String
     public var notes: String
     public var scriptNotes: String
     public var vfxNotes: String
@@ -118,6 +119,7 @@ public struct LogEntryDraft: Equatable, Sendable {
         rollNumber: String = "",
         timecodeIn: String = "00:00:00:00",
         timecodeOut: String = "",
+        duration: String = "",
         notes: String = "",
         scriptNotes: String = "",
         vfxNotes: String = "",
@@ -145,6 +147,7 @@ public struct LogEntryDraft: Equatable, Sendable {
         self.rollNumber = rollNumber
         self.timecodeIn = timecodeIn
         self.timecodeOut = timecodeOut
+        self.duration = duration
         self.notes = notes
         self.scriptNotes = scriptNotes
         self.vfxNotes = vfxNotes

@@ -18,6 +18,11 @@ public final class AuditService: AuditTracking, @unchecked Sendable {
             ("take", String(before.take), String(after.take)),
             ("lens", before.lens, after.lens),
             ("iso", String(before.iso), String(after.iso)),
+            ("resolution", before.resolution, after.resolution),
+            ("codec", before.codec, after.codec),
+            ("timecodeIn", before.timecodeIn, after.timecodeIn),
+            ("timecodeOut", before.timecodeOut, after.timecodeOut),
+            ("duration", before.duration, after.duration),
             ("notes", before.notes, after.notes)
         ]
 

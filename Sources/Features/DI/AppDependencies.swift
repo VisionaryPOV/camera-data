@@ -19,6 +19,9 @@ public final class ProductionSession {
     public var slateScene: String = ""
     public var slateTake: Int = 1
     public var slateIsRolling: Bool = false
+    public var securityEnabled: Bool = false
+    public var productionPIN: String = ""
+    public var isUnlocked: Bool = true
     public var pendingConflicts: [ConflictField] = []
     public var conflictEntryId: UUID?
     public var conflictLocalDraft: LogEntryDraft?
@@ -26,7 +29,21 @@ public final class ProductionSession {
 
     public init(isOnboarded: Bool = false) {
         self.isOnboarded = isOnboarded
+        self.securityEnabled = UserDefaults.standard.bool(forKey: Self.securityEnabledKey)
+        self.productionPIN = UserDefaults.standard.string(forKey: Self.productionPINKey) ?? ""
+        self.isUnlocked = !securityEnabled
     }
+
+    public func persistSecuritySettings() {
+        UserDefaults.standard.set(securityEnabled, forKey: Self.securityEnabledKey)
+        UserDefaults.standard.set(productionPIN, forKey: Self.productionPINKey)
+        if !securityEnabled {
+            isUnlocked = true
+        }
+    }
+
+    private static let securityEnabledKey = "cameraData.securityEnabled"
+    private static let productionPINKey = "cameraData.productionPIN"
 
     public func markReady(productionName: String?) {
         launchState = "dashboard_ready:\(productionName ?? "none")"

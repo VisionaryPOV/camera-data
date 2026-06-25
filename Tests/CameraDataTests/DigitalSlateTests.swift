@@ -12,20 +12,36 @@ final class DigitalSlateTests: XCTestCase {
         XCTAssertEqual(SlateTimeFormatter.timeOfDay(from: date, calendar: calendar), "14:07")
     }
 
-    func testSlateTakeIncrementUpdatesSession() {
+    func testSlateSessionControllerPresentDismissIncrementRolling() {
         let session = ProductionSession()
-        session.slateTake = 3
+        session.slateTake = 4
+        let controller = SlateSessionController(session: session)
 
-        session.slateTake += 1
+        controller.present()
+        XCTAssertTrue(controller.isPresented)
 
-        XCTAssertEqual(session.slateTake, 4)
+        controller.toggleRolling()
+        XCTAssertTrue(session.slateIsRolling)
+
+        controller.incrementTake()
+        XCTAssertEqual(session.slateTake, 5)
+
+        controller.dismiss()
+        XCTAssertFalse(controller.isPresented)
+        XCTAssertFalse(session.slateIsRolling)
     }
 
-    func testSlateRollingTogglePersistsOnSession() {
+    func testSlateBindingsDriveSessionFromEntryPoint() {
         let session = ProductionSession()
-        XCTAssertFalse(session.slateIsRolling)
+        let controller = SlateSessionController(session: session)
+        let bindings = controller.bindings()
 
-        session.slateIsRolling = true
+        bindings.scene.wrappedValue = "24A"
+        bindings.take.wrappedValue = 7
+        bindings.isRolling.wrappedValue = true
+
+        XCTAssertEqual(session.slateScene, "24A")
+        XCTAssertEqual(session.slateTake, 7)
         XCTAssertTrue(session.slateIsRolling)
     }
 }

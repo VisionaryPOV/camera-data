@@ -23,6 +23,9 @@ public struct EntryEditorView: View {
                 if let message = viewModel.validationMessage {
                     Text(message).foregroundStyle(.red).font(.caption)
                 }
+                if let voiceStatus = viewModel.voiceStatusMessage {
+                    Text(voiceStatus).foregroundStyle(ThemeTokens.accent).font(.caption)
+                }
 
                 GlassButton("Log & Next", isPrimary: true) {
                     Task { try? await viewModel.logAndNext() }
@@ -38,7 +41,14 @@ public struct EntryEditorView: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Close", action: onDismiss)
             }
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    Task { await viewModel.processVoiceLog() }
+                } label: {
+                    Image(systemName: viewModel.isProcessingVoice ? "waveform.circle.fill" : "mic.circle")
+                }
+                .disabled(!viewModel.canEdit || viewModel.isProcessingVoice)
+                .accessibilityLabel("Voice to log")
                 Button("SmartFill") { viewModel.applySmartFill() }
                     .disabled(!viewModel.canEdit)
             }
@@ -85,7 +95,14 @@ public struct EntryEditorView: View {
                 fieldCard(.iso)
                 fieldCard(.fps)
                 fieldCard(.filter)
+                fieldCard(.shutterAngle)
+                fieldCard(.shutterSpeed)
                 fieldCard(.whiteBalance)
+                fieldCard(.resolution)
+                fieldCard(.codec)
+                fieldCard(.timecodeIn)
+                fieldCard(.timecodeOut)
+                fieldCard(.duration)
             }
             fieldCard(.notes)
         }
@@ -104,7 +121,7 @@ public struct EntryEditorView: View {
                 Text(field.label)
                     .font(.caption)
                     .foregroundStyle(ThemeTokens.textSecondary)
-                if viewModel.inputMode == .keyboard, isFocused, field != .take, field != .iso {
+                if viewModel.inputMode == .keyboard, isFocused, field != .take, field != .iso, field != .shutterAngle {
                     keyboardField(for: field)
                 } else {
                     Text(viewModel.displayValue(for: field))
@@ -147,6 +164,32 @@ public struct EntryEditorView: View {
                 .keyboardType(.decimalPad)
                 .focused($keyboardFocus, equals: .fps)
                 .onChange(of: viewModel.fpsText) { _, _ in viewModel.syncFPSTextToDraft() }
+        case .shutterAngle:
+            TextField("Shutter °", text: $viewModel.shutterAngleText)
+                .keyboardType(.decimalPad)
+                .focused($keyboardFocus, equals: .shutterAngle)
+                .onChange(of: viewModel.shutterAngleText) { _, _ in viewModel.syncShutterAngleTextToDraft() }
+        case .shutterSpeed:
+            TextField("Shutter", text: Binding(
+                get: { viewModel.draft.shutterSpeed ?? "" },
+                set: { viewModel.draft.shutterSpeed = $0.isEmpty ? nil : $0 }
+            ))
+            .focused($keyboardFocus, equals: .shutterSpeed)
+        case .resolution:
+            TextField("Resolution", text: $viewModel.draft.resolution)
+                .focused($keyboardFocus, equals: .resolution)
+        case .codec:
+            TextField("Codec", text: $viewModel.draft.codec)
+                .focused($keyboardFocus, equals: .codec)
+        case .timecodeIn:
+            TextField("TC In", text: $viewModel.draft.timecodeIn)
+                .focused($keyboardFocus, equals: .timecodeIn)
+        case .timecodeOut:
+            TextField("TC Out", text: $viewModel.draft.timecodeOut)
+                .focused($keyboardFocus, equals: .timecodeOut)
+        case .duration:
+            TextField("Duration", text: $viewModel.draft.duration)
+                .focused($keyboardFocus, equals: .duration)
         case .whiteBalance:
             TextField("WB", text: $viewModel.draft.whiteBalance)
                 .focused($keyboardFocus, equals: .whiteBalance)

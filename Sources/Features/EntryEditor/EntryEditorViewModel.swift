@@ -12,20 +12,25 @@ public final class EntryEditorViewModel {
     public var suggestions: [SmartSuggestion] = []
     public var validationMessage: String?
     public var isSaving: Bool = false
+    public var isProcessingVoice: Bool = false
+    public var voiceStatusMessage: String?
     public var focusedField: EntryEditorFocus = .scene
     public var inputMode: EntryInputMode = .keypad
     public var fpsText: String = "24"
+    public var shutterAngleText: String = "180"
 
     private let useCase: LogTakeUseCase
     private let session: ProductionSession
     private let entryRepository: LogEntryRepositoryProtocol
     private let smartSuggestor: CoreMLSmartSuggestor?
+    private let speechTranscriber: SpeechTranscribing
     private var editingEntry: LogEntryModel?
     private var lastEntry: LogEntryDraft?
     private var takeEntryText: String = ""
+    private var takeReplaceMode = true
 
     public var canEdit: Bool {
-        session.currentRole.canEdit
+        session.currentRole.canEdit && session.isUnlocked
     }
 
     public init(
@@ -33,20 +38,25 @@ public final class EntryEditorViewModel {
         session: ProductionSession,
         entryRepository: LogEntryRepositoryProtocol,
         editingEntry: LogEntryModel? = nil,
-        smartSuggestor: CoreMLSmartSuggestor? = nil
+        smartSuggestor: CoreMLSmartSuggestor? = nil,
+        speechTranscriber: SpeechTranscribing = StubSpeechTranscriber()
     ) {
         self.useCase = useCase
         self.session = session
         self.entryRepository = entryRepository
         self.editingEntry = editingEntry
         self.smartSuggestor = smartSuggestor
+        self.speechTranscriber = speechTranscriber
         self.draft = editingEntry.map(LogEntryMapper.toDraft) ?? LogEntryDraft()
         self.fpsText = Self.formatFPS(self.draft.fps)
+        self.shutterAngleText = Self.formatShutterAngle(self.draft.shutterAngle)
     }
 
     public func onAppear() throws {
         guard canEdit else {
-            validationMessage = "Read-only access — logging disabled for \(session.currentRole.rawValue) role"
+            validationMessage = session.isUnlocked
+                ? "Read-only access — logging disabled for \(session.currentRole.rawValue) role"
+                : "Unlock production security to log takes"
             return
         }
 
@@ -75,16 +85,18 @@ public final class EntryEditorViewModel {
         }
 
         fpsText = Self.formatFPS(draft.fps)
+        shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
         applySmartFill()
         refreshSuggestions()
     }
 
     public func focus(_ field: EntryEditorFocus) {
         guard canEdit else { return }
-        syncFPSTextToDraft()
+        syncNumericTextsToDraft()
         focusedField = field
         if field == .take {
             takeEntryText = ""
+            takeReplaceMode = true
         }
         if field.usesNumericKeypad {
             inputMode = .keypad
@@ -94,7 +106,7 @@ public final class EntryEditorViewModel {
 
     public func toggleInputMode() {
         guard canEdit else { return }
-        syncFPSTextToDraft()
+        syncNumericTextsToDraft()
         inputMode = inputMode == .keypad ? .keyboard : .keypad
         HapticManager.light()
     }
@@ -113,6 +125,7 @@ public final class EntryEditorViewModel {
         }
         draft = useCase.prepareDraft(current: draft, lastEntry: lastEntry, cameraDefaults: cameraDefaults)
         fpsText = Self.formatFPS(draft.fps)
+        shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
         HapticManager.success()
     }
 
@@ -130,6 +143,27 @@ public final class EntryEditorViewModel {
         }
     }
 
+    public func processVoiceLog() async {
+        guard canEdit else { return }
+        isProcessingVoice = true
+        voiceStatusMessage = "Listening…"
+        defer { isProcessingVoice = false }
+
+        do {
+            let audio = await VoiceCaptureService.captureForTranscription()
+            let result = try await useCase.applyVoiceAudio(audio, to: draft, transcriber: speechTranscriber)
+            draft = result.draft
+            fpsText = Self.formatFPS(draft.fps)
+            shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
+            voiceStatusMessage = result.flags.isEmpty
+                ? "Voice applied"
+                : "Voice applied: \(result.flags.joined(separator: ", "))"
+            HapticManager.success()
+        } catch {
+            voiceStatusMessage = "Voice capture failed"
+        }
+    }
+
     public func inputKey(_ key: String) {
         guard canEdit else { return }
 
@@ -137,7 +171,12 @@ public final class EntryEditorViewModel {
         case .scene:
             draft.scene += key
         case .take:
-            takeEntryText += key
+            if takeReplaceMode {
+                takeEntryText = key
+                takeReplaceMode = false
+            } else {
+                takeEntryText += key
+            }
             draft.take = Int(takeEntryText) ?? 0
         case .rollNumber:
             draft.rollNumber += key.uppercased()
@@ -150,8 +189,23 @@ public final class EntryEditorViewModel {
         case .fps:
             fpsText += key
             syncFPSTextToDraft()
+        case .shutterAngle:
+            shutterAngleText += key
+            syncShutterAngleTextToDraft()
+        case .shutterSpeed:
+            draft.shutterSpeed = (draft.shutterSpeed ?? "") + key
         case .whiteBalance:
             draft.whiteBalance += key
+        case .resolution:
+            draft.resolution += key
+        case .codec:
+            draft.codec += key
+        case .timecodeIn:
+            draft.timecodeIn += key == "•" ? ":" : key
+        case .timecodeOut:
+            draft.timecodeOut += key == "•" ? ":" : key
+        case .duration:
+            draft.duration += key == "•" ? ":" : key
         case .notes:
             draft.notes += key
         }
@@ -167,6 +221,7 @@ public final class EntryEditorViewModel {
         case .take:
             if !takeEntryText.isEmpty { takeEntryText.removeLast() }
             draft.take = Int(takeEntryText) ?? 0
+            if takeEntryText.isEmpty { takeReplaceMode = true }
         case .rollNumber:
             if !draft.rollNumber.isEmpty { draft.rollNumber.removeLast() }
         case .lens:
@@ -178,8 +233,26 @@ public final class EntryEditorViewModel {
         case .fps:
             if !fpsText.isEmpty { fpsText.removeLast() }
             syncFPSTextToDraft()
+        case .shutterAngle:
+            if !shutterAngleText.isEmpty { shutterAngleText.removeLast() }
+            syncShutterAngleTextToDraft()
+        case .shutterSpeed:
+            if var speed = draft.shutterSpeed, !speed.isEmpty {
+                speed.removeLast()
+                draft.shutterSpeed = speed.isEmpty ? nil : speed
+            }
         case .whiteBalance:
             if !draft.whiteBalance.isEmpty { draft.whiteBalance.removeLast() }
+        case .resolution:
+            if !draft.resolution.isEmpty { draft.resolution.removeLast() }
+        case .codec:
+            if !draft.codec.isEmpty { draft.codec.removeLast() }
+        case .timecodeIn:
+            if !draft.timecodeIn.isEmpty { draft.timecodeIn.removeLast() }
+        case .timecodeOut:
+            if !draft.timecodeOut.isEmpty { draft.timecodeOut.removeLast() }
+        case .duration:
+            if !draft.duration.isEmpty { draft.duration.removeLast() }
         case .notes:
             if !draft.notes.isEmpty { draft.notes.removeLast() }
         }
@@ -204,9 +277,24 @@ public final class EntryEditorViewModel {
         }
     }
 
+    public func syncShutterAngleTextToDraft() {
+        if let value = Double(shutterAngleText) {
+            draft.shutterAngle = value
+        } else if shutterAngleText.isEmpty {
+            draft.shutterAngle = nil
+        }
+    }
+
+    public func syncNumericTextsToDraft() {
+        syncFPSTextToDraft()
+        syncShutterAngleTextToDraft()
+    }
+
     public func logAndNext() async throws {
         guard canEdit else {
-            validationMessage = "Read-only access — cannot log takes"
+            validationMessage = session.isUnlocked
+                ? "Read-only access — cannot log takes"
+                : "Unlock production security to log takes"
             return
         }
 
@@ -214,7 +302,7 @@ public final class EntryEditorViewModel {
               let camera = session.selectedCamera,
               let day = session.selectedDay else { return }
 
-        syncFPSTextToDraft()
+        syncNumericTextsToDraft()
         isSaving = true
         defer { isSaving = false }
 
@@ -230,6 +318,7 @@ public final class EntryEditorViewModel {
         lastEntry = LogEntryMapper.toDraft(result.saved)
         draft = result.nextDraft
         fpsText = Self.formatFPS(draft.fps)
+        shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
         session.slateScene = result.saved.scene
         session.slateTake = result.nextDraft.take
         editingEntry = nil
@@ -264,7 +353,14 @@ public final class EntryEditorViewModel {
         case .filter: draft.filter.isEmpty ? "—" : draft.filter
         case .iso: "\(draft.iso)"
         case .fps: fpsText
+        case .shutterAngle: shutterAngleText.isEmpty ? "—" : shutterAngleText
+        case .shutterSpeed: draft.shutterSpeed?.isEmpty == false ? draft.shutterSpeed! : "—"
         case .whiteBalance: draft.whiteBalance.isEmpty ? "—" : draft.whiteBalance
+        case .resolution: draft.resolution.isEmpty ? "—" : draft.resolution
+        case .codec: draft.codec.isEmpty ? "—" : draft.codec
+        case .timecodeIn: draft.timecodeIn.isEmpty ? "—" : draft.timecodeIn
+        case .timecodeOut: draft.timecodeOut.isEmpty ? "—" : draft.timecodeOut
+        case .duration: draft.duration.isEmpty ? "—" : draft.duration
         case .notes: draft.notes.isEmpty ? "—" : draft.notes
         }
     }
@@ -292,5 +388,13 @@ public final class EntryEditorViewModel {
             return String(format: "%.0f", fps)
         }
         return String(fps)
+    }
+
+    private static func formatShutterAngle(_ angle: Double?) -> String {
+        guard let angle else { return "" }
+        if angle == floor(angle) {
+            return String(format: "%.0f", angle)
+        }
+        return String(angle)
     }
 }

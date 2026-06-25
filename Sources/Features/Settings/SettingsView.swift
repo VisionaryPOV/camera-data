@@ -64,10 +64,24 @@ public struct SettingsView: View {
                 }
             }
             Section("Security") {
-                Label(
-                    SecurityService.canUseBiometrics() ? "Biometrics Available" : "Biometrics Unavailable",
-                    systemImage: "faceid"
-                )
+                Toggle("Require Unlock", isOn: $session.securityEnabled)
+                    .onChange(of: session.securityEnabled) { _, _ in
+                        session.persistSecuritySettings()
+                    }
+                SecureField("Production PIN", text: $session.productionPIN)
+                    .onChange(of: session.productionPIN) { _, _ in
+                        session.persistSecuritySettings()
+                    }
+                if SecurityService.canUseBiometrics() {
+                    Button("Test Face ID Unlock") {
+                        Task {
+                            let ok = await SecurityService.authenticate(reason: "Verify Camera Data unlock")
+                            if ok { session.isUnlocked = true }
+                        }
+                    }
+                } else {
+                    Label("Biometrics Unavailable", systemImage: "faceid")
+                }
             }
         }
         .scrollContentBackground(.hidden)
