@@ -56,16 +56,33 @@ public final class LiveCloudKitTransport: CloudKitSyncTransport, @unchecked Send
         if try await isAccountAvailable() {
             let zoneID = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
             let query = CKQuery(recordType: "LogEntry", predicate: NSPredicate(value: true))
-            let (matchResults, _) = try await privateDatabase.records(
-                matching: query,
-                inZoneWith: zoneID,
-                desiredKeys: nil
-            )
-            return matchResults.compactMap { _, result in
-                try? result.get()
+            do {
+                let (matchResults, _) = try await privateDatabase.records(
+                    matching: query,
+                    inZoneWith: zoneID,
+                    desiredKeys: nil
+                )
+                return matchResults.compactMap { _, result in
+                    try? result.get()
+                }
+            } catch {
+                if Self.isMissingCloudKitRecordTypeError(error) {
+                    return []
+                }
+                throw error
             }
         }
         return await offlineStore.logEntryCKRecords(in: zoneName)
+    }
+
+    private static func isMissingCloudKitRecordTypeError(_ error: Error) -> Bool {
+        if error.localizedDescription.localizedCaseInsensitiveContains("did not find record type") {
+            return true
+        }
+        if let ckError = error as? CKError, ckError.code == .unknownItem {
+            return true
+        }
+        return false
     }
 
     public func acceptShare(metadata: CKShare.Metadata) async throws {

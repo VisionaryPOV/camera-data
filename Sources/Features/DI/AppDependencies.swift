@@ -120,8 +120,8 @@ public final class AppDependencies {
             }
             try productionRepository.setActive(production)
             _ = try? await syncEngine.replayUnpushedOfflineRecords()
-            try await applyInboundSync()
             _ = await postSaveCoordinator.flushPending()
+            try? await applyInboundSync()
         }
 
         syncLatestEntryToSlate()

@@ -2,6 +2,7 @@
 import UIKit
 #endif
 
+@MainActor
 public enum HapticManager {
     public static func light() {
         #if canImport(UIKit)
