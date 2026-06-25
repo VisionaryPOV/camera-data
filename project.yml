@@ -16,7 +16,6 @@ settings:
 
 configs:
   Debug: debug
-  Debug-CloudKit: debug
   Release: release
 
 targets:
@@ -117,8 +116,6 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.PersonalTeam.entitlements
-        Debug-CloudKit:
           CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.entitlements
         Release:
           CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.entitlements
@@ -139,8 +136,6 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.widget
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.PersonalTeam.entitlements
-        Debug-CloudKit:
           CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.entitlements
         Release:
           CODE_SIGN_ENTITLEMENTS: Widgets/CameraDataWidget/CameraDataWidget.entitlements
@@ -171,13 +166,3 @@ schemes:
         - CameraDataTests
     run:
       config: Debug
-  CameraData-CloudKit:
-    build:
-      targets:
-        CameraData: all
-        CameraDataTests: [test]
-    test:
-      targets:
-        - CameraDataTests
-    run:
-      config: Debug-CloudKit

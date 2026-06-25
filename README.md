@@ -42,28 +42,28 @@ Tests/CameraDataTests/    # 51 unit tests on real implementations
 - iOS 26 SDK
 - iPhone/iPad simulator or device
 
-### Code signing
+### Code signing (paid Apple Developer Program)
 
-| Team type | Scheme | What works |
-|-----------|--------|------------|
-| **Personal Team** (free Apple ID) | `CameraData` | On-device debug builds. No iCloud or App Groups (widget uses fallback data). Offline sync queue still works locally. |
-| **Paid Apple Developer Program** | `CameraData-CloudKit` | Full CloudKit + App Groups + widget sharing. Required for TestFlight/App Store and live iCloud sync. |
+Requires **paid** membership — Personal Team cannot provision iCloud or App Groups.
 
-Personal Teams cannot provision **iCloud** or **App Groups** — Xcode will show “does not support the iCloud capability.” Use the default `CameraData` scheme (Debug entitlements) for device testing on a Personal Team.
+#### Portal setup (one time)
 
-#### Paid account: fix “provisioning profile doesn't include iCloud / App Groups”
+1. **App Group** → [App Groups](https://developer.apple.com/account/resources/identifiers/list/applicationGroup) → `group.com.visionarypov.cameradata`
+2. **iCloud container** → [iCloud Containers](https://developer.apple.com/account/resources/identifiers/list/cloudContainer) → `iCloud.com.visionarypov.cameradata`
+3. **App ID** → [App IDs](https://developer.apple.com/account/resources/identifiers/list) → `com.visionarypov.cameradata` → **iCloud** (CloudKit + container) + **App Groups**
+4. **Widget App ID** → `com.visionarypov.cameradata.widget` → **App Groups** only
 
-Xcode cannot add CloudKit to a profile until the identifiers exist in the [Developer portal](https://developer.apple.com/account/resources/identifiers/list). Do this **once**, in order:
+#### Xcode setup (critical)
 
-1. **App Group** → [Identifiers → App Groups](https://developer.apple.com/account/resources/identifiers/list/applicationGroup) → **+** → `group.com.visionarypov.cameradata`
-2. **iCloud container** → [Identifiers → iCloud Containers](https://developer.apple.com/account/resources/identifiers/list/cloudContainer) → **+** → `iCloud.com.visionarypov.cameradata`
-3. **Main App ID** → [Identifiers → App IDs](https://developer.apple.com/account/resources/identifiers/list) → **+** → `com.visionarypov.cameradata` → enable **iCloud** (CloudKit, select container above) and **App Groups** (select group above)
-4. **Widget App ID** → **+** → `com.visionarypov.cameradata.widget` → enable **App Groups** only
-5. In Xcode: scheme **`CameraData-CloudKit`**, team **YUSEF GREGORY EDMONDS**, **Automatically manage signing** on for **CameraData** and **CameraDataWidget**
-6. **Xcode → Settings → Accounts** → your Apple ID → **Download Manual Profiles**
-7. **Product → Clean Build Folder**, then build again
+1. Scheme: **`CameraData`**
+2. Targets **CameraData** and **CameraDataWidget** → Signing → team must be your **paid** account
+   - Must **NOT** say `(Personal Team)` in the build log
+   - If you see two teams in the dropdown, pick the paid membership (full legal name)
+3. Clear cached profiles: `./Scripts/reset-provisioning.sh`
+4. **Xcode → Settings → Accounts** → **Download Manual Profiles**
+5. **Product → Clean Build Folder** → build
 
-If you still see “capability associated with iCLOUD could not be determined”, wait 5–10 minutes after creating the container, then toggle signing off/on.
+If signing still fails, sign out/in of your Apple ID in Xcode Settings → Accounts, then repeat steps 3–5.
 
 After changing `project.yml`, regenerate the project:
 
