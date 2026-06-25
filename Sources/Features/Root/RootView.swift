@@ -212,10 +212,16 @@ public struct RootView: View {
             dependencies.session.persistSecuritySettings()
         }
         if args.contains("-ui_testing_slate") {
-            slateController.present()
-            slateController.toggleRolling()
-            slateController.incrementTake()
-            slateController.dismiss()
+            Task { @MainActor in
+                await Task.yield()
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                slateController.present()
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                slateController.toggleRolling()
+                slateController.incrementTake()
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                slateController.dismiss()
+            }
         }
     }
 

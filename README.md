@@ -4,7 +4,7 @@
 
 Native iOS/iPadOS camera data logging, reporting, and collaboration for professional motion picture and television production.
 
-> **Status:** MVP + Phase 2 + Phase 3 implemented — Xcode project builds, 74 unit tests pass, simulator launch verified.
+> **Status:** MVP + Phase 2 + Phase 3 implemented — Xcode project builds, 80 unit tests pass, simulator launch verified.
 
 ---
 
@@ -31,7 +31,7 @@ Sources/
   Features/               # Dashboard, Entry Editor, Reports, Settings, Slate
 CameraDataApp/            # @main app + App Intents
 Widgets/                  # Take count WidgetKit extension
-Tests/CameraDataTests/    # 74 unit tests on real implementations
+Tests/CameraDataTests/    # 80 unit tests on real implementations
 ```
 
 ---

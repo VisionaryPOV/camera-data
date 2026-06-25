@@ -6,7 +6,7 @@ import CameraDataFeatures
 
 @MainActor
 final class VoicePipelineIntegrationTests: XCTestCase {
-    func testVoicePipelineCaptureAndApplyUsesInjectedDependencies() async throws {
+    func testVoicePipelineFixedCaptureMergesDraftViaApplyVoiceAudio() async throws {
         let deps = try AppDependencies(
             swiftDataCloudKit: false,
             syncPipelineEnabled: false,
@@ -19,7 +19,8 @@ final class VoicePipelineIntegrationTests: XCTestCase {
             to: LogEntryDraft(),
             useCase: deps.logTakeUseCase,
             transcriber: deps.speechTranscriber,
-            voiceCapture: deps.voiceCapture
+            voiceCapture: deps.voiceCapture,
+            duration: 0.15
         )
 
         XCTAssertEqual(result.draft.scene, "12")

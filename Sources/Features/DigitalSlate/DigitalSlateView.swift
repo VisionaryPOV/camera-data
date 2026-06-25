@@ -70,6 +70,14 @@ public struct DigitalSlateView: View {
             }
             .padding()
         }
+        .onAppear {
+            NSLog(
+                "[CameraData] slate_view_appeared=true scene=%@ take=%d rolling=%@",
+                scene,
+                take,
+                isRolling ? "true" : "false"
+            )
+        }
         .overlay(alignment: .topTrailing) {
             Button(action: onDismiss) {
                 Image(systemName: "xmark.circle.fill")

@@ -32,6 +32,7 @@
 		3ABBC0B6E78B57DB39DEE30C /* VESFieldMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BFC23CDE6CE55316FBA6D4 /* VESFieldMapper.swift */; };
 		3B057D8ADA7F7604C74E89C8 /* DigitalSlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B492767AA4DA85F6FC63ABF /* DigitalSlateView.swift */; };
 		3B26EC3ABB977CC858CCD2ED /* ServicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F45147FF949A9ED3C24BCD /* ServicesTests.swift */; };
+		3B82BF35365FF9D518849CA6 /* VoiceCaptureLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C6961379A48DF0C035666CF /* VoiceCaptureLiveTests.swift */; };
 		3B9DE9BF42E0DA2A835B08D5 /* Phase3FeaturesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00FF9B542BBEC7312F142BF /* Phase3FeaturesTests.swift */; };
 		3D783AE5AFEA5F9F219489B5 /* EntryEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2329B5220777DD7A11E8B32 /* EntryEditorViewModel.swift */; };
 		4042E1FC2F82FFCCB68E2947 /* TakeIncrementer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9AA51B21FBD51D1AAFB550D /* TakeIncrementer.swift */; };
@@ -314,8 +315,9 @@
 		04B7CB4257260D429074A8D7 /* ConflictMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictMerger.swift; sourceTree = "<group>"; };
 		07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		08576C61C8E3276445045AF3 /* SmartSuggestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartSuggestService.swift; sourceTree = "<group>"; };
+		0C6961379A48DF0C035666CF /* VoiceCaptureLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureLiveTests.swift; sourceTree = "<group>"; };
 		0DA30100DB637ADFD60C8236 /* FilmTerminologyLexicon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmTerminologyLexicon.swift; sourceTree = "<group>"; };
-		0E964CD72DBBE5A0CF7FEB8D /* CameraDataWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CameraDataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E964CD72DBBE5A0CF7FEB8D /* CameraDataWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CameraDataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F5DD13D6619525BDEF258BB /* MetadataCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataCaptureService.swift; sourceTree = "<group>"; };
 		103C6E530170355974FA6DF6 /* RollNumberHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollNumberHelper.swift; sourceTree = "<group>"; };
 		1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransport.swift; sourceTree = "<group>"; };
@@ -353,7 +355,7 @@
 		643AB1D11D80DC88355569AF /* DataLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayerTests.swift; sourceTree = "<group>"; };
 		64F45147FF949A9ED3C24BCD /* ServicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesTests.swift; sourceTree = "<group>"; };
 		66D6A4B09F9757E90F83CF68 /* DashboardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardEntry.swift; sourceTree = "<group>"; };
-		6998ACDC4DD46B9E4F054654 /* CameraDataTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CameraDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6998ACDC4DD46B9E4F054654 /* CameraDataTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CAC1B91DBB5666A8664FD79 /* LogTakeUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTakeUseCase.swift; sourceTree = "<group>"; };
 		6D8D44CAC822B9B56C92932D /* AppBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBootstrapTests.swift; sourceTree = "<group>"; };
 		6EBFB66CBBEC532FE1CF24E4 /* EntryInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryInputBar.swift; sourceTree = "<group>"; };
@@ -372,7 +374,7 @@
 		958823EBDD2801452EFB85AB /* FrameIOExportHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameIOExportHook.swift; sourceTree = "<group>"; };
 		98A850605449B45F4F030E64 /* SortKeyGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortKeyGenerator.swift; sourceTree = "<group>"; };
 		9B8460F037F948701700DACD /* ProductionEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionEditorViewModel.swift; sourceTree = "<group>"; };
-		9D8AB49F3A6050604501760D /* CameraData.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CameraData.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D8AB49F3A6050604501760D /* CameraData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CameraData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0240CB02B64CFB93702E27B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		A0A642FF78137D6B7AD35618 /* CameraDataWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraDataWidget.entitlements; sourceTree = "<group>"; };
 		A0AA5B119F223E0C6FB5855A /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
@@ -653,6 +655,7 @@
 				F00FF9B542BBEC7312F142BF /* Phase3FeaturesTests.swift */,
 				55A48A7FB60ECAEA939D864B /* ProductionMetadataTests.swift */,
 				64F45147FF949A9ED3C24BCD /* ServicesTests.swift */,
+				0C6961379A48DF0C035666CF /* VoiceCaptureLiveTests.swift */,
 				EB978552FA6EBC9F70B08147 /* VoicePipelineIntegrationTests.swift */,
 			);
 			name = CameraDataTests;
@@ -1086,8 +1089,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = 7BED431238A77AEFA06BE54D /* Build configuration list for PBXProject "CameraData" */;
 			developmentRegion = en;
@@ -1141,6 +1142,7 @@
 				3B9DE9BF42E0DA2A835B08D5 /* Phase3FeaturesTests.swift in Sources */,
 				850B8314817E77E265E81C9F /* ProductionMetadataTests.swift in Sources */,
 				3B26EC3ABB977CC858CCD2ED /* ServicesTests.swift in Sources */,
+				3B82BF35365FF9D518849CA6 /* VoiceCaptureLiveTests.swift in Sources */,
 				8181C4CA852863082AFC6DF6 /* VoicePipelineIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1377,9 +1379,11 @@
 		00700F289C37A3323B4379E4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1391,6 +1395,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.services;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1462,6 +1467,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/CameraDataWidget/CameraDataWidget.entitlements;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widgets/CameraDataWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1478,9 +1484,11 @@
 		1CB922A4FA81C9CA1AC0FD99 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1492,6 +1500,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.domain;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1502,9 +1511,11 @@
 		3E7A688650AB94CB4F7BEC90 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1516,6 +1527,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.domain;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1526,9 +1538,11 @@
 		7A904FE18EF2274D724522E0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1540,6 +1554,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.features;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1550,9 +1565,11 @@
 		82E0835B523A463C52DAA470 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1564,6 +1581,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.designsystem;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1574,9 +1592,11 @@
 		83A7E166D57A0EC603E9CFE8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1588,6 +1608,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.data;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1599,6 +1620,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1616,6 +1638,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1632,9 +1655,11 @@
 		9788EB09FB757450247E3FA7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1646,6 +1671,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.features;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1656,9 +1682,11 @@
 		AAADBE1FCE21FC198FF5FEA7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1670,6 +1698,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.services;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1681,6 +1710,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/CameraDataWidget/CameraDataWidget.entitlements;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widgets/CameraDataWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1700,6 +1730,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CameraDataApp/CameraData.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Camera Data";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -1709,12 +1740,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice logging for camera takes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe voice logs on set";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = (
-					UIInterfaceOrientationPortrait,
-					UIInterfaceOrientationPortraitUpsideDown,
-					UIInterfaceOrientationLandscapeLeft,
-					UIInterfaceOrientationLandscapeRight,
-				);
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1728,9 +1754,11 @@
 		D0EF84BCA666D0E7008C1E99 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1742,6 +1770,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.designsystem;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1819,9 +1848,11 @@
 		F4F8557B416F2116650E7657 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1833,6 +1864,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.data;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1846,6 +1878,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CameraDataApp/CameraData.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Camera Data";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -1855,12 +1888,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice logging for camera takes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe voice logs on set";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = (
-					UIInterfaceOrientationPortrait,
-					UIInterfaceOrientationPortraitUpsideDown,
-					UIInterfaceOrientationLandscapeLeft,
-					UIInterfaceOrientationLandscapeRight,
-				);
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

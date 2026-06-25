@@ -1,4 +1,6 @@
 import XCTest
+import SwiftUI
+import UIKit
 @testable import CameraDataDomain
 @testable import CameraDataFeatures
 
@@ -43,5 +45,42 @@ final class DigitalSlateTests: XCTestCase {
         XCTAssertEqual(session.slateScene, "24A")
         XCTAssertEqual(session.slateTake, 7)
         XCTAssertTrue(session.slateIsRolling)
+    }
+
+    func testDigitalSlateViewHostsAndReflectsBindingUpdates() {
+        var scene = "18"
+        var take = 6
+        var rolling = false
+
+        let view = DigitalSlateView(
+            scene: Binding(get: { scene }, set: { scene = $0 }),
+            take: Binding(get: { take }, set: { take = $0 }),
+            isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            onIncrementTake: { take += 1 },
+            onDismiss: {}
+        )
+
+        let host = UIHostingController(rootView: view)
+        host.loadViewIfNeeded()
+        host.beginAppearanceTransition(true, animated: false)
+        host.endAppearanceTransition()
+
+        XCTAssertNotNil(host.view)
+
+        scene = "22"
+        take = 9
+        rolling = true
+        host.rootView = DigitalSlateView(
+            scene: Binding(get: { scene }, set: { scene = $0 }),
+            take: Binding(get: { take }, set: { take = $0 }),
+            isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            onIncrementTake: { take += 1 },
+            onDismiss: {}
+        )
+        host.view.layoutIfNeeded()
+
+        XCTAssertEqual(scene, "22")
+        XCTAssertEqual(take, 9)
+        XCTAssertTrue(rolling)
     }
 }
