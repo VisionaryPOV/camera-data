@@ -3,7 +3,7 @@ import SwiftData
 import CloudKit
 import CameraDataData
 import CameraDataDomain
-import CameraDataServices
+@testable import CameraDataServices
 
 final class ServicesTests: XCTestCase {
     func testExportServiceCSVContainsHeaderAndRow() {
@@ -333,5 +333,19 @@ final class ServicesTests: XCTestCase {
         let pending = await store2.pendingOperations()
         XCTAssertEqual(pending.count, 1)
         XCTAssertEqual(pending.first?.scene, "1")
+    }
+
+    func testMissingRecordTypeErrorDetectionMatchesCloudKitMessage() {
+        let error = NSError(
+            domain: CKError.errorDomain,
+            code: CKError.Code.unknownItem.rawValue,
+            userInfo: [NSLocalizedDescriptionKey: "Did not find record type: LogEntry"]
+        )
+        XCTAssertTrue(LiveCloudKitTransport.isMissingRecordTypeError(error))
+    }
+
+    func testMissingRecordTypeErrorDetectionRejectsUnrelatedErrors() {
+        XCTAssertFalse(LiveCloudKitTransport.isMissingRecordTypeError(CKError(.zoneNotFound)))
+        XCTAssertFalse(LiveCloudKitTransport.isMissingRecordTypeError(CKError(.networkUnavailable)))
     }
 }

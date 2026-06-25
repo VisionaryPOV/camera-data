@@ -299,7 +299,6 @@
 		0F5DD13D6619525BDEF258BB /* MetadataCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataCaptureService.swift; sourceTree = "<group>"; };
 		1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransport.swift; sourceTree = "<group>"; };
 		15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataServices.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		186B5C9F031796687672CEBB /* CameraDataWidget.PersonalTeam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraDataWidget.PersonalTeam.entitlements; sourceTree = "<group>"; };
 		1C5052B1CFBF7D176C5E263F /* AuditHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditHistoryView.swift; sourceTree = "<group>"; };
 		1F2676FEE718151B677126F5 /* RootActiveSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootActiveSheet.swift; sourceTree = "<group>"; };
 		1F950AB8B915A82D4EE68931 /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
@@ -307,7 +306,6 @@
 		22264CE2C121B8E8D592AC84 /* AppIntentLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntentLogService.swift; sourceTree = "<group>"; };
 		240A236E6C91E19E0E1B600A /* LogTakePipelineIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTakePipelineIntegrationTests.swift; sourceTree = "<group>"; };
 		26DE6AEBB4D5C85FA3E28F46 /* MetadataProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataProviding.swift; sourceTree = "<group>"; };
-		2B973F8667A96A8CF801D6D1 /* CameraData.PersonalTeam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraData.PersonalTeam.entitlements; sourceTree = "<group>"; };
 		2BA4F0F13BE27E77FDF7F209 /* CoreMLSmartSuggestor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLSmartSuggestor.swift; sourceTree = "<group>"; };
 		2E4118B7A590109B3781DEDE /* DashboardStatsCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStatsCalculator.swift; sourceTree = "<group>"; };
 		2E4228222041FD3E491404E5 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
@@ -714,7 +712,6 @@
 			isa = PBXGroup;
 			children = (
 				A0A642FF78137D6B7AD35618 /* CameraDataWidget.entitlements */,
-				186B5C9F031796687672CEBB /* CameraDataWidget.PersonalTeam.entitlements */,
 				8663A694D51FDAE5C606ABA8 /* CameraDataWidget.swift */,
 			);
 			name = CameraDataWidget;
@@ -787,7 +784,6 @@
 			children = (
 				5CCEA79A01487F5C6E0463C3 /* Assets.xcassets */,
 				92B261C7CB38742E58E60B71 /* CameraData.entitlements */,
-				2B973F8667A96A8CF801D6D1 /* CameraData.PersonalTeam.entitlements */,
 				E7EE2A542B19BA75C7591A35 /* CameraDataApp.swift */,
 				280C7F785EB444F6DC52588B /* Intents */,
 				16F4CF78690C6E97A2842917 /* Resources */,

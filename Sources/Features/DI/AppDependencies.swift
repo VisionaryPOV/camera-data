@@ -121,7 +121,11 @@ public final class AppDependencies {
             try productionRepository.setActive(production)
             _ = try? await syncEngine.replayUnpushedOfflineRecords()
             _ = await postSaveCoordinator.flushPending()
-            try? await applyInboundSync()
+            do {
+                try await applyInboundSync()
+            } catch {
+                NSLog("[CameraData] inbound_sync_warning=%@", error.localizedDescription)
+            }
         }
 
         syncLatestEntryToSlate()

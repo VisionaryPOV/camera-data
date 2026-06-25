@@ -66,7 +66,7 @@ public final class LiveCloudKitTransport: CloudKitSyncTransport, @unchecked Send
                     try? result.get()
                 }
             } catch {
-                if Self.isMissingCloudKitRecordTypeError(error) {
+                if Self.isMissingRecordTypeError(error) {
                     return []
                 }
                 throw error
@@ -75,12 +75,15 @@ public final class LiveCloudKitTransport: CloudKitSyncTransport, @unchecked Send
         return await offlineStore.logEntryCKRecords(in: zoneName)
     }
 
-    private static func isMissingCloudKitRecordTypeError(_ error: Error) -> Bool {
+    internal static func isMissingRecordTypeError(_ error: Error) -> Bool {
         if error.localizedDescription.localizedCaseInsensitiveContains("did not find record type") {
             return true
         }
-        if let ckError = error as? CKError, ckError.code == .unknownItem {
-            return true
+        if let ckError = error as? CKError,
+           let partialErrors = ckError.partialErrorsByItemID {
+            return partialErrors.values.contains {
+                $0.localizedDescription.localizedCaseInsensitiveContains("did not find record type")
+            }
         }
         return false
     }
@@ -100,6 +103,7 @@ public final class LiveCloudKitTransport: CloudKitSyncTransport, @unchecked Send
 
 public actor RecordingCloudKitTransport: CloudKitSyncTransport {
     public var shouldFailModifyRecords = false
+    public var fetchLogEntriesError: Error?
 
     public init() {}
 
@@ -135,6 +139,7 @@ public actor RecordingCloudKitTransport: CloudKitSyncTransport {
 
     public func fetchLogEntries(in zoneName: String) async throws -> [CKRecord] {
         fetchLogEntriesInvocationCount += 1
+        if let fetchLogEntriesError { throw fetchLogEntriesError }
         return remoteRecords.filter { $0.recordID.zoneID.zoneName == zoneName }
     }
 
@@ -144,6 +149,10 @@ public actor RecordingCloudKitTransport: CloudKitSyncTransport {
 
     public func setShouldFailModifyRecords(_ value: Bool) {
         shouldFailModifyRecords = value
+    }
+
+    public func setFetchLogEntriesError(_ error: Error?) {
+        fetchLogEntriesError = error
     }
 
     public func acceptShare(metadata: CKShare.Metadata) async throws {}
