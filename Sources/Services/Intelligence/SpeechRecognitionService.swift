@@ -25,14 +25,27 @@ public enum SpeechRecognitionService {
         request.requiresOnDeviceRecognition = true
         request.contextualStrings = FilmTerminologyLexicon.replacements.keys.map { String($0) }
 
+        let box = TranscriptionResultBox()
         return try await withCheckedThrowingContinuation { continuation in
-            recognizer.recognitionTask(with: request) { result, error in
+            box.store(continuation)
+            let speechTask = recognizer.recognitionTask(with: request) { result, error in
                 if let error {
-                    continuation.resume(throwing: error)
+                    box.finish(.failure(error))
                     return
                 }
                 guard let result, result.isFinal else { return }
-                continuation.resume(returning: result.bestTranscription.formattedString)
+                let text = result.bestTranscription.formattedString
+                if text.isEmpty {
+                    box.finish(.failure(SpeechRecognitionError.noTranscription))
+                } else {
+                    box.finish(.success(text))
+                }
+            }
+            box.setTask(speechTask)
+
+            Task {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                box.finish(.failure(SpeechRecognitionError.recognitionTimedOut))
             }
         }
     }
@@ -48,4 +61,34 @@ public enum SpeechRecognitionService {
 
 public enum SpeechRecognitionError: Error, Equatable {
     case recognizerUnavailable
+    case recognitionTimedOut
+    case noTranscription
+}
+
+private final class TranscriptionResultBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<String, Error>?
+    private var recognitionTask: SFSpeechRecognitionTask?
+
+    func store(_ continuation: CheckedContinuation<String, Error>) {
+        lock.lock()
+        self.continuation = continuation
+        lock.unlock()
+    }
+
+    func setTask(_ task: SFSpeechRecognitionTask) {
+        lock.lock()
+        recognitionTask = task
+        lock.unlock()
+    }
+
+    func finish(_ result: Result<String, Error>) {
+        lock.lock()
+        let continuation = self.continuation
+        self.continuation = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        lock.unlock()
+        continuation?.resume(with: result)
+    }
 }

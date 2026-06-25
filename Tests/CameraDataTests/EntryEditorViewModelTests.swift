@@ -7,6 +7,13 @@ import CameraDataServices
 
 @MainActor
 final class EntryEditorViewModelTests: XCTestCase {
+    private func unlockedSession() -> ProductionSession {
+        let session = ProductionSession(isOnboarded: true)
+        session.securityEnabled = false
+        session.isUnlocked = true
+        return session
+    }
+
     func testRollNumberHelperIncrements() {
         XCTAssertEqual(RollNumberHelper.increment("A27"), "A28")
         XCTAssertEqual(RollNumberHelper.increment("C1"), "C2")
@@ -28,7 +35,7 @@ final class EntryEditorViewModelTests: XCTestCase {
         try context.save()
 
         let repository = LogEntryRepository(context: context)
-        let session = ProductionSession(isOnboarded: true)
+        let session = unlockedSession()
         session.activeProduction = production
         session.selectedCamera = camera
         session.selectedDay = day
@@ -59,7 +66,7 @@ final class EntryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.draft.rollNumber, "A3")
     }
 
-    func testDeleteBackwardOnTake() async throws {
+    func testPrefilledTakeUsesReplaceModeForFirstDigit() async throws {
         let container = try ModelContainerFactory.makeInMemory()
         let context = container.mainContext
         let production = ProductionModel(name: "Test")
@@ -73,7 +80,8 @@ final class EntryEditorViewModelTests: XCTestCase {
         try context.save()
 
         let repository = LogEntryRepository(context: context)
-        let session = ProductionSession(isOnboarded: true)
+        let session = unlockedSession()
+        session.slateTake = 5
         session.activeProduction = production
         session.selectedCamera = camera
         session.selectedDay = day
@@ -91,6 +99,48 @@ final class EntryEditorViewModelTests: XCTestCase {
         )
 
         try viewModel.onAppear()
+        XCTAssertEqual(viewModel.draft.take, 5)
+        viewModel.focus(.take)
+        XCTAssertEqual(viewModel.displayValue(for: .take), "5")
+        viewModel.inputKey("2")
+        XCTAssertEqual(viewModel.draft.take, 2)
+        viewModel.inputKey("1")
+        XCTAssertEqual(viewModel.draft.take, 21)
+    }
+
+    func testDeleteBackwardOnTake() async throws {
+        let container = try ModelContainerFactory.makeInMemory()
+        let context = container.mainContext
+        let production = ProductionModel(name: "Test")
+        let camera = CameraUnitModel(label: "A")
+        let day = ShootDayModel(dayNumber: 1)
+        camera.production = production
+        day.production = production
+        production.cameras = [camera]
+        production.days = [day]
+        context.insert(production)
+        try context.save()
+
+        let repository = LogEntryRepository(context: context)
+        let session = unlockedSession()
+        session.activeProduction = production
+        session.selectedCamera = camera
+        session.selectedDay = day
+
+        let viewModel = EntryEditorViewModel(
+            useCase: LogTakeUseCase(
+                entryRepository: repository,
+                postSaveCoordinator: LogPostSaveCoordinator(
+                    syncEngine: SyncEngine(transport: RecordingCloudKitTransport())
+                ),
+                metadataProvider: FixedMetadataProvider()
+            ),
+            session: session,
+            entryRepository: repository
+        )
+
+        try viewModel.onAppear()
+        viewModel.draft.take = 0
         viewModel.focus(.take)
         viewModel.inputKey("1")
         viewModel.inputKey("2")

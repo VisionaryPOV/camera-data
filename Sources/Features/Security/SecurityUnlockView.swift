@@ -50,6 +50,7 @@ public struct SecurityUnlockView: View {
     private func unlockWithPIN() {
         if SecurityService.validatePIN(enteredPIN, expected: session.productionPIN) {
             session.isUnlocked = true
+            NSLog("[CameraData] security_unlocked=true method=pin")
             errorMessage = nil
             HapticManager.success()
         } else {
@@ -62,6 +63,7 @@ public struct SecurityUnlockView: View {
         let ok = await SecurityService.authenticate(reason: "Unlock Camera Data production")
         if ok {
             session.isUnlocked = true
+            NSLog("[CameraData] security_unlocked=true method=biometric")
             errorMessage = nil
             HapticManager.success()
         } else {

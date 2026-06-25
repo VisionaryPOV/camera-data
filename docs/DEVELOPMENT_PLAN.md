@@ -11,7 +11,7 @@
 | **Phase 3** | **Complete** | Speech framework voice logging, Core ML SmartSuggest, NLP search, Digital Slate, audit history, security |
 | **Polish** | **Complete** | On-set sim tests, batched CloudKit sync, durable offline queue |
 
-**Build:** Xcode 26 · iOS 26+ · 70 unit tests · Simulator verified
+**Build:** Xcode 26 · iOS 26+ · 74 unit tests · Simulator verified
 
 **Sync architecture:** SwiftData uses local persistence (`cloudKitDatabase: .none`); custom `SyncEngine` + `CloudKitSyncTransport` handles explicit CK `LogEntry` records, durable offline queue, inbound pull, and conflict resolution UI.
 

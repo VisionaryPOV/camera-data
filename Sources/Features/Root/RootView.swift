@@ -197,7 +197,8 @@ public struct RootView: View {
             useCase: dependencies.logTakeUseCase,
             session: dependencies.session,
             entryRepository: dependencies.logEntryRepository,
-            smartSuggestor: dependencies.smartSuggestor
+            smartSuggestor: dependencies.smartSuggestor,
+            speechTranscriber: dependencies.speechTranscriber
         )
     }
 

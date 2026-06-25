@@ -121,7 +121,7 @@ public struct EntryEditorView: View {
                 Text(field.label)
                     .font(.caption)
                     .foregroundStyle(ThemeTokens.textSecondary)
-                if viewModel.inputMode == .keyboard, isFocused, field != .take, field != .iso, field != .shutterAngle {
+                if viewModel.inputMode == .keyboard, isFocused, field != .take, field != .iso {
                     keyboardField(for: field)
                 } else {
                     Text(viewModel.displayValue(for: field))

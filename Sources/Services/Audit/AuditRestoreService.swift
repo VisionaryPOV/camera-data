@@ -9,15 +9,20 @@ public enum AuditRestoreService {
         case "scene": draft.scene = value
         case "take": draft.take = Int(value) ?? draft.take
         case "lens": draft.lens = value
+        case "filter": draft.filter = value
         case "iso": draft.iso = Int(value) ?? draft.iso
+        case "fps": draft.fps = Double(value) ?? draft.fps
+        case "whiteBalance": draft.whiteBalance = value
         case "notes": draft.notes = value
         case "resolution": draft.resolution = value
         case "codec": draft.codec = value
         case "timecodeIn": draft.timecodeIn = value
         case "timecodeOut": draft.timecodeOut = value
         case "duration": draft.duration = value
-        case "shutterSpeed": draft.shutterSpeed = value
-        case "shutterAngle": draft.shutterAngle = Double(value)
+        case "shutterSpeed":
+            draft.shutterSpeed = value.isEmpty ? nil : value
+        case "shutterAngle":
+            draft.shutterAngle = Double(value)
         default: break
         }
     }

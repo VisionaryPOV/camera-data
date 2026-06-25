@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Observation
 
@@ -13,19 +14,31 @@ public final class SlateSessionController {
 
     public func present() {
         isPresented = true
+        NSLog(
+            "[CameraData] slate_presented=true scene=%@ take=%d rolling=%@",
+            session.slateScene,
+            session.slateTake,
+            session.slateIsRolling ? "true" : "false"
+        )
     }
 
     public func dismiss() {
         isPresented = false
         session.slateIsRolling = false
+        NSLog("[CameraData] slate_dismissed=true")
     }
 
     public func toggleRolling() {
         session.slateIsRolling.toggle()
+        NSLog(
+            "[CameraData] slate_rolling=%@",
+            session.slateIsRolling ? "true" : "false"
+        )
     }
 
     public func incrementTake() {
         session.slateTake += 1
+        NSLog("[CameraData] slate_take=%d", session.slateTake)
     }
 
     public func bindings() -> (

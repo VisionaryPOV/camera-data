@@ -20,10 +20,16 @@ public struct AuditHistoryView: View {
                     Text("\(event.old) → \(event.new)")
                         .font(.caption.monospaced())
                     Text(event.at.formatted()).font(.caption2).foregroundStyle(ThemeTokens.textSecondary)
-                    Button("Restore \(event.old)") {
-                        onRestore(event.field, event.old)
+                    HStack(spacing: 12) {
+                        Button("Restore prior: \(event.old)") {
+                            onRestore(event.field, event.old)
+                        }
+                        .font(.caption.weight(.semibold))
+                        Button("Restore latest: \(event.new)") {
+                            onRestore(event.field, event.new)
+                        }
+                        .font(.caption.weight(.semibold))
                     }
-                    .font(.caption.weight(.semibold))
                 }
             }
         }

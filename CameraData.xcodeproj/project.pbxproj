@@ -97,6 +97,7 @@
 		D4A5FBC059B18FA83ED711EF /* CameraDataDesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F16E2D869E4FCFB02C722AD6 /* CameraDataDesignSystem.framework */; };
 		D5A31862566CAD984C6456D1 /* NLPQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FD14069573B3F3323657E4 /* NLPQueryParser.swift */; };
 		D6A2D423F7BF488561D8ED06 /* CameraDataDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */; };
+		D8A45A2E1942EED576CFEF54 /* VoicePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479A77AED92F3FC7807C1004 /* VoicePipeline.swift */; };
 		D8AA1D06B4905E0812F5A795 /* SmartSuggestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08576C61C8E3276445045AF3 /* SmartSuggestService.swift */; };
 		DC3C946E4B9D788000EA953A /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B6DE37510259E831B95B17 /* DashboardViewModel.swift */; };
 		DC7204078F480D13EDEF94D8 /* CameraDataFeatures.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E581F09E01939C51D43BF804 /* CameraDataFeatures.framework */; };
@@ -336,6 +337,7 @@
 		3E180C62DC4A0D897B90435E /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		4277351032C9630D57B08582 /* DomainTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTypes.swift; sourceTree = "<group>"; };
 		46BD0EA2271B41FBE310EC7E /* SlateSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateSessionController.swift; sourceTree = "<group>"; };
+		479A77AED92F3FC7807C1004 /* VoicePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicePipeline.swift; sourceTree = "<group>"; };
 		49E2844DE565F0B1341799C5 /* DomainLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainLogicTests.swift; sourceTree = "<group>"; };
 		4CB8267801E22D1810204199 /* ThemeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTokens.swift; sourceTree = "<group>"; };
 		50A9A4409A42C5EF13AF8FB2 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
@@ -571,6 +573,7 @@
 				3C18B935CF55BF037FF6BCF7 /* SpeechRecognitionService.swift */,
 				E4A0A91309A93C45B376B027 /* VoiceCaptureService.swift */,
 				B9C57BE98156486E44BD6FD9 /* VoiceLoggingService.swift */,
+				479A77AED92F3FC7807C1004 /* VoicePipeline.swift */,
 			);
 			path = Intelligence;
 			sourceTree = "<group>";
@@ -1231,6 +1234,7 @@
 				C549627456887969D20FC7A6 /* SyncEngine.swift in Sources */,
 				F20B4F054B93CB51AA1DD085 /* VoiceCaptureService.swift in Sources */,
 				D18F92F4393A4CA70E10D9AE /* VoiceLoggingService.swift in Sources */,
+				D8A45A2E1942EED576CFEF54 /* VoicePipeline.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

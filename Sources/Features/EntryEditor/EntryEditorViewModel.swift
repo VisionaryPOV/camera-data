@@ -39,7 +39,7 @@ public final class EntryEditorViewModel {
         entryRepository: LogEntryRepositoryProtocol,
         editingEntry: LogEntryModel? = nil,
         smartSuggestor: CoreMLSmartSuggestor? = nil,
-        speechTranscriber: SpeechTranscribing = StubSpeechTranscriber()
+        speechTranscriber: SpeechTranscribing = SpeechFrameworkTranscriber()
     ) {
         self.useCase = useCase
         self.session = session
@@ -150,8 +150,11 @@ public final class EntryEditorViewModel {
         defer { isProcessingVoice = false }
 
         do {
-            let audio = await VoiceCaptureService.captureForTranscription()
-            let result = try await useCase.applyVoiceAudio(audio, to: draft, transcriber: speechTranscriber)
+            let result = try await VoicePipeline.captureAndApply(
+                to: draft,
+                useCase: useCase,
+                transcriber: speechTranscriber
+            )
             draft = result.draft
             fpsText = Self.formatFPS(draft.fps)
             shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
@@ -159,8 +162,10 @@ public final class EntryEditorViewModel {
                 ? "Voice applied"
                 : "Voice applied: \(result.flags.joined(separator: ", "))"
             HapticManager.success()
+        } catch VoiceCaptureError.microphoneDenied {
+            voiceStatusMessage = "Microphone access required"
         } catch {
-            voiceStatusMessage = "Voice capture failed"
+            voiceStatusMessage = "Voice transcription failed"
         }
     }
 

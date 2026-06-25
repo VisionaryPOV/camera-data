@@ -4,7 +4,7 @@
 
 Native iOS/iPadOS camera data logging, reporting, and collaboration for professional motion picture and television production.
 
-> **Status:** MVP + Phase 2 + Phase 3 implemented — Xcode project builds, 70 unit tests pass, simulator launch verified.
+> **Status:** MVP + Phase 2 + Phase 3 implemented — Xcode project builds, 74 unit tests pass, simulator launch verified.
 
 ---
 

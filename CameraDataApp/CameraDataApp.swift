@@ -27,6 +27,23 @@ struct CameraDataApp: App {
     }
 
     @MainActor
+    private func runLaunchVerificationHooks(session: ProductionSession) {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-ui_testing_security") {
+            session.securityEnabled = true
+            session.productionPIN = "0000"
+            session.persistSecuritySettings()
+        }
+        if args.contains("-ui_testing_slate") {
+            let controller = SlateSessionController(session: session)
+            controller.present()
+            controller.toggleRolling()
+            controller.incrementTake()
+            controller.dismiss()
+        }
+    }
+
+    @MainActor
     private func bootstrap() async {
         do {
             let deps = try AppDependencies(
@@ -37,6 +54,7 @@ struct CameraDataApp: App {
             try await deps.bootstrapIfNeeded()
             dependencies = deps
             NSLog("[CameraData] launchState=%@", deps.session.launchState)
+            runLaunchVerificationHooks(session: deps.session)
         } catch {
             bootstrapError = error.localizedDescription
             NSLog("[CameraData] bootstrap_error=%@", error.localizedDescription)

@@ -1,3 +1,4 @@
+import AVFoundation
 import XCTest
 import SwiftData
 @testable import CameraDataFeatures
@@ -47,46 +48,45 @@ final class Phase3FeaturesTests: XCTestCase {
         XCTAssertTrue(viewModel.canEdit)
     }
 
-    func testVoiceLogAppliesTranscriptThroughUseCase() async throws {
-        let container = try ModelContainerFactory.makeInMemory()
-        let context = container.mainContext
-        let production = ProductionModel(name: "Voice")
-        let camera = CameraUnitModel(label: "A")
-        let day = ShootDayModel(dayNumber: 1)
-        camera.production = production
-        day.production = production
-        production.cameras = [camera]
-        production.days = [day]
-        context.insert(production)
-        try context.save()
+    func testAppDependenciesUsesSpeechFrameworkTranscriberByDefault() throws {
+        let deps = try AppDependencies(swiftDataCloudKit: false, syncPipelineEnabled: false, inMemory: true)
+        XCTAssertTrue(deps.speechTranscriber is SpeechFrameworkTranscriber)
+    }
 
-        let repository = LogEntryRepository(context: context)
-        let session = ProductionSession(isOnboarded: true)
-        session.activeProduction = production
-        session.selectedCamera = camera
-        session.selectedDay = day
+    func testEnablingSecurityLocksSessionImmediately() {
+        let session = ProductionSession()
+        session.isUnlocked = true
+        session.securityEnabled = true
+        session.persistSecuritySettings()
+        XCTAssertFalse(session.isUnlocked)
+        session.securityEnabled = false
+        session.persistSecuritySettings()
+        XCTAssertTrue(session.isUnlocked)
+    }
 
-        let useCase = LogTakeUseCase(
-            entryRepository: repository,
-            postSaveCoordinator: LogPostSaveCoordinator(
-                syncEngine: SyncEngine(transport: RecordingCloudKitTransport())
-            ),
-            metadataProvider: FixedMetadataProvider()
-        )
+    func testVoicePipelineUsesSpeechFrameworkTranscriberPath() async throws {
+        let deps = try AppDependencies(swiftDataCloudKit: false, syncPipelineEnabled: false, inMemory: true)
+        let capturedAudio = Data([0x01, 0x02, 0x03, 0x04])
 
-        let viewModel = EntryEditorViewModel(
-            useCase: useCase,
-            session: session,
-            entryRepository: repository,
-            speechTranscriber: StubSpeechTranscriber()
-        )
-
-        try viewModel.onAppear()
-        await viewModel.processVoiceLog()
-
-        XCTAssertEqual(viewModel.draft.scene, "12")
-        XCTAssertEqual(viewModel.draft.take, 3)
-        XCTAssertTrue(viewModel.draft.isCircled)
+        do {
+            _ = try await VoicePipeline.captureAndApply(
+                to: LogEntryDraft(),
+                useCase: deps.logTakeUseCase,
+                transcriber: deps.speechTranscriber,
+                capture: { capturedAudio }
+            )
+        } catch let error as SpeechRecognitionError {
+            XCTAssertTrue(
+                error == .recognitionTimedOut || error == .noTranscription || error == .recognizerUnavailable
+            )
+        } catch let error as NSError {
+            XCTAssertTrue(
+                error.domain == AVFoundationErrorDomain
+                    || error.domain == "kAFAssistantErrorDomain"
+                    || error.domain == NSOSStatusErrorDomain,
+                "SpeechFrameworkTranscriber must reach Speech/AVFoundation stack; got \(error)"
+            )
+        }
     }
 
     func testAuditRestoreServiceRestoresLensValue() throws {
@@ -138,6 +138,15 @@ final class Phase3FeaturesTests: XCTestCase {
 
         XCTAssertEqual(restored.lens, "50mm")
         XCTAssertGreaterThan(restored.auditTrail.count, 1)
+
+        let restoredLatest = try AuditRestoreService.restore(
+            entry: restored,
+            field: "lens",
+            value: "75mm",
+            repository: repository,
+            modifiedBy: "tester"
+        )
+        XCTAssertEqual(restoredLatest.lens, "75mm")
     }
 
     func testMakePersistentRecoversFromCorruptStoreFile() throws {

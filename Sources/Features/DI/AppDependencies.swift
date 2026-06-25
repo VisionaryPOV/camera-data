@@ -37,8 +37,12 @@ public final class ProductionSession {
     public func persistSecuritySettings() {
         UserDefaults.standard.set(securityEnabled, forKey: Self.securityEnabledKey)
         UserDefaults.standard.set(productionPIN, forKey: Self.productionPINKey)
-        if !securityEnabled {
+        if securityEnabled {
+            isUnlocked = false
+            NSLog("[CameraData] security_locked=true")
+        } else {
             isUnlocked = true
+            NSLog("[CameraData] security_unlocked=true")
         }
     }
 
@@ -71,6 +75,7 @@ public final class AppDependencies {
     public let presenceService: PresenceService
     public let auditService: AuditService
     public let smartSuggestor: CoreMLSmartSuggestor
+    public let speechTranscriber: SpeechTranscribing
     public let session: ProductionSession
     public let syncPipelineEnabled: Bool
     public let offlineCloudKitStore: OfflineCloudKitRecordStore
@@ -81,7 +86,8 @@ public final class AppDependencies {
         inMemory: Bool = false,
         syncTransport: CloudKitSyncTransport? = nil,
         offlineCloudKitStore: OfflineCloudKitRecordStore? = nil,
-        metadataProvider: (any MetadataProviding)? = nil
+        metadataProvider: (any MetadataProviding)? = nil,
+        speechTranscriber: SpeechTranscribing? = nil
     ) throws {
         modelContainer = try inMemory
             ? ModelContainerFactory.makeInMemory()
@@ -113,6 +119,7 @@ public final class AppDependencies {
         )
         presenceService = PresenceService()
         smartSuggestor = CoreMLSmartSuggestor()
+        self.speechTranscriber = speechTranscriber ?? SpeechFrameworkTranscriber()
 
         let onboarded = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         session = ProductionSession(isOnboarded: onboarded)
