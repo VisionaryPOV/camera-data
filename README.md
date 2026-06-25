@@ -51,6 +51,20 @@ Tests/CameraDataTests/    # 51 unit tests on real implementations
 
 Personal Teams cannot provision **iCloud** or **App Groups** — Xcode will show “does not support the iCloud capability.” Use the default `CameraData` scheme (Debug entitlements) for device testing on a Personal Team.
 
+#### Paid account: fix “provisioning profile doesn't include iCloud / App Groups”
+
+Xcode cannot add CloudKit to a profile until the identifiers exist in the [Developer portal](https://developer.apple.com/account/resources/identifiers/list). Do this **once**, in order:
+
+1. **App Group** → [Identifiers → App Groups](https://developer.apple.com/account/resources/identifiers/list/applicationGroup) → **+** → `group.com.visionarypov.cameradata`
+2. **iCloud container** → [Identifiers → iCloud Containers](https://developer.apple.com/account/resources/identifiers/list/cloudContainer) → **+** → `iCloud.com.visionarypov.cameradata`
+3. **Main App ID** → [Identifiers → App IDs](https://developer.apple.com/account/resources/identifiers/list) → **+** → `com.visionarypov.cameradata` → enable **iCloud** (CloudKit, select container above) and **App Groups** (select group above)
+4. **Widget App ID** → **+** → `com.visionarypov.cameradata.widget` → enable **App Groups** only
+5. In Xcode: scheme **`CameraData-CloudKit`**, team **YUSEF GREGORY EDMONDS**, **Automatically manage signing** on for **CameraData** and **CameraDataWidget**
+6. **Xcode → Settings → Accounts** → your Apple ID → **Download Manual Profiles**
+7. **Product → Clean Build Folder**, then build again
+
+If you still see “capability associated with iCLOUD could not be determined”, wait 5–10 minutes after creating the container, then toggle signing off/on.
+
 After changing `project.yml`, regenerate the project:
 
 ```bash
