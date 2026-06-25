@@ -6,9 +6,9 @@ import CameraDataDomain
 public final class ProductionModel {
     public var id: UUID
     public var name: String
-    public var directorName: String
-    public var dpName: String
-    public var episodeOrProductionNumber: String
+    public var directorName: String = ""
+    public var dpName: String = ""
+    public var episodeOrProductionNumber: String = ""
     public var code: String
     public var createdAt: Date
     public var archivedAt: Date?

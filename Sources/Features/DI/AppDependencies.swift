@@ -18,6 +18,7 @@ public final class ProductionSession {
     public var presenceMessages: [String] = []
     public var slateScene: String = ""
     public var slateTake: Int = 1
+    public var slateIsRolling: Bool = false
     public var pendingConflicts: [ConflictField] = []
     public var conflictEntryId: UUID?
     public var conflictLocalDraft: LogEntryDraft?

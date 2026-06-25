@@ -11,7 +11,7 @@
 | **Phase 3** | **Complete** | Speech framework voice logging, Core ML SmartSuggest, NLP search, Digital Slate, audit history, security |
 | **Polish** | **Complete** | On-set sim tests, batched CloudKit sync, durable offline queue |
 
-**Build:** Xcode 26 · iOS 26+ · 51 unit tests · Simulator verified
+**Build:** Xcode 26 · iOS 26+ · 54 unit tests · Simulator verified
 
 **Sync architecture:** SwiftData uses local persistence (`cloudKitDatabase: .none`); custom `SyncEngine` + `CloudKitSyncTransport` handles explicit CK `LogEntry` records, durable offline queue, inbound pull, and conflict resolution UI.
 
@@ -493,12 +493,12 @@ This sequence validates the riskiest UX assumption — **logging speed + delight
 
 ## Todos
 
-- [ ] **foundation** — Scaffold Xcode 26 universal app: Swift 6, SwiftData, DesignSystem module, DI container, feature module structure
-- [ ] **data-model** — Implement core SwiftData entities (Production, CameraUnit, ShootDay, LogEntry, CustomField*) with sync metadata stubs and indexes
-- [ ] **hero-editor** — Build Entry Editor: glass keypad, SmartFill v1, Log & Next loop, haptics, auto-save
-- [ ] **dashboard** — Build Production/Camera dashboard with paginated take list, stats row, multi-camera switcher
-- [ ] **export-v1** — Implement PDF/CSV/JSON export pipeline with VES-default field map
-- [ ] **mvp-beta** — Onboarding, templates, on-set simulation tests, TestFlight beta with ACs
-- [ ] **cloudkit-sync** — Phase 2: CloudKit shared zones, presence, roles, conflict resolution UI
-- [ ] **advanced-exports** — Phase 2: Branded PDF renderer, daily wrap, Frame.io C2C hooks, widgets/Shortcuts
-- [ ] **intelligence** — Phase 3: Voice-to-log, ML SmartSuggest, NLP search, audit history, Digital Slate, GPS/gyro
+- [x] **foundation** — Scaffold Xcode 26 universal app: Swift 6, SwiftData, DesignSystem module, DI container, feature module structure
+- [x] **data-model** — Implement core SwiftData entities (Production, CameraUnit, ShootDay, LogEntry, CustomField*) with sync metadata stubs and indexes
+- [x] **hero-editor** — Build Entry Editor: glass keypad, SmartFill v1, Log & Next loop, haptics, auto-save
+- [x] **dashboard** — Build Production/Camera dashboard with paginated take list, stats row, multi-camera switcher
+- [x] **export-v1** — Implement PDF/CSV/JSON export pipeline with VES-default field map
+- [x] **mvp-beta** — Onboarding, templates, on-set simulation tests, TestFlight beta with ACs
+- [x] **cloudkit-sync** — Phase 2: CloudKit shared zones, presence, roles, conflict resolution UI
+- [x] **advanced-exports** — Phase 2: Branded PDF renderer, daily wrap, Frame.io C2C hooks, widgets/Shortcuts
+- [x] **intelligence** — Phase 3: Voice-to-log, ML SmartSuggest, NLP search, audit history, Digital Slate, GPS/gyro

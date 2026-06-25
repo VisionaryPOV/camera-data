@@ -60,8 +60,9 @@ public struct RootView: View {
             DigitalSlateView(
                 scene: slateSceneBinding,
                 take: slateTakeBinding,
-                isRolling: .constant(false),
-                onIncrementTake: incrementSlateTake
+                isRolling: slateIsRollingBinding,
+                onIncrementTake: incrementSlateTake,
+                onDismiss: { showSlate = false }
             )
         }
         .overlay {
@@ -176,6 +177,13 @@ public struct RootView: View {
         Binding(
             get: { dependencies.session.slateTake },
             set: { dependencies.session.slateTake = $0 }
+        )
+    }
+
+    private var slateIsRollingBinding: Binding<Bool> {
+        Binding(
+            get: { dependencies.session.slateIsRolling },
+            set: { dependencies.session.slateIsRolling = $0 }
         )
     }
 

@@ -22,6 +22,7 @@ public final class EntryEditorViewModel {
     private let smartSuggestor: CoreMLSmartSuggestor?
     private var editingEntry: LogEntryModel?
     private var lastEntry: LogEntryDraft?
+    private var takeEntryText: String = ""
 
     public var canEdit: Bool {
         session.currentRole.canEdit
@@ -82,6 +83,9 @@ public final class EntryEditorViewModel {
         guard canEdit else { return }
         syncFPSTextToDraft()
         focusedField = field
+        if field == .take {
+            takeEntryText = ""
+        }
         if field.usesNumericKeypad {
             inputMode = .keypad
         }
@@ -133,7 +137,8 @@ public final class EntryEditorViewModel {
         case .scene:
             draft.scene += key
         case .take:
-            appendDigit(to: &draft.take, key: key)
+            takeEntryText += key
+            draft.take = Int(takeEntryText) ?? 0
         case .rollNumber:
             draft.rollNumber += key.uppercased()
         case .lens:
@@ -160,7 +165,8 @@ public final class EntryEditorViewModel {
         case .scene:
             if !draft.scene.isEmpty { draft.scene.removeLast() }
         case .take:
-            removeLastDigit(from: &draft.take)
+            if !takeEntryText.isEmpty { takeEntryText.removeLast() }
+            draft.take = Int(takeEntryText) ?? 0
         case .rollNumber:
             if !draft.rollNumber.isEmpty { draft.rollNumber.removeLast() }
         case .lens:
@@ -247,7 +253,12 @@ public final class EntryEditorViewModel {
     public func displayValue(for field: EntryEditorFocus) -> String {
         switch field {
         case .scene: draft.scene.isEmpty ? "—" : draft.scene
-        case .take: "\(draft.take)"
+        case .take:
+            if focusedField == .take, !takeEntryText.isEmpty {
+                takeEntryText
+            } else {
+                "\(draft.take)"
+            }
         case .rollNumber: draft.rollNumber.isEmpty ? "—" : draft.rollNumber
         case .lens: draft.lens.isEmpty ? "—" : draft.lens
         case .filter: draft.filter.isEmpty ? "—" : draft.filter

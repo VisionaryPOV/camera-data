@@ -40,6 +40,7 @@
 		4733655C254E764BF35B8DE6 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA5B119F223E0C6FB5855A /* HapticManager.swift */; };
 		47D6CA82C74FF9C9A29B6B6E /* DashboardStatsCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4118B7A590109B3781DEDE /* DashboardStatsCalculator.swift */; };
 		4C7159B3F2B39411EAA70B7C /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E180C62DC4A0D897B90435E /* ReportsView.swift */; };
+		5326A36A0D0BFDE279663492 /* SlateTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53B91C4773464134EA841996 /* SlateTimeFormatter.swift */; };
 		5519F6AEB4681E975E1C2B64 /* ProductionEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8460F037F948701700DACD /* ProductionEditorViewModel.swift */; };
 		5A5DDA4C3EE48377C5CB817E /* CameraDataData.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5A7B1A43B1577D7EF753FFB7 /* CameraDataWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663A694D51FDAE5C606ABA8 /* CameraDataWidget.swift */; };
@@ -67,6 +68,7 @@
 		8DF6A482DF284DA6C42A016D /* CameraDataServices.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9295FECC272DBD7E5BFDFFDB /* DashboardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D6A4B09F9757E90F83CF68 /* DashboardEntry.swift */; };
 		994D651D0F9413BE0217D69B /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DDF0DC890D417CD43371B9 /* EntryEditorView.swift */; };
+		99DC0ACE58234C48120799EF /* DigitalSlateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02509C7550F5053CBA386432 /* DigitalSlateTests.swift */; };
 		9D3001BDEA625EF7C7AF3551 /* DomainTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4277351032C9630D57B08582 /* DomainTypes.swift */; };
 		9F893913C9B53DBA5910D8EB /* CameraDataDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */; };
 		A23553F7055E29748F938F31 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332A85715D9EA8EF913C6052 /* ExportService.swift */; };
@@ -300,6 +302,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02509C7550F5053CBA386432 /* DigitalSlateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigitalSlateTests.swift; sourceTree = "<group>"; };
 		04B7CB4257260D429074A8D7 /* ConflictMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictMerger.swift; sourceTree = "<group>"; };
 		07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		08576C61C8E3276445045AF3 /* SmartSuggestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartSuggestService.swift; sourceTree = "<group>"; };
@@ -330,6 +333,7 @@
 		49E2844DE565F0B1341799C5 /* DomainLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainLogicTests.swift; sourceTree = "<group>"; };
 		4CB8267801E22D1810204199 /* ThemeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTokens.swift; sourceTree = "<group>"; };
 		50A9A4409A42C5EF13AF8FB2 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
+		53B91C4773464134EA841996 /* SlateTimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateTimeFormatter.swift; sourceTree = "<group>"; };
 		55A48A7FB60ECAEA939D864B /* ProductionMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionMetadataTests.swift; sourceTree = "<group>"; };
 		5CCEA79A01487F5C6E0463C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6199345EFA1A734F30ED4AA8 /* CameraDataDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataDesignSystem.swift; sourceTree = "<group>"; };
@@ -578,6 +582,7 @@
 				FBFCB13D7DE50A31EB350728 /* LogEntryValidator.swift */,
 				88FD14069573B3F3323657E4 /* NLPQueryParser.swift */,
 				103C6E530170355974FA6DF6 /* RollNumberHelper.swift */,
+				53B91C4773464134EA841996 /* SlateTimeFormatter.swift */,
 				379F3492CDDF7840F2D8AEEB /* SmartFillEngine.swift */,
 				98A850605449B45F4F030E64 /* SortKeyGenerator.swift */,
 				E9AA51B21FBD51D1AAFB550D /* TakeIncrementer.swift */,
@@ -620,6 +625,7 @@
 			children = (
 				6D8D44CAC822B9B56C92932D /* AppBootstrapTests.swift */,
 				643AB1D11D80DC88355569AF /* DataLayerTests.swift */,
+				02509C7550F5053CBA386432 /* DigitalSlateTests.swift */,
 				49E2844DE565F0B1341799C5 /* DomainLogicTests.swift */,
 				BEC45ACEBE13314F04AB7CE0 /* EntryEditorViewModelTests.swift */,
 				1F950AB8B915A82D4EE68931 /* IntegrationTests.swift */,
@@ -1095,6 +1101,7 @@
 			files = (
 				2C41EC36017A49E339E095A1 /* AppBootstrapTests.swift in Sources */,
 				4333033E7F08A5F60603B7A5 /* DataLayerTests.swift in Sources */,
+				99DC0ACE58234C48120799EF /* DigitalSlateTests.swift in Sources */,
 				2531565ECCA6D8DD6156C5DD /* DomainLogicTests.swift in Sources */,
 				79D130D17213BFABE563C183 /* EntryEditorViewModelTests.swift in Sources */,
 				E8CF1848020D39C67C6381B4 /* IntegrationTests.swift in Sources */,
@@ -1128,6 +1135,7 @@
 				2E5A67992EB1E1E2330295CE /* LogEntryValidator.swift in Sources */,
 				D5A31862566CAD984C6456D1 /* NLPQueryParser.swift in Sources */,
 				1CF0A750D14A789F46B47509 /* RollNumberHelper.swift in Sources */,
+				5326A36A0D0BFDE279663492 /* SlateTimeFormatter.swift in Sources */,
 				2A6FD237E0D7EA71723ADB2D /* SmartFillEngine.swift in Sources */,
 				296913D9829777CC7C731DFA /* SortKeyGenerator.swift in Sources */,
 				4042E1FC2F82FFCCB68E2947 /* TakeIncrementer.swift in Sources */,
