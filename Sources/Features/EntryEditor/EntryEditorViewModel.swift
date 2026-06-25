@@ -12,6 +12,9 @@ public final class EntryEditorViewModel {
     public var suggestions: [SmartSuggestion] = []
     public var validationMessage: String?
     public var isSaving: Bool = false
+    public var focusedField: EntryEditorFocus = .scene
+    public var inputMode: EntryInputMode = .keypad
+    public var fpsText: String = "24"
 
     private let useCase: LogTakeUseCase
     private let session: ProductionSession
@@ -37,6 +40,7 @@ public final class EntryEditorViewModel {
         self.editingEntry = editingEntry
         self.smartSuggestor = smartSuggestor
         self.draft = editingEntry.map(LogEntryMapper.toDraft) ?? LogEntryDraft()
+        self.fpsText = Self.formatFPS(self.draft.fps)
     }
 
     public func onAppear() throws {
@@ -65,8 +69,30 @@ public final class EntryEditorViewModel {
             )
         }
 
+        if draft.rollNumber.isEmpty, let lastRoll = lastEntry?.rollNumber, !lastRoll.isEmpty {
+            draft.rollNumber = lastRoll
+        }
+
+        fpsText = Self.formatFPS(draft.fps)
         applySmartFill()
         refreshSuggestions()
+    }
+
+    public func focus(_ field: EntryEditorFocus) {
+        guard canEdit else { return }
+        syncFPSTextToDraft()
+        focusedField = field
+        if field.usesNumericKeypad {
+            inputMode = .keypad
+        }
+        HapticManager.light()
+    }
+
+    public func toggleInputMode() {
+        guard canEdit else { return }
+        syncFPSTextToDraft()
+        inputMode = inputMode == .keypad ? .keyboard : .keypad
+        HapticManager.light()
     }
 
     public func applySmartFill() {
@@ -82,6 +108,8 @@ public final class EntryEditorViewModel {
             )
         }
         draft = useCase.prepareDraft(current: draft, lastEntry: lastEntry, cameraDefaults: cameraDefaults)
+        fpsText = Self.formatFPS(draft.fps)
+        HapticManager.success()
     }
 
     public func refreshSuggestions() {
@@ -98,25 +126,76 @@ public final class EntryEditorViewModel {
         }
     }
 
-    public func appendToScene(_ digit: String) {
+    public func inputKey(_ key: String) {
         guard canEdit else { return }
-        draft.scene += digit
+
+        switch focusedField {
+        case .scene:
+            draft.scene += key
+        case .take:
+            appendDigit(to: &draft.take, key: key)
+        case .rollNumber:
+            draft.rollNumber += key.uppercased()
+        case .lens:
+            draft.lens += key
+        case .filter:
+            draft.filter += key
+        case .iso:
+            appendDigit(to: &draft.iso, key: key)
+        case .fps:
+            fpsText += key
+            syncFPSTextToDraft()
+        case .whiteBalance:
+            draft.whiteBalance += key
+        case .notes:
+            draft.notes += key
+        }
         HapticManager.light()
     }
 
-    public func appendToTake(_ digit: String) {
+    public func deleteBackward() {
         guard canEdit else { return }
-        let current = draft.take == 0 ? "" : String(draft.take)
-        if let newValue = Int(current + digit) {
-            draft.take = newValue
+
+        switch focusedField {
+        case .scene:
+            if !draft.scene.isEmpty { draft.scene.removeLast() }
+        case .take:
+            removeLastDigit(from: &draft.take)
+        case .rollNumber:
+            if !draft.rollNumber.isEmpty { draft.rollNumber.removeLast() }
+        case .lens:
+            if !draft.lens.isEmpty { draft.lens.removeLast() }
+        case .filter:
+            if !draft.filter.isEmpty { draft.filter.removeLast() }
+        case .iso:
+            removeLastDigit(from: &draft.iso)
+        case .fps:
+            if !fpsText.isEmpty { fpsText.removeLast() }
+            syncFPSTextToDraft()
+        case .whiteBalance:
+            if !draft.whiteBalance.isEmpty { draft.whiteBalance.removeLast() }
+        case .notes:
+            if !draft.notes.isEmpty { draft.notes.removeLast() }
         }
         HapticManager.light()
+    }
+
+    public func advanceRollNumber() {
+        guard canEdit else { return }
+        draft.rollNumber = RollNumberHelper.increment(draft.rollNumber)
+        HapticManager.medium()
     }
 
     public func toggleCircled() {
         guard canEdit else { return }
         draft.isCircled.toggle()
         if draft.isCircled { HapticManager.success() } else { HapticManager.light() }
+    }
+
+    public func syncFPSTextToDraft() {
+        if let value = Double(fpsText) {
+            draft.fps = value
+        }
     }
 
     public func logAndNext() async throws {
@@ -129,6 +208,7 @@ public final class EntryEditorViewModel {
               let camera = session.selectedCamera,
               let day = session.selectedDay else { return }
 
+        syncFPSTextToDraft()
         isSaving = true
         defer { isSaving = false }
 
@@ -143,6 +223,7 @@ public final class EntryEditorViewModel {
         HapticManager.medium()
         lastEntry = LogEntryMapper.toDraft(result.saved)
         draft = result.nextDraft
+        fpsText = Self.formatFPS(draft.fps)
         session.slateScene = result.saved.scene
         session.slateTake = result.nextDraft.take
         editingEntry = nil
@@ -154,9 +235,51 @@ public final class EntryEditorViewModel {
         guard canEdit else { return }
         switch suggestion.field {
         case "lens": draft.lens = suggestion.value
-        case "iso": draft.iso = Int(suggestion.value) ?? draft.iso
+        case "iso":
+            draft.iso = Int(suggestion.value) ?? draft.iso
+        case "roll", "rollNumber":
+            draft.rollNumber = suggestion.value
         default: break
         }
         HapticManager.light()
+    }
+
+    public func displayValue(for field: EntryEditorFocus) -> String {
+        switch field {
+        case .scene: draft.scene.isEmpty ? "—" : draft.scene
+        case .take: "\(draft.take)"
+        case .rollNumber: draft.rollNumber.isEmpty ? "—" : draft.rollNumber
+        case .lens: draft.lens.isEmpty ? "—" : draft.lens
+        case .filter: draft.filter.isEmpty ? "—" : draft.filter
+        case .iso: "\(draft.iso)"
+        case .fps: fpsText
+        case .whiteBalance: draft.whiteBalance.isEmpty ? "—" : draft.whiteBalance
+        case .notes: draft.notes.isEmpty ? "—" : draft.notes
+        }
+    }
+
+    private func appendDigit(to value: inout Int, key: String) {
+        guard let digit = Int(key) else { return }
+        let current = value == 0 ? "" : String(value)
+        if let newValue = Int(current + String(digit)) {
+            value = newValue
+        }
+    }
+
+    private func removeLastDigit(from value: inout Int) {
+        let current = value == 0 ? "" : String(value)
+        guard !current.isEmpty else {
+            value = 0
+            return
+        }
+        let trimmed = String(current.dropLast())
+        value = Int(trimmed) ?? 0
+    }
+
+    private static func formatFPS(_ fps: Double) -> String {
+        if fps == floor(fps) {
+            return String(format: "%.0f", fps)
+        }
+        return String(fps)
     }
 }
