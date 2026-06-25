@@ -11,9 +11,11 @@ public final class ProductionRepository: ProductionRepositoryProtocol {
         self.context = context
     }
 
-    public func fetchAll() throws -> [ProductionModel] {
+    public func fetchAll(includeArchived: Bool = false) throws -> [ProductionModel] {
         let descriptor = FetchDescriptor<ProductionModel>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
-        return try context.fetch(descriptor)
+        let all = try context.fetch(descriptor)
+        if includeArchived { return all }
+        return all.filter { $0.archivedAt == nil }
     }
 
     public func fetchActive() throws -> ProductionModel? {
@@ -45,6 +47,43 @@ public final class ProductionRepository: ProductionRepositoryProtocol {
 
     public func setActive(_ production: ProductionModel) throws {
         UserDefaults.standard.set(production.id.uuidString, forKey: defaultsKey)
+    }
+
+    public func updateMetadata(_ production: ProductionModel, metadata: ProductionMetadata) throws {
+        production.applyMetadata(metadata)
+        if production.code.isEmpty, !metadata.productionTitle.isEmpty {
+            production.code = String(metadata.productionTitle.prefix(6)).uppercased()
+        }
+        try context.save()
+    }
+
+    public func updateShootDay(
+        _ day: ShootDayModel,
+        dayNumber: Int,
+        date: Date,
+        locationName: String,
+        notes: String
+    ) throws {
+        day.dayNumber = dayNumber
+        day.date = date
+        day.locationName = locationName
+        day.notes = notes
+        try context.save()
+    }
+
+    public func addShootDay(to production: ProductionModel, locationName: String = "") throws -> ShootDayModel {
+        let nextNumber = (production.days.map(\.dayNumber).max() ?? 0) + 1
+        let day = ShootDayModel(date: .now, dayNumber: nextNumber, locationName: locationName)
+        day.production = production
+        production.days.append(day)
+        context.insert(day)
+        try context.save()
+        return day
+    }
+
+    public func archive(_ production: ProductionModel) throws {
+        production.archivedAt = .now
+        try context.save()
     }
 }
 
@@ -180,6 +219,9 @@ public final class ProductionTemplateRepository: ProductionTemplateRepositoryPro
         let clone = ProductionModel(name: newName)
         clone.settingsJSON = source.settingsJSON
         clone.brandingJSON = source.brandingJSON
+        clone.directorName = source.directorName
+        clone.dpName = source.dpName
+        clone.episodeOrProductionNumber = source.episodeOrProductionNumber
 
         for cam in source.cameras.sorted(by: { $0.sortOrder < $1.sortOrder }) {
             let newCam = CameraUnitModel(label: cam.label, sortOrder: cam.sortOrder)

@@ -35,6 +35,33 @@ public enum ThemeMode: String, Codable, Sendable {
     case nightRed
 }
 
+public struct ProductionMetadata: Equatable, Sendable, Codable {
+    public var productionTitle: String
+    public var directorName: String
+    public var dpName: String
+    public var episodeOrProductionNumber: String
+
+    public init(
+        productionTitle: String = "",
+        directorName: String = "",
+        dpName: String = "",
+        episodeOrProductionNumber: String = ""
+    ) {
+        self.productionTitle = productionTitle
+        self.directorName = directorName
+        self.dpName = dpName
+        self.episodeOrProductionNumber = episodeOrProductionNumber
+    }
+
+    public var crewCreditsLine: String {
+        var parts: [String] = []
+        if !directorName.isEmpty { parts.append("Director: \(directorName)") }
+        if !dpName.isEmpty { parts.append("DP: \(dpName)") }
+        if !episodeOrProductionNumber.isEmpty { parts.append("Ep/Prod: \(episodeOrProductionNumber)") }
+        return parts.joined(separator: "  •  ")
+    }
+}
+
 public struct SyncMetadata: Codable, Equatable, Sendable {
     public var ckRecordName: String?
     public var shareURL: String?

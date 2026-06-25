@@ -5,15 +5,59 @@ import CameraDataDomain
 
 public struct ExportBranding: Sendable {
     public var productionName: String
+    public var directorName: String
+    public var dpName: String
+    public var episodeOrProductionNumber: String
     public var logoText: String
     public var crewCredits: String
     public var accentHex: String
 
-    public init(productionName: String, logoText: String = "", crewCredits: String = "", accentHex: String = "#E8A838") {
+    public init(
+        productionName: String,
+        directorName: String = "",
+        dpName: String = "",
+        episodeOrProductionNumber: String = "",
+        logoText: String = "",
+        crewCredits: String = "",
+        accentHex: String = "#E8A838"
+    ) {
         self.productionName = productionName
+        self.directorName = directorName
+        self.dpName = dpName
+        self.episodeOrProductionNumber = episodeOrProductionNumber
         self.logoText = logoText
-        self.crewCredits = crewCredits
+        self.crewCredits = crewCredits.isEmpty
+            ? Self.defaultCrewCredits(director: directorName, dp: dpName, episode: episodeOrProductionNumber)
+            : crewCredits
         self.accentHex = accentHex
+    }
+
+    public static func from(metadata: ProductionMetadata) -> ExportBranding {
+        ExportBranding(
+            productionName: metadata.productionTitle.isEmpty ? "Production" : metadata.productionTitle,
+            directorName: metadata.directorName,
+            dpName: metadata.dpName,
+            episodeOrProductionNumber: metadata.episodeOrProductionNumber
+        )
+    }
+
+    private static func defaultCrewCredits(director: String, dp: String, episode: String) -> String {
+        ProductionMetadata(
+            directorName: director,
+            dpName: dp,
+            episodeOrProductionNumber: episode
+        ).crewCreditsLine
+    }
+
+    public var reportHeaderLines: [String] {
+        var lines: [String] = []
+        if !episodeOrProductionNumber.isEmpty {
+            lines.append("Episode / Production #: \(episodeOrProductionNumber)")
+        }
+        if !directorName.isEmpty { lines.append("Director: \(directorName)") }
+        if !dpName.isEmpty { lines.append("DP: \(dpName)") }
+        if !crewCredits.isEmpty, lines.isEmpty { lines.append(crewCredits) }
+        return lines
     }
 }
 
@@ -79,9 +123,9 @@ public enum ExportService {
             title.draw(at: CGPoint(x: inset, y: y), withAttributes: bodyAttrs)
             y += 24
 
-            if !branding.crewCredits.isEmpty {
-                branding.crewCredits.draw(at: CGPoint(x: inset, y: y), withAttributes: bodyAttrs)
-                y += 20
+            for line in branding.reportHeaderLines where !line.isEmpty {
+                line.draw(at: CGPoint(x: inset, y: y), withAttributes: bodyAttrs)
+                y += 16
             }
 
             let header = VESFieldMapper.csvHeader().joined(separator: " | ")
@@ -111,6 +155,10 @@ public enum ExportService {
             notes: "Takes: \(summary.takeCount), Circled: \(summary.circledCount), Lens: \(summary.dominantLens ?? "—")"
         )
         return pdfData(from: [draft], branding: branding, title: "Daily Wrap")
+    }
+
+    public static func csvReportPreamble(branding: ExportBranding) -> String {
+        branding.reportHeaderLines.joined(separator: "\n")
     }
 
     private static func escapeCSV(_ value: String) -> String {

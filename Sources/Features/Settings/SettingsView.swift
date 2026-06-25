@@ -6,21 +6,32 @@ import CameraDataServices
 
 public struct SettingsView: View {
     @Bindable public var session: ProductionSession
+    @Bindable public var productionEditor: ProductionEditorViewModel
     public var onCloneTemplate: () -> Void
     public var onReviewConflicts: () -> Void
+    public var onManageProductions: () -> Void
 
     public init(
         session: ProductionSession,
+        productionEditor: ProductionEditorViewModel,
         onCloneTemplate: @escaping () -> Void,
-        onReviewConflicts: @escaping () -> Void
+        onReviewConflicts: @escaping () -> Void,
+        onManageProductions: @escaping () -> Void
     ) {
         self.session = session
+        self.productionEditor = productionEditor
         self.onCloneTemplate = onCloneTemplate
         self.onReviewConflicts = onReviewConflicts
+        self.onManageProductions = onManageProductions
     }
 
     public var body: some View {
         Form {
+            ProductionEditorView(
+                viewModel: productionEditor,
+                onManageProductions: onManageProductions
+            )
+
             Section("Appearance") {
                 Picker("Theme", selection: $session.themeMode) {
                     Text("Cinematic Dark").tag(ThemeMode.cinematicDark)
@@ -37,7 +48,7 @@ public struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(ThemeTokens.textSecondary)
             }
-            Section("Production") {
+            Section("Templates") {
                 Button("Clone Production Template", action: onCloneTemplate)
             }
             Section("Collaboration") {

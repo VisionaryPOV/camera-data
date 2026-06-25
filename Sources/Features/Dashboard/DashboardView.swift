@@ -45,7 +45,7 @@ public struct DashboardView: View {
                     .padding()
             }
         }
-        .navigationTitle(session.activeProduction?.name ?? "Camera Data")
+        .navigationTitle(session.activeProduction?.displayTitle ?? "Camera Data")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Reports", action: onOpenReports)
@@ -64,14 +64,17 @@ public struct DashboardView: View {
 
     private var header: some View {
         HStack {
+            if let production = session.activeProduction {
+                GlassChip(production.displayTitle, isSelected: false)
+                if !production.episodeOrProductionNumber.isEmpty {
+                    GlassChip("Ep \(production.episodeOrProductionNumber)", isSelected: false)
+                }
+            }
             if let day = session.selectedDay {
                 GlassChip("Day \(day.dayNumber)", isSelected: true)
             }
             GlassChip(session.currentRole.rawValue, isSelected: false)
             Spacer()
-            Text("Launch: \(session.launchState)")
-                .font(.caption2)
-                .foregroundStyle(ThemeTokens.textSecondary)
         }
     }
 

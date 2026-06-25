@@ -51,7 +51,8 @@ public struct ReportsView: View {
     }
 
     private func exportPDF() {
-        let branding = ExportBranding(productionName: production?.name ?? "Production")
+        let branding = production.map { ExportBranding.from(metadata: $0.metadata) }
+            ?? ExportBranding(productionName: "Production")
         let data = ExportService.pdfData(from: drafts, branding: branding)
         exportMessage = "PDF generated (\(data.count) bytes)"
     }

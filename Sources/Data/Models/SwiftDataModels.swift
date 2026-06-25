@@ -6,6 +6,9 @@ import CameraDataDomain
 public final class ProductionModel {
     public var id: UUID
     public var name: String
+    public var directorName: String
+    public var dpName: String
+    public var episodeOrProductionNumber: String
     public var code: String
     public var createdAt: Date
     public var archivedAt: Date?
@@ -40,6 +43,9 @@ public final class ProductionModel {
     ) {
         self.id = id
         self.name = name
+        self.directorName = ""
+        self.dpName = ""
+        self.episodeOrProductionNumber = ""
         self.code = code.isEmpty ? String(name.prefix(6)).uppercased() : code
         self.createdAt = createdAt
         self.schemaVersion = schemaVersion

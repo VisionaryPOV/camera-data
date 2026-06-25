@@ -10,6 +10,8 @@ public struct RootView: View {
     @State private var activeSheet: RootActiveSheet?
     @State private var showSlate = false
     @State private var searchQuery = ""
+    @State private var productionEditorViewModel: ProductionEditorViewModel
+    @State private var productionsList: [ProductionModel] = []
 
     public init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -17,6 +19,10 @@ public struct RootView: View {
             entryRepository: dependencies.logEntryRepository,
             session: dependencies.session,
             smartSuggestor: dependencies.smartSuggestor
+        ))
+        _productionEditorViewModel = State(initialValue: ProductionEditorViewModel(
+            productionRepository: dependencies.productionRepository,
+            session: dependencies.session
         ))
     }
 
@@ -108,14 +114,36 @@ public struct RootView: View {
             NavigationStack {
                 SettingsView(
                     session: dependencies.session,
+                    productionEditor: productionEditorViewModel,
                     onCloneTemplate: cloneTemplate,
                     onReviewConflicts: {
                         if !dependencies.session.pendingConflicts.isEmpty {
                             activeSheet = .conflicts
                         }
+                    },
+                    onManageProductions: {
+                        reloadProductionsList()
+                        activeSheet = .productions
                     }
                 )
             }
+
+        case .productions:
+            NavigationStack {
+                ProductionsListView(
+                    productions: productionsList,
+                    activeProductionId: dependencies.session.activeProduction?.id,
+                    onSelect: selectProduction,
+                    onCreate: createProduction,
+                    onArchive: archiveProduction
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { activeSheet = .settings }
+                    }
+                }
+            }
+            .onAppear { reloadProductionsList() }
 
         case .search:
             SearchView(query: $searchQuery, entries: dashboardViewModel.entryModels)
@@ -172,7 +200,49 @@ public struct RootView: View {
 
     private func cloneTemplate() {
         guard let source = dependencies.session.activeProduction else { return }
-        _ = try? dependencies.templateRepository.cloneProduction(from: source, newName: "\(source.name) Copy")
+        _ = try? dependencies.templateRepository.cloneProduction(from: source, newName: "\(source.displayTitle) Copy")
+        reloadProductionsList()
+    }
+
+    private func reloadProductionsList() {
+        productionsList = (try? dependencies.productionRepository.fetchAll(includeArchived: false)) ?? []
+    }
+
+    private func createProduction() {
+        guard let production = try? dependencies.productionRepository.create(name: "Untitled Production") else { return }
+        try? dependencies.activateProduction(production)
+        productionEditorViewModel.reloadFromSession()
+        reloadProductionsList()
+        try? dashboardViewModel.reload()
+        activeSheet = .settings
+    }
+
+    private func selectProduction(_ production: ProductionModel, startNewDay: Bool) {
+        do {
+            if startNewDay {
+                let day = try dependencies.productionRepository.addShootDay(to: production)
+                try dependencies.activateProduction(production, shootDay: day)
+            } else {
+                try dependencies.activateProduction(production)
+            }
+            productionEditorViewModel.reloadFromSession()
+            try dashboardViewModel.reload()
+            reloadProductionsList()
+            activeSheet = .settings
+        } catch {
+            return
+        }
+    }
+
+    private func archiveProduction(_ production: ProductionModel) {
+        try? dependencies.productionRepository.archive(production)
+        reloadProductionsList()
+        if dependencies.session.activeProduction?.id == production.id,
+           let next = productionsList.first {
+            try? dependencies.activateProduction(next)
+            productionEditorViewModel.reloadFromSession()
+            try? dashboardViewModel.reload()
+        }
     }
 
     private func resolveConflicts(_ resolutions: [String: ConflictResolutionChoice]) {

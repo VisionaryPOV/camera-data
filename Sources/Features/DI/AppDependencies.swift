@@ -194,6 +194,15 @@ public final class AppDependencies {
         await postSaveCoordinator.flushPending()
     }
 
+    public func activateProduction(_ production: ProductionModel, shootDay: ShootDayModel? = nil) throws {
+        try productionRepository.setActive(production)
+        session.activeProduction = production
+        session.selectedCamera = production.cameras.sorted(by: { $0.sortOrder < $1.sortOrder }).first
+        session.selectedDay = shootDay
+            ?? production.days.sorted(by: { $0.dayNumber < $1.dayNumber }).last
+        syncLatestEntryToSlate()
+    }
+
     public func syncLatestEntryToSlate() {
         guard let production = session.activeProduction,
               let camera = session.selectedCamera else { return }

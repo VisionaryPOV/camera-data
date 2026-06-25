@@ -4,10 +4,14 @@ import CameraDataDomain
 
 @MainActor
 public protocol ProductionRepositoryProtocol {
-    func fetchAll() throws -> [ProductionModel]
+    func fetchAll(includeArchived: Bool) throws -> [ProductionModel]
     func fetchActive() throws -> ProductionModel?
     func create(name: String) throws -> ProductionModel
     func setActive(_ production: ProductionModel) throws
+    func updateMetadata(_ production: ProductionModel, metadata: ProductionMetadata) throws
+    func updateShootDay(_ day: ShootDayModel, dayNumber: Int, date: Date, locationName: String, notes: String) throws
+    func addShootDay(to production: ProductionModel, locationName: String) throws -> ShootDayModel
+    func archive(_ production: ProductionModel) throws
 }
 
 @MainActor

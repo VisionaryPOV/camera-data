@@ -27,4 +27,4 @@ Log one take on device; the schema is created on first push.
 
 6. **Deploy Schema Changes** to Development
 
-Also add `Production` (fields: `name`, `code`) if using share creation.
+Also add `Production` (fields: `name`, `code`, `directorName`, `dpName`, `episodeOrProductionNumber`) if using share creation.
