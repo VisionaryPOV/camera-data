@@ -44,7 +44,7 @@ public enum AppIntentLogService {
         var draft = LogEntryDraft(scene: scene, take: take)
         draft = deps.logTakeUseCase.prepareDraft(current: draft, lastEntry: nil, cameraDefaults: nil)
 
-        let result = try await deps.logTakeUseCase.logAndNext(
+        _ = try await deps.logTakeUseCase.logAndNext(
             draft: draft,
             production: production,
             camera: camera,

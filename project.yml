@@ -114,6 +114,11 @@ targets:
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Capture shoot location metadata"
         INFOPLIST_KEY_NSFaceIDUsageDescription: "Secure production access"
         INFOPLIST_KEY_NSCameraUsageDescription: "Attach reference photos to takes"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
       configs:
         Debug:
           CODE_SIGN_ENTITLEMENTS: CameraDataApp/CameraData.entitlements

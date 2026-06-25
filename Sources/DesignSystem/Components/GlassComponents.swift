@@ -19,7 +19,7 @@ public struct GlassSurface: ViewModifier {
 }
 
 public extension View {
-    public func glassSurface(interactive: Bool = false) -> some View {
+    func glassSurface(interactive: Bool = false) -> some View {
         modifier(GlassSurface(interactive: interactive))
     }
 }
