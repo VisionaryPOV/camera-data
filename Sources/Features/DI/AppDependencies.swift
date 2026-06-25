@@ -76,6 +76,7 @@ public final class AppDependencies {
     public let auditService: AuditService
     public let smartSuggestor: CoreMLSmartSuggestor
     public let speechTranscriber: SpeechTranscribing
+    public let voiceCapture: VoiceCapturing
     public let session: ProductionSession
     public let syncPipelineEnabled: Bool
     public let offlineCloudKitStore: OfflineCloudKitRecordStore
@@ -87,7 +88,8 @@ public final class AppDependencies {
         syncTransport: CloudKitSyncTransport? = nil,
         offlineCloudKitStore: OfflineCloudKitRecordStore? = nil,
         metadataProvider: (any MetadataProviding)? = nil,
-        speechTranscriber: SpeechTranscribing? = nil
+        speechTranscriber: SpeechTranscribing? = nil,
+        voiceCapture: VoiceCapturing? = nil
     ) throws {
         modelContainer = try inMemory
             ? ModelContainerFactory.makeInMemory()
@@ -120,6 +122,7 @@ public final class AppDependencies {
         presenceService = PresenceService()
         smartSuggestor = CoreMLSmartSuggestor()
         self.speechTranscriber = speechTranscriber ?? SpeechFrameworkTranscriber()
+        self.voiceCapture = voiceCapture ?? LiveVoiceCapture()
 
         let onboarded = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         session = ProductionSession(isOnboarded: onboarded)

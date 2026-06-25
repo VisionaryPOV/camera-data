@@ -1,4 +1,3 @@
-import AVFoundation
 import XCTest
 import SwiftData
 import CloudKit
@@ -131,23 +130,6 @@ final class ServicesTests: XCTestCase {
         await service.heartbeat(userId: "u1", displayName: "Sarah", editingEntryLabel: "Take 4")
         let label = await service.presenceLabel(for: "u1")
         XCTAssertEqual(label, "Sarah is editing Take 4")
-    }
-
-    func testSpeechFrameworkTranscriberInvokesSpeechRecognitionService() async {
-        let transcriber = SpeechFrameworkTranscriber()
-        do {
-            _ = try await transcriber.transcribe(Data([0x00, 0x01, 0x02]))
-        } catch let error as SpeechRecognitionError {
-            XCTAssertTrue(
-                error == .recognitionTimedOut || error == .noTranscription || error == .recognizerUnavailable
-            )
-        } catch let error as NSError {
-            XCTAssertTrue(
-                error.domain == AVFoundationErrorDomain
-                    || error.domain == "kAFAssistantErrorDomain"
-                    || error.domain == NSOSStatusErrorDomain
-            )
-        }
     }
 
     func testVoiceLoggingServiceProcessesTranscript() {

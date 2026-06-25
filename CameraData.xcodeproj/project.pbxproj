@@ -63,6 +63,7 @@
 		7B4AD1FA38CD5037510DD171 /* CameraDataData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */; };
 		7DAF89676AC1B69375D4DC66 /* CameraDataServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */; };
 		801EAFEDA588039F8B43606A /* CameraDataServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */; };
+		8181C4CA852863082AFC6DF6 /* VoicePipelineIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB978552FA6EBC9F70B08147 /* VoicePipelineIntegrationTests.swift */; };
 		81A4192ED61B5F37F491FDAF /* FrameIOExportHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958823EBDD2801452EFB85AB /* FrameIOExportHook.swift */; };
 		81E9EBE9F6C24F54E0BDED92 /* LogEntryMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13003A137C16895674800C9 /* LogEntryMapper.swift */; };
 		82DAD75D18F7680EB5552A14 /* CameraDataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78104B570D01F1BD450FF534 /* CameraDataServices.swift */; };
@@ -106,6 +107,7 @@
 		E349969ECC7EFE4A8E00345E /* PresenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D3E043701B3E2B240FDBAA /* PresenceService.swift */; };
 		E3CEA9C813CFA1955AD62DC0 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F559D8FDF780A86C76F1AB55 /* SwiftDataModels.swift */; };
 		E8CF1848020D39C67C6381B4 /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F950AB8B915A82D4EE68931 /* IntegrationTests.swift */; };
+		E9377F47E2926F41BBF52FEA /* VoiceCapturing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F34C85D239BE229C6944ABC /* VoiceCapturing.swift */; };
 		EA23652612DB5BD7F4E95286 /* EntryInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EBFB66CBBEC532FE1CF24E4 /* EntryInputBar.swift */; };
 		ECF548E9CE3AFF4B60D281C4 /* ProductionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D47DD554EC300CDED911B36 /* ProductionsListView.swift */; };
 		EDAEFD3F31EAFF2BA841913A /* CameraDataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EE2A542B19BA75C7591A35 /* CameraDataApp.swift */; };
@@ -340,6 +342,7 @@
 		479A77AED92F3FC7807C1004 /* VoicePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicePipeline.swift; sourceTree = "<group>"; };
 		49E2844DE565F0B1341799C5 /* DomainLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainLogicTests.swift; sourceTree = "<group>"; };
 		4CB8267801E22D1810204199 /* ThemeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTokens.swift; sourceTree = "<group>"; };
+		4F34C85D239BE229C6944ABC /* VoiceCapturing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCapturing.swift; sourceTree = "<group>"; };
 		50A9A4409A42C5EF13AF8FB2 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
 		53B91C4773464134EA841996 /* SlateTimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateTimeFormatter.swift; sourceTree = "<group>"; };
 		55A48A7FB60ECAEA939D864B /* ProductionMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionMetadataTests.swift; sourceTree = "<group>"; };
@@ -393,6 +396,7 @@
 		E8C23F68E331692F74302417 /* CameraDataDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataDomain.swift; sourceTree = "<group>"; };
 		E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataDomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9AA51B21FBD51D1AAFB550D /* TakeIncrementer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeIncrementer.swift; sourceTree = "<group>"; };
+		EB978552FA6EBC9F70B08147 /* VoicePipelineIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicePipelineIntegrationTests.swift; sourceTree = "<group>"; };
 		EEC64ED3B2AE42C7890038D5 /* LogPostSaveCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogPostSaveCoordinator.swift; sourceTree = "<group>"; };
 		F00FF9B542BBEC7312F142BF /* Phase3FeaturesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase3FeaturesTests.swift; sourceTree = "<group>"; };
 		F16E2D869E4FCFB02C722AD6 /* CameraDataDesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataDesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -572,6 +576,7 @@
 				08576C61C8E3276445045AF3 /* SmartSuggestService.swift */,
 				3C18B935CF55BF037FF6BCF7 /* SpeechRecognitionService.swift */,
 				E4A0A91309A93C45B376B027 /* VoiceCaptureService.swift */,
+				4F34C85D239BE229C6944ABC /* VoiceCapturing.swift */,
 				B9C57BE98156486E44BD6FD9 /* VoiceLoggingService.swift */,
 				479A77AED92F3FC7807C1004 /* VoicePipeline.swift */,
 			);
@@ -648,6 +653,7 @@
 				F00FF9B542BBEC7312F142BF /* Phase3FeaturesTests.swift */,
 				55A48A7FB60ECAEA939D864B /* ProductionMetadataTests.swift */,
 				64F45147FF949A9ED3C24BCD /* ServicesTests.swift */,
+				EB978552FA6EBC9F70B08147 /* VoicePipelineIntegrationTests.swift */,
 			);
 			name = CameraDataTests;
 			path = Tests/CameraDataTests;
@@ -1135,6 +1141,7 @@
 				3B9DE9BF42E0DA2A835B08D5 /* Phase3FeaturesTests.swift in Sources */,
 				850B8314817E77E265E81C9F /* ProductionMetadataTests.swift in Sources */,
 				3B26EC3ABB977CC858CCD2ED /* ServicesTests.swift in Sources */,
+				8181C4CA852863082AFC6DF6 /* VoicePipelineIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1233,6 +1240,7 @@
 				6276BB32574F072BD5D75BFD /* SpeechRecognitionService.swift in Sources */,
 				C549627456887969D20FC7A6 /* SyncEngine.swift in Sources */,
 				F20B4F054B93CB51AA1DD085 /* VoiceCaptureService.swift in Sources */,
+				E9377F47E2926F41BBF52FEA /* VoiceCapturing.swift in Sources */,
 				D18F92F4393A4CA70E10D9AE /* VoiceLoggingService.swift in Sources */,
 				D8A45A2E1942EED576CFEF54 /* VoicePipeline.swift in Sources */,
 			);

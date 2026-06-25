@@ -31,7 +31,7 @@ Sources/
   Features/               # Dashboard, Entry Editor, Reports, Settings, Slate
 CameraDataApp/            # @main app + App Intents
 Widgets/                  # Take count WidgetKit extension
-Tests/CameraDataTests/    # 51 unit tests on real implementations
+Tests/CameraDataTests/    # 74 unit tests on real implementations
 ```
 
 ---

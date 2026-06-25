@@ -24,6 +24,7 @@ public final class EntryEditorViewModel {
     private let entryRepository: LogEntryRepositoryProtocol
     private let smartSuggestor: CoreMLSmartSuggestor?
     private let speechTranscriber: SpeechTranscribing
+    private let voiceCapture: any VoiceCapturing
     private var editingEntry: LogEntryModel?
     private var lastEntry: LogEntryDraft?
     private var takeEntryText: String = ""
@@ -39,7 +40,8 @@ public final class EntryEditorViewModel {
         entryRepository: LogEntryRepositoryProtocol,
         editingEntry: LogEntryModel? = nil,
         smartSuggestor: CoreMLSmartSuggestor? = nil,
-        speechTranscriber: SpeechTranscribing = SpeechFrameworkTranscriber()
+        speechTranscriber: SpeechTranscribing = SpeechFrameworkTranscriber(),
+        voiceCapture: (any VoiceCapturing)? = nil
     ) {
         self.useCase = useCase
         self.session = session
@@ -47,6 +49,7 @@ public final class EntryEditorViewModel {
         self.editingEntry = editingEntry
         self.smartSuggestor = smartSuggestor
         self.speechTranscriber = speechTranscriber
+        self.voiceCapture = voiceCapture ?? LiveVoiceCapture()
         self.draft = editingEntry.map(LogEntryMapper.toDraft) ?? LogEntryDraft()
         self.fpsText = Self.formatFPS(self.draft.fps)
         self.shutterAngleText = Self.formatShutterAngle(self.draft.shutterAngle)
@@ -153,7 +156,8 @@ public final class EntryEditorViewModel {
             let result = try await VoicePipeline.captureAndApply(
                 to: draft,
                 useCase: useCase,
-                transcriber: speechTranscriber
+                transcriber: speechTranscriber,
+                voiceCapture: voiceCapture
             )
             draft = result.draft
             fpsText = Self.formatFPS(draft.fps)

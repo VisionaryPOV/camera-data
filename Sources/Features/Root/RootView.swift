@@ -81,6 +81,7 @@ public struct RootView: View {
             }
         }
         .task {
+            runLaunchVerificationHooksIfNeeded()
             await refreshPresence()
         }
         .onChange(of: scenePhase) { _, phase in
@@ -198,8 +199,24 @@ public struct RootView: View {
             session: dependencies.session,
             entryRepository: dependencies.logEntryRepository,
             smartSuggestor: dependencies.smartSuggestor,
-            speechTranscriber: dependencies.speechTranscriber
+            speechTranscriber: dependencies.speechTranscriber,
+            voiceCapture: dependencies.voiceCapture
         )
+    }
+
+    private func runLaunchVerificationHooksIfNeeded() {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-ui_testing_security") {
+            dependencies.session.securityEnabled = true
+            dependencies.session.productionPIN = "0000"
+            dependencies.session.persistSecuritySettings()
+        }
+        if args.contains("-ui_testing_slate") {
+            slateController.present()
+            slateController.toggleRolling()
+            slateController.incrementTake()
+            slateController.dismiss()
+        }
     }
 
     private func completeOnboarding() {

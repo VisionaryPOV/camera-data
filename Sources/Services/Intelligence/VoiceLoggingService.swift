@@ -21,6 +21,19 @@ public struct StubSpeechTranscriber: SpeechTranscribing {
     }
 }
 
+public struct FixedSpeechTranscriber: SpeechTranscribing, Sendable {
+    public let text: String
+
+    public init(text: String) {
+        self.text = text
+    }
+
+    public func transcribe(_ audioData: Data) async throws -> String {
+        guard !audioData.isEmpty else { return "" }
+        return text
+    }
+}
+
 public enum VoiceLoggingService {
     public static func processTranscript(_ text: String) -> (draft: LogEntryDraft, flags: [String]) {
         let parsed = FilmTerminologyLexicon.processTranscript(text)

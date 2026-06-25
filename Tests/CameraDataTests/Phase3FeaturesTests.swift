@@ -1,4 +1,3 @@
-import AVFoundation
 import XCTest
 import SwiftData
 @testable import CameraDataFeatures
@@ -62,31 +61,6 @@ final class Phase3FeaturesTests: XCTestCase {
         session.securityEnabled = false
         session.persistSecuritySettings()
         XCTAssertTrue(session.isUnlocked)
-    }
-
-    func testVoicePipelineUsesSpeechFrameworkTranscriberPath() async throws {
-        let deps = try AppDependencies(swiftDataCloudKit: false, syncPipelineEnabled: false, inMemory: true)
-        let capturedAudio = Data([0x01, 0x02, 0x03, 0x04])
-
-        do {
-            _ = try await VoicePipeline.captureAndApply(
-                to: LogEntryDraft(),
-                useCase: deps.logTakeUseCase,
-                transcriber: deps.speechTranscriber,
-                capture: { capturedAudio }
-            )
-        } catch let error as SpeechRecognitionError {
-            XCTAssertTrue(
-                error == .recognitionTimedOut || error == .noTranscription || error == .recognizerUnavailable
-            )
-        } catch let error as NSError {
-            XCTAssertTrue(
-                error.domain == AVFoundationErrorDomain
-                    || error.domain == "kAFAssistantErrorDomain"
-                    || error.domain == NSOSStatusErrorDomain,
-                "SpeechFrameworkTranscriber must reach Speech/AVFoundation stack; got \(error)"
-            )
-        }
     }
 
     func testAuditRestoreServiceRestoresLensValue() throws {

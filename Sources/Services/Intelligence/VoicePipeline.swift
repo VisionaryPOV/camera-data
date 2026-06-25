@@ -3,15 +3,14 @@ import CameraDataDomain
 
 @MainActor
 public enum VoicePipeline {
-    public typealias CaptureProvider = @Sendable () async throws -> Data
-
     public static func captureAndApply(
         to draft: LogEntryDraft,
         useCase: LogTakeUseCase,
         transcriber: SpeechTranscribing,
-        capture: CaptureProvider = { try await VoiceCaptureService.captureForTranscription() }
+        voiceCapture: any VoiceCapturing,
+        duration: TimeInterval = 2.5
     ) async throws -> (draft: LogEntryDraft, flags: [String]) {
-        let audio = try await capture()
+        let audio = try await voiceCapture.captureForTranscription(duration: duration)
         return try await useCase.applyVoiceAudio(audio, to: draft, transcriber: transcriber)
     }
 }
