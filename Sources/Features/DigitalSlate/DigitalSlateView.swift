@@ -8,19 +8,22 @@ public struct DigitalSlateView: View {
     @Binding public var isRolling: Bool
     public var onIncrementTake: () -> Void
     public var onDismiss: () -> Void
+    public var onViewAppeared: (() -> Void)?
 
     public init(
         scene: Binding<String>,
         take: Binding<Int>,
         isRolling: Binding<Bool>,
         onIncrementTake: @escaping () -> Void,
-        onDismiss: @escaping () -> Void = {}
+        onDismiss: @escaping () -> Void = {},
+        onViewAppeared: (() -> Void)? = nil
     ) {
         self._scene = scene
         self._take = take
         self._isRolling = isRolling
         self.onIncrementTake = onIncrementTake
         self.onDismiss = onDismiss
+        self.onViewAppeared = onViewAppeared
     }
 
     public var body: some View {
@@ -77,6 +80,7 @@ public struct DigitalSlateView: View {
                 take,
                 isRolling ? "true" : "false"
             )
+            onViewAppeared?()
         }
         .overlay(alignment: .topTrailing) {
             Button(action: onDismiss) {

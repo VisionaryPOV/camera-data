@@ -47,6 +47,33 @@ final class DigitalSlateTests: XCTestCase {
         XCTAssertTrue(session.slateIsRolling)
     }
 
+    func testDigitalSlateViewOnAppearFiresObservableCallback() {
+        var appeared = false
+        var scene = "18"
+        var take = 6
+        var rolling = false
+
+        let view = DigitalSlateView(
+            scene: Binding(get: { scene }, set: { scene = $0 }),
+            take: Binding(get: { take }, set: { take = $0 }),
+            isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            onIncrementTake: { take += 1 },
+            onDismiss: {},
+            onViewAppeared: { appeared = true }
+        )
+
+        let host = UIHostingController(rootView: view)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 400, height: 800))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        host.view.setNeedsLayout()
+        host.view.layoutIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
+
+        XCTAssertTrue(appeared, "DigitalSlateView body onAppear must execute for fullScreenCover path")
+        window.isHidden = true
+    }
+
     func testDigitalSlateViewHostsAndReflectsBindingUpdates() {
         var scene = "18"
         var take = 6
@@ -82,5 +109,27 @@ final class DigitalSlateTests: XCTestCase {
         XCTAssertEqual(scene, "22")
         XCTAssertEqual(take, 9)
         XCTAssertTrue(rolling)
+    }
+
+    func testSlateLaunchHookPresentationSequence() async {
+        let session = ProductionSession()
+        let controller = SlateSessionController(session: session)
+
+        XCTAssertFalse(controller.isPresented)
+        await Task.yield()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        controller.present()
+        XCTAssertTrue(controller.isPresented)
+
+        controller.toggleRolling()
+        XCTAssertTrue(session.slateIsRolling)
+
+        controller.incrementTake()
+        XCTAssertEqual(session.slateTake, 2)
+
+        controller.dismiss()
+        XCTAssertFalse(controller.isPresented)
+        XCTAssertFalse(session.slateIsRolling)
     }
 }

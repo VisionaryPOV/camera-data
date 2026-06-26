@@ -10,7 +10,6 @@ public enum VoiceCaptureError: Error, Equatable {
 /// Captures microphone audio via AVAudioRecorder for Speech framework transcription.
 public enum VoiceCaptureService {
     private static let permissionTimeout: TimeInterval = 3
-    private static let captureGrace: TimeInterval = 1
 
     public static func requestMicrophoneAccess() async -> Bool {
         await withTaskGroup(of: Bool.self) { group in
@@ -32,12 +31,13 @@ public enum VoiceCaptureService {
     }
 
     public static func captureForTranscription(duration: TimeInterval = 2.5) async throws -> Data {
-        try await withThrowingTaskGroup(of: Data.self) { group in
+        let timeout = captureTimeout(for: duration)
+        return try await withThrowingTaskGroup(of: Data.self) { group in
             group.addTask {
                 try await performCapture(duration: duration)
             }
             group.addTask {
-                try await Task.sleep(nanoseconds: UInt64((duration + captureGrace) * 1_000_000_000))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 throw VoiceCaptureError.recorderFailed
             }
             guard let data = try await group.next() else {
@@ -48,14 +48,22 @@ public enum VoiceCaptureService {
         }
     }
 
+    private static func captureTimeout(for duration: TimeInterval) -> TimeInterval {
+        permissionTimeout + duration + 0.5
+    }
+
     private static func performCapture(duration: TimeInterval) async throws -> Data {
         guard await requestMicrophoneAccess() else {
             throw VoiceCaptureError.microphoneDenied
         }
 
         let audioSession = AVAudioSession.sharedInstance()
-        try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-        try audioSession.setActive(true)
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+            try audioSession.setActive(true)
+        } catch {
+            throw VoiceCaptureError.recorderFailed
+        }
         defer { try? audioSession.setActive(false, options: .notifyOthersOnDeactivation) }
 
         let url = FileManager.default.temporaryDirectory
@@ -69,7 +77,13 @@ public enum VoiceCaptureService {
             AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
         ]
 
-        let recorder = try AVAudioRecorder(url: url, settings: settings)
+        let recorder: AVAudioRecorder
+        do {
+            recorder = try AVAudioRecorder(url: url, settings: settings)
+        } catch {
+            throw VoiceCaptureError.recorderFailed
+        }
+
         guard recorder.prepareToRecord() else {
             throw VoiceCaptureError.recorderFailed
         }
@@ -80,7 +94,12 @@ public enum VoiceCaptureService {
         try await Task.sleep(nanoseconds: UInt64((duration + 0.05) * 1_000_000_000))
         recorder.stop()
 
-        let data = try Data(contentsOf: url)
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            throw VoiceCaptureError.recorderFailed
+        }
         guard !data.isEmpty else { throw VoiceCaptureError.emptyRecording }
         return data
     }
