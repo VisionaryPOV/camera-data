@@ -7,6 +7,15 @@ import CameraDataServices
 
 @MainActor
 final class EntryEditorViewModelTests: XCTestCase {
+    /// Retains the in-memory store for the duration of each test. Without this,
+    /// SwiftData destroys model instances when the container is released.
+    private var modelContainer: ModelContainer?
+
+    override func tearDown() {
+        modelContainer = nil
+        super.tearDown()
+    }
+
     private func unlockedSession() -> ProductionSession {
         let session = ProductionSession(isOnboarded: true)
         session.securityEnabled = false
@@ -16,6 +25,7 @@ final class EntryEditorViewModelTests: XCTestCase {
 
     private func makeViewModel() throws -> EntryEditorViewModel {
         let container = try ModelContainerFactory.makeInMemory()
+        modelContainer = container
         let context = container.mainContext
         let production = ProductionModel(name: "Test")
         let camera = CameraUnitModel(label: "A")
@@ -60,6 +70,7 @@ final class EntryEditorViewModelTests: XCTestCase {
     func testAlphabeticKeypadEntersTimecodeColon() async throws {
         let viewModel = try makeViewModel()
         try viewModel.onAppear()
+        viewModel.draft.timecodeIn = ""
         viewModel.focus(.timecodeIn)
         viewModel.toggleInputMode()
         viewModel.inputKey("1")
