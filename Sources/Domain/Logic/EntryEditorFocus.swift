@@ -53,6 +53,13 @@ public enum EntryEditorFocus: String, Equatable, CaseIterable, Sendable {
         default: false
         }
     }
+
+    public var supportsTimecodeInput: Bool {
+        switch self {
+        case .timecodeIn, .timecodeOut, .duration: true
+        default: false
+        }
+    }
 }
 
 public enum EntryInputMode: Equatable, Sendable {

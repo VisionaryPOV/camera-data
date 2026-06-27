@@ -14,6 +14,116 @@ final class EntryEditorViewModelTests: XCTestCase {
         return session
     }
 
+    private func makeViewModel() throws -> EntryEditorViewModel {
+        let container = try ModelContainerFactory.makeInMemory()
+        let context = container.mainContext
+        let production = ProductionModel(name: "Test")
+        let camera = CameraUnitModel(label: "A")
+        let day = ShootDayModel(dayNumber: 1)
+        camera.production = production
+        day.production = production
+        production.cameras = [camera]
+        production.days = [day]
+        context.insert(production)
+        try context.save()
+
+        let repository = LogEntryRepository(context: context)
+        let session = unlockedSession()
+        session.activeProduction = production
+        session.selectedCamera = camera
+        session.selectedDay = day
+
+        return EntryEditorViewModel(
+            useCase: LogTakeUseCase(
+                entryRepository: repository,
+                postSaveCoordinator: LogPostSaveCoordinator(
+                    syncEngine: SyncEngine(transport: RecordingCloudKitTransport())
+                ),
+                metadataProvider: FixedMetadataProvider()
+            ),
+            session: session,
+            entryRepository: repository
+        )
+    }
+
+    func testAlphabeticKeypadEntersMixedSceneValue() async throws {
+        let viewModel = try makeViewModel()
+        try viewModel.onAppear()
+        viewModel.focus(.scene)
+        viewModel.toggleInputMode()
+        viewModel.inputKey("2")
+        viewModel.inputKey("4")
+        viewModel.inputKey("A")
+        XCTAssertEqual(viewModel.draft.scene, "24A")
+    }
+
+    func testAlphabeticKeypadEntersTimecodeColon() async throws {
+        let viewModel = try makeViewModel()
+        try viewModel.onAppear()
+        viewModel.focus(.timecodeIn)
+        viewModel.toggleInputMode()
+        viewModel.inputKey("1")
+        viewModel.inputKey(":")
+        viewModel.inputKey("0")
+        viewModel.inputKey("0")
+        XCTAssertEqual(viewModel.draft.timecodeIn, "1:00")
+    }
+
+    func testDraftPersistsOnSameViewModelInstance() async throws {
+        let viewModel = try makeViewModel()
+        try viewModel.onAppear()
+        viewModel.focus(.scene)
+        viewModel.inputKey("1")
+        viewModel.inputKey("8")
+        XCTAssertEqual(viewModel.draft.scene, "18")
+        viewModel.inputKey("A")
+        XCTAssertEqual(viewModel.draft.scene, "18A")
+    }
+
+    func testToggleInputModeSwitchesBetweenKeypadAndKeyboard() async throws {
+        let container = try ModelContainerFactory.makeInMemory()
+        let context = container.mainContext
+        let production = ProductionModel(name: "Test")
+        let camera = CameraUnitModel(label: "A")
+        let day = ShootDayModel(dayNumber: 1)
+        camera.production = production
+        day.production = production
+        production.cameras = [camera]
+        production.days = [day]
+        context.insert(production)
+        try context.save()
+
+        let repository = LogEntryRepository(context: context)
+        let session = unlockedSession()
+        session.activeProduction = production
+        session.selectedCamera = camera
+        session.selectedDay = day
+
+        let viewModel = EntryEditorViewModel(
+            useCase: LogTakeUseCase(
+                entryRepository: repository,
+                postSaveCoordinator: LogPostSaveCoordinator(
+                    syncEngine: SyncEngine(transport: RecordingCloudKitTransport())
+                ),
+                metadataProvider: FixedMetadataProvider()
+            ),
+            session: session,
+            entryRepository: repository
+        )
+
+        try viewModel.onAppear()
+        XCTAssertEqual(viewModel.inputMode, .keypad)
+
+        viewModel.toggleInputMode()
+        XCTAssertEqual(viewModel.inputMode, .keyboard)
+
+        viewModel.inputKey("G")
+        XCTAssertEqual(viewModel.draft.scene, "G")
+
+        viewModel.toggleInputMode()
+        XCTAssertEqual(viewModel.inputMode, .keypad)
+    }
+
     func testRollNumberHelperIncrements() {
         XCTAssertEqual(RollNumberHelper.increment("A27"), "A28")
         XCTAssertEqual(RollNumberHelper.increment("C1"), "C2")

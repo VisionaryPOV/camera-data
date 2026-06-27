@@ -14,7 +14,9 @@
 		1599D2E2357CBDCB2B635D97 /* AuditRestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88CB4D17ED28EF81E3E8C8B /* AuditRestoreService.swift */; };
 		188A24A2C46E0B77FD6A38B9 /* ConflictResolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F5C7AC0F49DC220FDA4AA1 /* ConflictResolutionView.swift */; };
 		1CF0A750D14A789F46B47509 /* RollNumberHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103C6E530170355974FA6DF6 /* RollNumberHelper.swift */; };
+		1D6C208A0AB2164693F58244 /* SlateTimecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E727BB22F21A965B06A0AC30 /* SlateTimecode.swift */; };
 		1DEF20F4AE753FE386AAACC5 /* LogTakeUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC1B91DBB5666A8664FD79 /* LogTakeUseCase.swift */; };
+		1F4F9FAF5127A3164397ED41 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4D936DCA95F4EBED00F27EFB /* PrivacyInfo.xcprivacy */; };
 		22382A65E1A2D2DFE1064A66 /* CameraDataData.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		24AA1A2673FA50AAED859C9A /* CameraDataDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C23F68E331692F74302417 /* CameraDataDomain.swift */; };
 		25267837397E4362314EFD0B /* CoreMLSmartSuggestor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA4F0F13BE27E77FDF7F209 /* CoreMLSmartSuggestor.swift */; };
@@ -22,12 +24,15 @@
 		296913D9829777CC7C731DFA /* SortKeyGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98A850605449B45F4F030E64 /* SortKeyGenerator.swift */; };
 		297259B7E1E3BEB1F0773E81 /* ProductionMetadataMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE32EC954EF22CA7B147BEFD /* ProductionMetadataMapper.swift */; };
 		29A2774DD5681926B4F7F14D /* ProductionEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9768C5E831CE1CEAEFF7F0D /* ProductionEditorView.swift */; };
+		29E401CCBD137A270EEF0299 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 120E400B8C7715CB22C4CDD1 /* PrivacyInfo.xcprivacy */; };
 		2A3174FB4F599D0B90763D33 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F54DE306ED3466BBCA540B3 /* SettingsView.swift */; };
 		2A6FD237E0D7EA71723ADB2D /* SmartFillEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379F3492CDDF7840F2D8AEEB /* SmartFillEngine.swift */; };
+		2B4D82B53FBAD02D0462EE69 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F3930E3DB5F197696CD53AAB /* PrivacyInfo.xcprivacy */; };
 		2C41EC36017A49E339E095A1 /* AppBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D8D44CAC822B9B56C92932D /* AppBootstrapTests.swift */; };
 		2D2163ACA315B148A7738453 /* CameraDataDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */; };
 		2E5A67992EB1E1E2330295CE /* LogEntryValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFCB13D7DE50A31EB350728 /* LogEntryValidator.swift */; };
 		398D3CD27BCCF9CFF9ED72C1 /* CameraDataFeatures.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E581F09E01939C51D43BF804 /* CameraDataFeatures.framework */; };
+		39F78F280812749E7F410F0C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 069D7FC6C44CE52CCFB2A262 /* PrivacyInfo.xcprivacy */; };
 		3A58B5A5AD286768F4A65A77 /* MetadataCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5DD13D6619525BDEF258BB /* MetadataCaptureService.swift */; };
 		3ABBC0B6E78B57DB39DEE30C /* VESFieldMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BFC23CDE6CE55316FBA6D4 /* VESFieldMapper.swift */; };
 		3B057D8ADA7F7604C74E89C8 /* DigitalSlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B492767AA4DA85F6FC63ABF /* DigitalSlateView.swift */; };
@@ -42,6 +47,7 @@
 		455EBFD9E2A2F57696D06AD5 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4228222041FD3E491404E5 /* SearchView.swift */; };
 		4733655C254E764BF35B8DE6 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA5B119F223E0C6FB5855A /* HapticManager.swift */; };
 		47D6CA82C74FF9C9A29B6B6E /* DashboardStatsCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4118B7A590109B3781DEDE /* DashboardStatsCalculator.swift */; };
+		494E1C649DC7953DE67EF597 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8D44E8111A90D6D542747563 /* PrivacyInfo.xcprivacy */; };
 		4C7159B3F2B39411EAA70B7C /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E180C62DC4A0D897B90435E /* ReportsView.swift */; };
 		5326A36A0D0BFDE279663492 /* SlateTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53B91C4773464134EA841996 /* SlateTimeFormatter.swift */; };
 		5519F6AEB4681E975E1C2B64 /* ProductionEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8460F037F948701700DACD /* ProductionEditorViewModel.swift */; };
@@ -56,6 +62,7 @@
 		6AB322B072B3B453BBF587FF /* SecurityUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8590288320C8F9DBC25236A7 /* SecurityUnlockView.swift */; };
 		6DCEB02A65447DDFE98424E2 /* ThemeTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8267801E22D1810204199 /* ThemeTokens.swift */; };
 		6E67028C323FB67B9A5249F2 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0240CB02B64CFB93702E27B /* OnboardingView.swift */; };
+		70554E06BE2AC689A8A678F4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FC72B5A8B9194EA17109AD0C /* PrivacyInfo.xcprivacy */; };
 		7204BD03E4E441F17BFD0E77 /* CameraDataServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */; };
 		72BA45B1A573964ACA1480EB /* SlateSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BD0EA2271B41FBE310EC7E /* SlateSessionController.swift */; };
 		74AF18B82DCF98DF27B74D8A /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A9A4409A42C5EF13AF8FB2 /* RepositoryProtocols.swift */; };
@@ -109,6 +116,7 @@
 		E3CEA9C813CFA1955AD62DC0 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F559D8FDF780A86C76F1AB55 /* SwiftDataModels.swift */; };
 		E8CF1848020D39C67C6381B4 /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F950AB8B915A82D4EE68931 /* IntegrationTests.swift */; };
 		E9377F47E2926F41BBF52FEA /* VoiceCapturing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F34C85D239BE229C6944ABC /* VoiceCapturing.swift */; };
+		E9C009FD53D2C06881ED2B91 /* SlateProductionSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD38D03379FAFFD8C5CC33C0 /* SlateProductionSettings.swift */; };
 		EA23652612DB5BD7F4E95286 /* EntryInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EBFB66CBBEC532FE1CF24E4 /* EntryInputBar.swift */; };
 		ECF548E9CE3AFF4B60D281C4 /* ProductionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D47DD554EC300CDED911B36 /* ProductionsListView.swift */; };
 		EDAEFD3F31EAFF2BA841913A /* CameraDataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EE2A542B19BA75C7591A35 /* CameraDataApp.swift */; };
@@ -313,13 +321,15 @@
 /* Begin PBXFileReference section */
 		02509C7550F5053CBA386432 /* DigitalSlateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigitalSlateTests.swift; sourceTree = "<group>"; };
 		04B7CB4257260D429074A8D7 /* ConflictMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictMerger.swift; sourceTree = "<group>"; };
+		069D7FC6C44CE52CCFB2A262 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		07A3980BD98F290E1EBCEB70 /* CameraDataData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		08576C61C8E3276445045AF3 /* SmartSuggestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartSuggestService.swift; sourceTree = "<group>"; };
 		0C6961379A48DF0C035666CF /* VoiceCaptureLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureLiveTests.swift; sourceTree = "<group>"; };
 		0DA30100DB637ADFD60C8236 /* FilmTerminologyLexicon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmTerminologyLexicon.swift; sourceTree = "<group>"; };
-		0E964CD72DBBE5A0CF7FEB8D /* CameraDataWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CameraDataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E964CD72DBBE5A0CF7FEB8D /* CameraDataWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CameraDataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F5DD13D6619525BDEF258BB /* MetadataCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataCaptureService.swift; sourceTree = "<group>"; };
 		103C6E530170355974FA6DF6 /* RollNumberHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollNumberHelper.swift; sourceTree = "<group>"; };
+		120E400B8C7715CB22C4CDD1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1494952F9D5E9A13B9D5465F /* CloudKitSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransport.swift; sourceTree = "<group>"; };
 		15CAB68F189B54E888EFEC7D /* CameraDataServices.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataServices.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C5052B1CFBF7D176C5E263F /* AuditHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditHistoryView.swift; sourceTree = "<group>"; };
@@ -344,6 +354,7 @@
 		479A77AED92F3FC7807C1004 /* VoicePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicePipeline.swift; sourceTree = "<group>"; };
 		49E2844DE565F0B1341799C5 /* DomainLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainLogicTests.swift; sourceTree = "<group>"; };
 		4CB8267801E22D1810204199 /* ThemeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTokens.swift; sourceTree = "<group>"; };
+		4D936DCA95F4EBED00F27EFB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4F34C85D239BE229C6944ABC /* VoiceCapturing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCapturing.swift; sourceTree = "<group>"; };
 		50A9A4409A42C5EF13AF8FB2 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
 		53B91C4773464134EA841996 /* SlateTimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateTimeFormatter.swift; sourceTree = "<group>"; };
@@ -355,7 +366,7 @@
 		643AB1D11D80DC88355569AF /* DataLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayerTests.swift; sourceTree = "<group>"; };
 		64F45147FF949A9ED3C24BCD /* ServicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesTests.swift; sourceTree = "<group>"; };
 		66D6A4B09F9757E90F83CF68 /* DashboardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardEntry.swift; sourceTree = "<group>"; };
-		6998ACDC4DD46B9E4F054654 /* CameraDataTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6998ACDC4DD46B9E4F054654 /* CameraDataTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CameraDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CAC1B91DBB5666A8664FD79 /* LogTakeUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTakeUseCase.swift; sourceTree = "<group>"; };
 		6D8D44CAC822B9B56C92932D /* AppBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBootstrapTests.swift; sourceTree = "<group>"; };
 		6EBFB66CBBEC532FE1CF24E4 /* EntryInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryInputBar.swift; sourceTree = "<group>"; };
@@ -369,12 +380,13 @@
 		865885A4292CEB7D5822B5DC /* CameraDataFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataFeatures.swift; sourceTree = "<group>"; };
 		8663A694D51FDAE5C606ABA8 /* CameraDataWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataWidget.swift; sourceTree = "<group>"; };
 		88FD14069573B3F3323657E4 /* NLPQueryParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NLPQueryParser.swift; sourceTree = "<group>"; };
+		8D44E8111A90D6D542747563 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		92B261C7CB38742E58E60B71 /* CameraData.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraData.entitlements; sourceTree = "<group>"; };
 		92D3E043701B3E2B240FDBAA /* PresenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceService.swift; sourceTree = "<group>"; };
 		958823EBDD2801452EFB85AB /* FrameIOExportHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameIOExportHook.swift; sourceTree = "<group>"; };
 		98A850605449B45F4F030E64 /* SortKeyGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortKeyGenerator.swift; sourceTree = "<group>"; };
 		9B8460F037F948701700DACD /* ProductionEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionEditorViewModel.swift; sourceTree = "<group>"; };
-		9D8AB49F3A6050604501760D /* CameraData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CameraData.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D8AB49F3A6050604501760D /* CameraData.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CameraData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0240CB02B64CFB93702E27B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		A0A642FF78137D6B7AD35618 /* CameraDataWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraDataWidget.entitlements; sourceTree = "<group>"; };
 		A0AA5B119F223E0C6FB5855A /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
@@ -389,11 +401,13 @@
 		D05B04D3F64697772C389F0C /* OfflineCloudKitRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCloudKitRecordStore.swift; sourceTree = "<group>"; };
 		D4BFC23CDE6CE55316FBA6D4 /* VESFieldMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VESFieldMapper.swift; sourceTree = "<group>"; };
 		D4CF171B66E6A7EAF1BA5378 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
+		DD38D03379FAFFD8C5CC33C0 /* SlateProductionSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateProductionSettings.swift; sourceTree = "<group>"; };
 		E0AA3ECE0EE787CFEF6C3CBC /* EntryEditorFocus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorFocus.swift; sourceTree = "<group>"; };
 		E13003A137C16895674800C9 /* LogEntryMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntryMapper.swift; sourceTree = "<group>"; };
 		E3DDF0DC890D417CD43371B9 /* EntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorView.swift; sourceTree = "<group>"; };
 		E4A0A91309A93C45B376B027 /* VoiceCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureService.swift; sourceTree = "<group>"; };
 		E581F09E01939C51D43BF804 /* CameraDataFeatures.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataFeatures.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E727BB22F21A965B06A0AC30 /* SlateTimecode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlateTimecode.swift; sourceTree = "<group>"; };
 		E7EE2A542B19BA75C7591A35 /* CameraDataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataApp.swift; sourceTree = "<group>"; };
 		E8C23F68E331692F74302417 /* CameraDataDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDataDomain.swift; sourceTree = "<group>"; };
 		E91DFE46B55B6B09CD6D97AA /* CameraDataDomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataDomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -403,10 +417,12 @@
 		F00FF9B542BBEC7312F142BF /* Phase3FeaturesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase3FeaturesTests.swift; sourceTree = "<group>"; };
 		F16E2D869E4FCFB02C722AD6 /* CameraDataDesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CameraDataDesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2329B5220777DD7A11E8B32 /* EntryEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorViewModel.swift; sourceTree = "<group>"; };
+		F3930E3DB5F197696CD53AAB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F559D8FDF780A86C76F1AB55 /* SwiftDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModels.swift; sourceTree = "<group>"; };
 		F57C4BA88990A4386DD6E29A /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		F76420D928703FF40EC390AF /* LensPredictor.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = LensPredictor.mlmodel; sourceTree = "<group>"; };
 		FBFCB13D7DE50A31EB350728 /* LogEntryValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntryValidator.swift; sourceTree = "<group>"; };
+		FC72B5A8B9194EA17109AD0C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FE32EC954EF22CA7B147BEFD /* ProductionMetadataMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionMetadataMapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -603,6 +619,8 @@
 				FBFCB13D7DE50A31EB350728 /* LogEntryValidator.swift */,
 				88FD14069573B3F3323657E4 /* NLPQueryParser.swift */,
 				103C6E530170355974FA6DF6 /* RollNumberHelper.swift */,
+				DD38D03379FAFFD8C5CC33C0 /* SlateProductionSettings.swift */,
+				E727BB22F21A965B06A0AC30 /* SlateTimecode.swift */,
 				53B91C4773464134EA841996 /* SlateTimeFormatter.swift */,
 				379F3492CDDF7840F2D8AEEB /* SmartFillEngine.swift */,
 				98A850605449B45F4F030E64 /* SortKeyGenerator.swift */,
@@ -616,6 +634,7 @@
 			isa = PBXGroup;
 			children = (
 				865885A4292CEB7D5822B5DC /* CameraDataFeatures.swift */,
+				4D936DCA95F4EBED00F27EFB /* PrivacyInfo.xcprivacy */,
 				83742E3CD2D3450E63D7E2B3 /* Collaboration */,
 				D44ECD690595C284829AC6D1 /* Dashboard */,
 				089F3196E63E4CEEDE0DD7B7 /* DI */,
@@ -682,6 +701,7 @@
 			isa = PBXGroup;
 			children = (
 				78104B570D01F1BD450FF534 /* CameraDataServices.swift */,
+				FC72B5A8B9194EA17109AD0C /* PrivacyInfo.xcprivacy */,
 				0F4D1F60323D110D1D0175CE /* AppIntent */,
 				D73E4D4596047B72E4D68EC4 /* Audit */,
 				8D9686DCD0999D56137CDAEB /* Export */,
@@ -766,6 +786,7 @@
 			children = (
 				2112343900A6D4F95663797E /* CameraDataData.swift */,
 				7138F5A221715E3C173FCA4E /* ModelContainerFactory.swift */,
+				8D44E8111A90D6D542747563 /* PrivacyInfo.xcprivacy */,
 				1D67AD00754C215046E8559C /* Mappers */,
 				73AB0F073A65C84288860399 /* Models */,
 				1AA9517EEDEE6C02B708AF99 /* Repositories */,
@@ -787,6 +808,7 @@
 			children = (
 				A0A642FF78137D6B7AD35618 /* CameraDataWidget.entitlements */,
 				8663A694D51FDAE5C606ABA8 /* CameraDataWidget.swift */,
+				F3930E3DB5F197696CD53AAB /* PrivacyInfo.xcprivacy */,
 			);
 			name = CameraDataWidget;
 			path = Widgets/CameraDataWidget;
@@ -861,6 +883,7 @@
 				5CCEA79A01487F5C6E0463C3 /* Assets.xcassets */,
 				92B261C7CB38742E58E60B71 /* CameraData.entitlements */,
 				E7EE2A542B19BA75C7591A35 /* CameraDataApp.swift */,
+				120E400B8C7715CB22C4CDD1 /* PrivacyInfo.xcprivacy */,
 				280C7F785EB444F6DC52588B /* Intents */,
 				16F4CF78690C6E97A2842917 /* Resources */,
 			);
@@ -904,6 +927,7 @@
 			children = (
 				300CD2F3D3418F87B2A00C49 /* AppGroupStore.swift */,
 				E8C23F68E331692F74302417 /* CameraDataDomain.swift */,
+				069D7FC6C44CE52CCFB2A262 /* PrivacyInfo.xcprivacy */,
 				32163C9C0B9DF7E0B761B93A /* Logic */,
 				55CB00E7E95BE1B97FF8C465 /* Models */,
 			);
@@ -919,6 +943,7 @@
 			buildConfigurationList = 33B5BEF1DD56C262CB973369 /* Build configuration list for PBXNativeTarget "CameraDataWidget" */;
 			buildPhases = (
 				C8C6823A26CB403289AADAA4 /* Sources */,
+				15D0D15820A019D674B45B7C /* Resources */,
 				BDA9FBE5462993737896FF0E /* Frameworks */,
 			);
 			buildRules = (
@@ -957,6 +982,7 @@
 			buildConfigurationList = 14378C8A52E2BF31C752A99D /* Build configuration list for PBXNativeTarget "CameraDataData" */;
 			buildPhases = (
 				B7C5B97EFD16FB595F03C8F6 /* Sources */,
+				5413126568BA4AC345D57A79 /* Resources */,
 				DB578FD99231CCC566764398 /* Frameworks */,
 			);
 			buildRules = (
@@ -1000,6 +1026,7 @@
 			buildConfigurationList = 3D0AE468BA21EE4671EBE3C4 /* Build configuration list for PBXNativeTarget "CameraDataFeatures" */;
 			buildPhases = (
 				5F767684AD51555745E7D09E /* Sources */,
+				75C6F6438CA46C59340828C5 /* Resources */,
 				A7F437FE788835DAAC7823F7 /* Frameworks */,
 			);
 			buildRules = (
@@ -1022,6 +1049,7 @@
 			buildConfigurationList = 54C6746FCAC863DC58295133 /* Build configuration list for PBXNativeTarget "CameraDataServices" */;
 			buildPhases = (
 				A28ED05A09BA97FCAD2A32D2 /* Sources */,
+				04A771E7A0399E699316EAA5 /* Resources */,
 				52C889C1EC2497800E7D9DAF /* Frameworks */,
 			);
 			buildRules = (
@@ -1042,6 +1070,7 @@
 			buildConfigurationList = DBCDCD7A617E4F99E306ED94 /* Build configuration list for PBXNativeTarget "CameraDataDomain" */;
 			buildPhases = (
 				4618BDE5377CB88EF72C5598 /* Sources */,
+				57AE3B06AC14D0F4378B0763 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -1089,6 +1118,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = 7BED431238A77AEFA06BE54D /* Build configuration list for PBXProject "CameraData" */;
 			developmentRegion = en;
@@ -1117,11 +1148,52 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		04A771E7A0399E699316EAA5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70554E06BE2AC689A8A678F4 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		15D0D15820A019D674B45B7C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B4D82B53FBAD02D0462EE69 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		164E3DD3F604BBB454D6219E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				C1F1203288B72A15DAB3F1F5 /* Assets.xcassets in Resources */,
+				29E401CCBD137A270EEF0299 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5413126568BA4AC345D57A79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				494E1C649DC7953DE67EF597 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		57AE3B06AC14D0F4378B0763 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39F78F280812749E7F410F0C /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		75C6F6438CA46C59340828C5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F4F9FAF5127A3164397ED41 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1171,7 +1243,9 @@
 				2E5A67992EB1E1E2330295CE /* LogEntryValidator.swift in Sources */,
 				D5A31862566CAD984C6456D1 /* NLPQueryParser.swift in Sources */,
 				1CF0A750D14A789F46B47509 /* RollNumberHelper.swift in Sources */,
+				E9C009FD53D2C06881ED2B91 /* SlateProductionSettings.swift in Sources */,
 				5326A36A0D0BFDE279663492 /* SlateTimeFormatter.swift in Sources */,
+				1D6C208A0AB2164693F58244 /* SlateTimecode.swift in Sources */,
 				2A6FD237E0D7EA71723ADB2D /* SmartFillEngine.swift in Sources */,
 				296913D9829777CC7C731DFA /* SortKeyGenerator.swift in Sources */,
 				4042E1FC2F82FFCCB68E2947 /* TakeIncrementer.swift in Sources */,
@@ -1379,11 +1453,9 @@
 		00700F289C37A3323B4379E4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1395,7 +1467,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.services;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1467,7 +1538,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/CameraDataWidget/CameraDataWidget.entitlements;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widgets/CameraDataWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1484,11 +1554,9 @@
 		1CB922A4FA81C9CA1AC0FD99 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1500,7 +1568,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.domain;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1511,11 +1578,9 @@
 		3E7A688650AB94CB4F7BEC90 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1527,7 +1592,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.domain;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1538,11 +1602,9 @@
 		7A904FE18EF2274D724522E0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1554,7 +1616,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.features;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1565,11 +1626,9 @@
 		82E0835B523A463C52DAA470 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1581,7 +1640,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.designsystem;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1592,11 +1650,9 @@
 		83A7E166D57A0EC603E9CFE8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1608,7 +1664,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.data;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1620,7 +1675,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1638,7 +1692,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1655,11 +1708,9 @@
 		9788EB09FB757450247E3FA7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1671,7 +1722,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.features;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1682,11 +1732,9 @@
 		AAADBE1FCE21FC198FF5FEA7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1698,7 +1746,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.services;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1710,7 +1757,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/CameraDataWidget/CameraDataWidget.entitlements;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widgets/CameraDataWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1730,7 +1776,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CameraDataApp/CameraData.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Camera Data";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -1740,7 +1785,12 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice logging for camera takes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe voice logs on set";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = (
+					UIInterfaceOrientationPortrait,
+					UIInterfaceOrientationPortraitUpsideDown,
+					UIInterfaceOrientationLandscapeLeft,
+					UIInterfaceOrientationLandscapeRight,
+				);
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1754,11 +1804,9 @@
 		D0EF84BCA666D0E7008C1E99 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1770,7 +1818,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.designsystem;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1848,11 +1895,9 @@
 		F4F8557B416F2116650E7657 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1864,7 +1909,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.visionarypov.cameradata.data;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1878,7 +1922,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CameraDataApp/CameraData.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 3VSNQ93JZN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Camera Data";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -1888,7 +1931,12 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice logging for camera takes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe voice logs on set";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = (
+					UIInterfaceOrientationPortrait,
+					UIInterfaceOrientationPortraitUpsideDown,
+					UIInterfaceOrientationLandscapeLeft,
+					UIInterfaceOrientationLandscapeRight,
+				);
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

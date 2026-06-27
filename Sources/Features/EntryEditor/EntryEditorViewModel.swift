@@ -330,6 +330,7 @@ public final class EntryEditorViewModel {
         shutterAngleText = Self.formatShutterAngle(draft.shutterAngle)
         session.slateScene = result.saved.scene
         session.slateTake = result.nextDraft.take
+        session.slateRollNumber = result.saved.rollNumber
         editingEntry = nil
         validationMessage = nil
         refreshSuggestions()

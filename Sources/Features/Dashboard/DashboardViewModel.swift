@@ -75,6 +75,7 @@ public final class DashboardViewModel {
         if let latest = entries.first {
             session.slateScene = latest.displayDraft.scene
             session.slateTake = latest.displayDraft.take
+            session.slateRollNumber = latest.displayDraft.rollNumber
         }
     }
 

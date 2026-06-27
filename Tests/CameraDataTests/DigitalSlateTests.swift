@@ -6,12 +6,54 @@ import UIKit
 
 @MainActor
 final class DigitalSlateTests: XCTestCase {
-    func testSlateTimeFormatterFormats24HourTime() {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-        let date = calendar.date(from: DateComponents(year: 2026, month: 6, day: 25, hour: 14, minute: 7))!
+    func testSlateTimecodeFormatsHoursMinutesSecondsFrames() {
+        let origin = Date(timeIntervalSince1970: 0)
+        let date = Date(timeIntervalSince1970: 3661.5)
+        let groups = SlateTimecode.digitGroups(from: date, origin: origin, fps: 24)
 
-        XCTAssertEqual(SlateTimeFormatter.timeOfDay(from: date, calendar: calendar), "14:07")
+        XCTAssertEqual(groups, ["01", "01", "01", "12"])
+    }
+
+    func testSlateTimecodeFractionalFrameRates() {
+        XCTAssertEqual(SlateTimecode.framesPerSecond(for: 23.976), 24)
+        XCTAssertEqual(SlateTimecode.framesPerSecond(for: 29.97), 30)
+
+        let origin = Date(timeIntervalSince1970: 0)
+        let at23976 = SlateTimecode.components(
+            from: Date(timeIntervalSince1970: 1 + (23.0 / 23.976)),
+            origin: origin,
+            fps: 23.976
+        )
+        XCTAssertEqual(at23976.frames, 23)
+    }
+
+    func testSlateTimecodeUsesSelectedFrameRateForFrames() {
+        let origin = Date(timeIntervalSince1970: 0)
+        let at24 = SlateTimecode.components(
+            from: Date(timeIntervalSince1970: 1 + (23.0 / 24.0)),
+            origin: origin,
+            fps: 24
+        )
+        let at60 = SlateTimecode.components(
+            from: Date(timeIntervalSince1970: 1 + (59.0 / 60.0)),
+            origin: origin,
+            fps: 60
+        )
+
+        XCTAssertEqual(at24.frames, 23)
+        XCTAssertEqual(at60.frames, 59)
+    }
+
+    func testSlateSettingsResolverUsesManualValues() {
+        XCTAssertEqual(
+            SlateSettingsResolver.resolvedFPS(presetID: "manual", manualFPS: 47.952),
+            47.952,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            SlateSettingsResolver.resolvedWhiteBalanceLabel(presetID: "manual", manualKelvin: 4900),
+            "4900K"
+        )
     }
 
     func testSlateSessionControllerPresentDismissIncrementRolling() {
@@ -24,6 +66,7 @@ final class DigitalSlateTests: XCTestCase {
 
         controller.toggleRolling()
         XCTAssertTrue(session.slateIsRolling)
+        XCTAssertNotNil(session.slateRollOrigin)
 
         controller.incrementTake()
         XCTAssertEqual(session.slateTake, 5)
@@ -31,6 +74,7 @@ final class DigitalSlateTests: XCTestCase {
         controller.dismiss()
         XCTAssertFalse(controller.isPresented)
         XCTAssertFalse(session.slateIsRolling)
+        XCTAssertNil(session.slateRollOrigin)
     }
 
     func testSlateBindingsDriveSessionFromEntryPoint() {
@@ -40,10 +84,16 @@ final class DigitalSlateTests: XCTestCase {
 
         bindings.scene.wrappedValue = "24A"
         bindings.take.wrappedValue = 7
+        bindings.rollNumber.wrappedValue = "A001"
+        bindings.frameRatePresetID.wrappedValue = "23.976"
+        bindings.whiteBalancePresetID.wrappedValue = "3200"
         bindings.isRolling.wrappedValue = true
 
         XCTAssertEqual(session.slateScene, "24A")
         XCTAssertEqual(session.slateTake, 7)
+        XCTAssertEqual(session.slateRollNumber, "A001")
+        XCTAssertEqual(session.slateFrameRatePresetID, "23.976")
+        XCTAssertEqual(session.slateWhiteBalancePresetID, "3200")
         XCTAssertTrue(session.slateIsRolling)
     }
 
@@ -51,12 +101,23 @@ final class DigitalSlateTests: XCTestCase {
         var appeared = false
         var scene = "18"
         var take = 6
+        var roll = "A01"
         var rolling = false
+        var fpsPreset = "24"
+        var manualFPS = 24.0
+        var wbPreset = "5600"
+        var manualWB = 5600
 
         let view = DigitalSlateView(
             scene: Binding(get: { scene }, set: { scene = $0 }),
             take: Binding(get: { take }, set: { take = $0 }),
+            rollNumber: Binding(get: { roll }, set: { roll = $0 }),
             isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            frameRatePresetID: Binding(get: { fpsPreset }, set: { fpsPreset = $0 }),
+            manualFrameRate: Binding(get: { manualFPS }, set: { manualFPS = $0 }),
+            whiteBalancePresetID: Binding(get: { wbPreset }, set: { wbPreset = $0 }),
+            manualWhiteBalanceKelvin: Binding(get: { manualWB }, set: { manualWB = $0 }),
+            rollOrigin: nil,
             onIncrementTake: { take += 1 },
             onDismiss: {},
             onViewAppeared: { appeared = true }
@@ -77,12 +138,23 @@ final class DigitalSlateTests: XCTestCase {
     func testDigitalSlateViewHostsAndReflectsBindingUpdates() {
         var scene = "18"
         var take = 6
+        var roll = ""
         var rolling = false
+        var fpsPreset = "24"
+        var manualFPS = 24.0
+        var wbPreset = "5600"
+        var manualWB = 5600
 
         let view = DigitalSlateView(
             scene: Binding(get: { scene }, set: { scene = $0 }),
             take: Binding(get: { take }, set: { take = $0 }),
+            rollNumber: Binding(get: { roll }, set: { roll = $0 }),
             isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            frameRatePresetID: Binding(get: { fpsPreset }, set: { fpsPreset = $0 }),
+            manualFrameRate: Binding(get: { manualFPS }, set: { manualFPS = $0 }),
+            whiteBalancePresetID: Binding(get: { wbPreset }, set: { wbPreset = $0 }),
+            manualWhiteBalanceKelvin: Binding(get: { manualWB }, set: { manualWB = $0 }),
+            rollOrigin: nil,
             onIncrementTake: { take += 1 },
             onDismiss: {}
         )
@@ -100,7 +172,13 @@ final class DigitalSlateTests: XCTestCase {
         host.rootView = DigitalSlateView(
             scene: Binding(get: { scene }, set: { scene = $0 }),
             take: Binding(get: { take }, set: { take = $0 }),
+            rollNumber: Binding(get: { roll }, set: { roll = $0 }),
             isRolling: Binding(get: { rolling }, set: { rolling = $0 }),
+            frameRatePresetID: Binding(get: { fpsPreset }, set: { fpsPreset = $0 }),
+            manualFrameRate: Binding(get: { manualFPS }, set: { manualFPS = $0 }),
+            whiteBalancePresetID: Binding(get: { wbPreset }, set: { wbPreset = $0 }),
+            manualWhiteBalanceKelvin: Binding(get: { manualWB }, set: { manualWB = $0 }),
+            rollOrigin: Date(),
             onIncrementTake: { take += 1 },
             onDismiss: {}
         )

@@ -12,6 +12,7 @@ public struct RootView: View {
     @State private var slateController: SlateSessionController
     @State private var searchQuery = ""
     @State private var productionEditorViewModel: ProductionEditorViewModel
+    @State private var entryEditorViewModel: EntryEditorViewModel?
     @State private var productionsList: [ProductionModel] = []
 
     public init(dependencies: AppDependencies) {
@@ -63,7 +64,13 @@ public struct RootView: View {
             DigitalSlateView(
                 scene: bindings.scene,
                 take: bindings.take,
+                rollNumber: bindings.rollNumber,
                 isRolling: bindings.isRolling,
+                frameRatePresetID: bindings.frameRatePresetID,
+                manualFrameRate: bindings.manualFrameRate,
+                whiteBalancePresetID: bindings.whiteBalancePresetID,
+                manualWhiteBalanceKelvin: bindings.manualWhiteBalanceKelvin,
+                rollOrigin: bindings.rollOrigin,
                 onIncrementTake: {
                     slateController.incrementTake()
                     HapticManager.medium()
@@ -100,16 +107,19 @@ public struct RootView: View {
     private func sheetContent(for sheet: RootActiveSheet) -> some View {
         switch sheet {
         case .editor:
-            NavigationStack {
-                EntryEditorView(
-                    viewModel: entryEditorViewModel,
-                    onDismiss: {
-                        activeSheet = nil
-                        try? dashboardViewModel.reload()
-                    }
-                )
+            if let entryEditorViewModel {
+                NavigationStack {
+                    EntryEditorView(
+                        viewModel: entryEditorViewModel,
+                        onDismiss: {
+                            activeSheet = nil
+                            self.entryEditorViewModel = nil
+                            try? dashboardViewModel.reload()
+                        }
+                    )
+                }
+                .presentationBackground(.ultraThinMaterial)
             }
-            .presentationBackground(.ultraThinMaterial)
 
         case .reports:
             NavigationStack {
@@ -179,6 +189,7 @@ public struct RootView: View {
 
     private func openEditorIfUnlocked() {
         guard dependencies.session.isUnlocked else { return }
+        entryEditorViewModel = makeEntryEditorViewModel()
         activeSheet = .editor
     }
 
@@ -193,7 +204,7 @@ public struct RootView: View {
         try? dashboardViewModel.reload()
     }
 
-    private var entryEditorViewModel: EntryEditorViewModel {
+    private func makeEntryEditorViewModel() -> EntryEditorViewModel {
         EntryEditorViewModel(
             useCase: dependencies.logTakeUseCase,
             session: dependencies.session,

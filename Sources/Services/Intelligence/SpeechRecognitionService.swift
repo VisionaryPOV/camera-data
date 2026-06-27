@@ -43,10 +43,15 @@ public enum SpeechRecognitionService {
             }
             box.setTask(speechTask)
 
-            Task {
-                try await Task.sleep(nanoseconds: 1_000_000_000)
-                box.finish(.failure(SpeechRecognitionError.recognitionTimedOut))
+            let timeoutTask = Task {
+                do {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    box.finish(.failure(SpeechRecognitionError.recognitionTimedOut))
+                } catch {
+                    // Cancelled when recognition completes first.
+                }
             }
+            box.setTimeoutTask(timeoutTask)
         }
     }
 
@@ -69,6 +74,7 @@ private final class TranscriptionResultBox: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<String, Error>?
     private var recognitionTask: SFSpeechRecognitionTask?
+    private var timeoutTask: Task<Void, Never>?
 
     func store(_ continuation: CheckedContinuation<String, Error>) {
         lock.lock()
@@ -82,13 +88,22 @@ private final class TranscriptionResultBox: @unchecked Sendable {
         lock.unlock()
     }
 
+    func setTimeoutTask(_ task: Task<Void, Never>) {
+        lock.lock()
+        timeoutTask = task
+        lock.unlock()
+    }
+
     func finish(_ result: Result<String, Error>) {
         lock.lock()
         let continuation = self.continuation
         self.continuation = nil
         recognitionTask?.cancel()
         recognitionTask = nil
+        let timeout = timeoutTask
+        timeoutTask = nil
         lock.unlock()
+        timeout?.cancel()
         continuation?.resume(with: result)
     }
 }

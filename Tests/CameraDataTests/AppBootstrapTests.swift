@@ -1,6 +1,7 @@
 import CloudKit
 import XCTest
 @testable import CameraDataFeatures
+@testable import CameraDataDomain
 import CameraDataServices
 
 @MainActor
@@ -47,5 +48,38 @@ final class AppBootstrapTests: XCTestCase {
         try await deps.bootstrapIfNeeded()
 
         XCTAssertTrue(deps.session.launchState.hasPrefix("dashboard_ready:"))
+    }
+
+    func testSyncLatestEntryToSlateIncludesRollNumber() async throws {
+        let deps = try AppDependencies(
+            swiftDataCloudKit: false,
+            syncPipelineEnabled: false,
+            inMemory: true
+        )
+        try await deps.bootstrapIfNeeded()
+
+        guard let production = deps.session.activeProduction,
+              let camera = deps.session.selectedCamera,
+              let day = deps.session.selectedDay else {
+            XCTFail("Missing bootstrap context")
+            return
+        }
+
+        var draft = LogEntryDraft(scene: "44", take: 2, rollNumber: "B004")
+        _ = try await deps.logTakeUseCase.logAndNext(
+            draft: draft,
+            production: production,
+            camera: camera,
+            day: day,
+            existing: nil,
+            modifiedBy: "test"
+        )
+
+        deps.session.slateRollNumber = ""
+        deps.syncLatestEntryToSlate()
+
+        XCTAssertEqual(deps.session.slateScene, "44")
+        XCTAssertEqual(deps.session.slateTake, 2)
+        XCTAssertEqual(deps.session.slateRollNumber, "B004")
     }
 }

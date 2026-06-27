@@ -18,7 +18,13 @@ public final class ProductionSession {
     public var presenceMessages: [String] = []
     public var slateScene: String = ""
     public var slateTake: Int = 1
+    public var slateRollNumber: String = ""
     public var slateIsRolling: Bool = false
+    public var slateRollOrigin: Date?
+    public var slateFrameRatePresetID: String = "24"
+    public var slateManualFrameRate: Double = 24
+    public var slateWhiteBalancePresetID: String = "5600"
+    public var slateManualWhiteBalanceKelvin: Int = 5600
     public var securityEnabled: Bool = false
     public var productionPIN: String = ""
     public var isUnlocked: Bool = true
@@ -240,9 +246,11 @@ public final class AppDependencies {
         if let latest = entries.first {
             session.slateScene = latest.scene
             session.slateTake = latest.take
+            session.slateRollNumber = latest.rollNumber
         } else {
             session.slateScene = ""
             session.slateTake = 1
+            session.slateRollNumber = ""
         }
     }
 }

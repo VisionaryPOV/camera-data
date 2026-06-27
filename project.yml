@@ -24,6 +24,8 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Domain
+      - path: Sources/Domain/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       GENERATE_INFOPLIST_FILE: YES
       PRODUCT_BUNDLE_IDENTIFIER: com.visionarypov.cameradata.domain
@@ -48,6 +50,8 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Data
+      - path: Sources/Data/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - target: CameraDataDomain
     settings:
@@ -61,6 +65,10 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Services
+        excludes:
+          - PrivacyInfo.xcprivacy
+      - path: Sources/Services/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - target: CameraDataDomain
       - target: CameraDataData
@@ -75,6 +83,8 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Features
+      - path: Sources/Features/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - target: CameraDataDomain
       - target: CameraDataData
@@ -94,6 +104,7 @@ targets:
     resources:
       - path: CameraDataApp/Resources
         type: folder
+      - path: CameraDataApp/PrivacyInfo.xcprivacy
       - Resources/LensPredictor.mlmodel
     dependencies:
       - target: CameraDataFeatures
@@ -133,6 +144,8 @@ targets:
       - path: Widgets/CameraDataWidget
         excludes:
           - Info.plist
+      - path: Widgets/CameraDataWidget/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - target: CameraDataDomain
     settings:
