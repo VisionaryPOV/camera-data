@@ -61,7 +61,7 @@ public enum SlateSettingsResolver {
 
     public static func resolvedWhiteBalanceLabel(presetID: String, manualKelvin: Int) -> String {
         if let preset = SlateWhiteBalanceOption.presets.first(where: { $0.id == presetID }),
-           let kelvin = preset.kelvin {
+           preset.kelvin != nil {
             return preset.label
         }
         return "\(max(manualKelvin, 1000))K"
